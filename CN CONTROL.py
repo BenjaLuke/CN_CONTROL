@@ -1,0 +1,8545 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Mon Oct  3 01:03:21 2022
+
+@author: BENJAMIN MIGUEL
+"""
+
+import sqlite3
+# librerias necesarias
+from ast import Break, Return                           # Para salir de un bucle
+from datetime import *                                  # Para trabajar con fechas
+from tkinter import *                                   # Para crear la interfaz gráfica
+from tkinter.ttk import Combobox                        # Para crear los combobox
+from reportlab.lib.pagesizes import A4,landscape        # 210mm x 297mm   # Para crear el PDF
+from reportlab.pdfgen import canvas                     # Para crear el PDF
+from reportlab.lib.units import mm                      # Para crear el PDF
+from reportlab.pdfbase import pdfmetrics                # Para crear el PDF
+from reportlab.pdfbase.ttfonts import TTFont            # Para crear el PDF
+import shutil                                           # Para copiar archivos
+import os                                               # Para borrar archivos
+import time                                             # Para trabajar con el tiempo
+#  ----------------------------------- Raiz -----------------------------------
+
+raiz = Tk()                                             # Crea la ventana raiz
+raiz.title("CN Control")                                # Le da un título a la ventana
+raiz.iconbitmap("image/icono.ico")                      # Le da un icono a la ventana
+raiz.config(bg="#b7b493")                               # Le da un color de fondo a la ventana
+raiz.config(bd=10)                                      # Le da un borde a la ventana
+raiz.config(relief="groove")                            # Le da un tipo de borde a la ventana
+logo = PhotoImage(file="image/logo.png")                # Carga laimagen del logo
+logo = logo.subsample(8, 8)                             # Lo colocamos en raiz utilizando la transparencia
+Label(raiz, image=logo, bg="#b7b493").place(x=30, y=20) # Lo colocamos en raiz utilizando la transparencia
+
+# Si en cualquier momento se pulsan las teclas CTRL + R se va al menu de registro
+raiz.bind("<Control-r>", lambda event: menuRegistrosIntroducir())
+raiz.bind("<Control-R>", lambda event: menuRegistrosIntroducir())
+# Si en cualquier momento se pulsan las teclas CTRL + V se va al menu de ventas
+raiz.bind("<Control-v>", lambda event: menuVentasIntroducir())
+raiz.bind("<Control-V>", lambda event: menuVentasIntroducir())
+# Si en cualquier momento se pulsan las teclas CTRL + I se va al menu de incidencias
+raiz.bind("<Control-i>", lambda event: menuIncidenciasIntroducir())
+raiz.bind("<Control-I>", lambda event: menuIncidenciasIntroducir()) 
+# Si en cualquier momento se pulsan las teclas CTRL + C se va al menu de consultar incidencias
+raiz.bind("<Control-c>", lambda event: menuIncidenciasConsultar())
+raiz.bind("<Control-C>", lambda event: menuIncidenciasConsultar())
+# Si en cualquier momento se pulsan las teclas CTRL + U se va al menu de cambio de usuario
+raiz.bind("<Control-u>", lambda event: cambioUsuario1())
+raiz.bind("<Control-U>", lambda event: cambioUsuario1())
+# Si en cualquier momento se pulsan las teclas CTRL + N se limpian las celdas de texto
+raiz.bind("<Control-n>", lambda event: LimpiaElegibles())
+raiz.bind("<Control-N>", lambda event: LimpiaElegibles())
+# Si en cualquier momento se pulsan las teclas CTRL + + se aumenta el tamaño de la letra
+raiz.bind("<Control-plus>", lambda event: TamanyoMas())
+# Si en cualquier momento se pulsan las teclas CTRL + - se disminuye el tamaño de la letra
+raiz.bind("<Control-minus>", lambda event: TamanyoMenos())
+# Si en cualquier momento se pulsan las teclas CTRL + INTRO se fuerza el pulsado del botón VALIDAR
+raiz.bind("<Control-Return>", lambda event: BotonValidarForzado())
+# Si en cualquier momento se pulsan las teclas CTRL + P se fuerza la impresión de PDF
+raiz.bind("<Control-p>", lambda event: BotonImprimirForzado())
+raiz.bind("<Control-P>", lambda event: BotonImprimirForzado())
+# Si en cualquier momento se pulsan las teclas CTRL + CURSOR ARRIBA se fuerza el pulsado del botón SUBIR
+raiz.bind("<Control-Up>", lambda event: BotonSubirForzado())
+# Si en cualquier momento se pulsan las teclas CTRL + CURSOR ABAJO se fuerza el pulsado del botón BAJAR
+raiz.bind("<Control-Down>", lambda event: BotonBajarForzado())
+# Si en cualquier momento se pulsan las teclas CTRL + CURSOR IZQUIERDA se fuerza el pulsado del botón REGRESAR
+raiz.bind("<Control-Left>", lambda event: BotonRegresarForzado())
+# Si en cualquier momento se pulsan las teclas ESC se fuerza el pulsado del botón SALIR 
+raiz.bind("<Escape>", lambda event: Saliendo())
+# Si aquí se pulsan las teclas CTRL + D no pasa nada
+raiz.bind("<Control-d>", lambda event: regresaSinNada())
+raiz.bind("<Control-D>", lambda event: regresaSinNada())
+#  ---------------------- Definiendo variables necesarias ---------------------
+
+global  DatosUsuario    
+global usuarioNivel
+
+DatosUsuario = ()
+usuarioNivel = "0"
+usuarioReal = "No s'ha identificat"
+
+global TamanyoLetra
+TamanyoLetra = 0
+
+global origenes
+origenes = ""
+global idiomas
+idiomas = ""
+global horas
+horas = ""
+global fuentes
+fuentes = ""
+global descripciones
+descripciones = ""
+global tiposPago
+tiposPago = ""  
+global estados
+estados = "" 
+global usoUsuarios
+usoUsuarios = ""
+global productos
+productos = ""
+global productosR
+productosR = ""
+global productosS
+productosS = ""
+
+global puntero
+
+global fecha
+global diaGlobal
+global diaGlobaltk
+global mesGlobal
+global mesGlobaltk
+global anyoGlobal
+global anyoGlobaltk
+global diaFecha
+global mesFecha
+global anyoFecha
+
+fecha = datetime.now()
+diaGlobal = str(fecha.day)
+diaGlobaltk = StringVar()
+diaGlobaltk.set(diaGlobal)
+mesGlobal = str(fecha.month)
+mesGlobaltk = StringVar()
+mesGlobaltk.set(mesGlobal)
+anyoGlobal = str(fecha.year)
+anyoGlobaltk = StringVar()
+anyoGlobaltk.set(anyoGlobal)
+
+# Variables del sector 3
+# Definimos el valor del puntero para cuando los listados som más largos que el espacio en pantalla
+puntero = 0
+           
+# ------------------------------ Funciones globales ----------------------
+def CopiaSeguridadGlobal    ():
+    
+    # Ventana de aviso
+    # Preparamos la ventana Tk donde trabajaremos
+    global ventana2
+    ventana2 = Tk()                             # Creamos la ventana
+    ventana2.title(" ")                         # Título de la ventana
+    ventana2.geometry("400x25")                 # Damos tamaño a la ventana
+    ventana2.configure(bg='blue')               # Color de fondo
+    ventana2.iconbitmap("image/icono.ico")      # Icono de la ventana
+    ventana2.deiconify()                        # Mostramos la ventana
+    ventana2label = Label(ventana2, text = "Fent còpia de seguretat...", bg = "blue", fg = "white", font = ("Helvetica", 12))   
+    ventana2label.pack()                    # Coloca el label en la ventana
+    ventana2.overrideredirect(True)         # Quitamos el marco de la ventana
+    ventana2.update()                       # Actualiza la ventana
+
+    fecha = datetime.now()
+    # Crea en la carpeta Security una carpeta con nombre fecha y hora actual
+    os.mkdir("Security/" + str(anyoGlobal) + "-" + str(mesGlobal) + "-" + str(diaGlobal) + " " + str(fecha.hour) + "-" + str(fecha.minute) + "-" + str(fecha.second))
+    # Copia la carpeta databases dentro de esta carpeta
+    shutil.copytree("databases", "Security/" + str(anyoGlobal) + "-" + str(mesGlobal) + "-" + str(diaGlobal) + " " + str(fecha.hour) + "-" + str(fecha.minute) + "-" + str(fecha.second) + "/databases")
+    # Copia la carpeta files dentro de esta carpeta
+    shutil.copytree("files", "Security/" + str(anyoGlobal) + "-" + str(mesGlobal) + "-" + str(diaGlobal) + " " + str(fecha.hour) + "-" + str(fecha.minute) + "-" + str(fecha.second) + "/files")
+    
+    ventana2.destroy()                          # Destruimos la ventana
+def Saliendo                ():
+    
+    CopiaSeguridadGlobal()
+    # Cerramos tkinter
+    raiz.destroy()      
+def cambiaPasaEncima        (boton, colorEncima, colorFuera): 
+  
+    boton.bind("<Enter>", func=lambda e: boton.config(background=colorEncima))
+    boton.bind("<Leave>", func=lambda e: boton.config(background=colorFuera)) 
+def creaBoton               (boton,frame,texto,comando,fila,columna,colfondo,colletras,altura,ancho,colPasa):
+    
+    boton = Button(frame, text=texto, command=comando)
+    boton.grid(row=fila, column=columna)
+    boton.config(bg=colfondo,fg=colletras,  height = altura, width = ancho)
+    boton.grid(padx=10, pady=10)
+    cambiaPasaEncima(boton,colPasa,colfondo)
+def creaLabel               (etiqueta,frame,texto,fila,columna,filaexp,colexp,separax,colfondo,colletra,posicion,tamanyo,tipo):
+    
+    etiqueta = Label(frame,text=texto,textvariable=texto)
+    etiqueta.grid(row=fila, column=columna,rowspan=filaexp,columnspan=colexp)
+    etiqueta.config(padx = separax,bg=colfondo,fg=colletra, anchor=posicion, font=("Helvetica", tamanyo, tipo))
+    etiqueta.grid(padx=10, pady=10)
+def creaEntry               (entrada,frame,textoreferencia,justificacion,fila,columna,colfondo,colletra,ancho,tamanyo):
+    
+    entrada = Entry(frame,textvariable=textoreferencia,justify = justificacion)
+    entrada.grid(row=fila, column=columna)
+    entrada.config(bg=colfondo,fg=colletra,  width = ancho, font=("Helvetica", tamanyo))
+def ConfiguraColumnas       (frame,cantCol,*valores):
+    
+    for i in range(cantCol):
+        e = valores[i]
+        frame.columnconfigure(i,weight = e)     
+def ConfiguraFilas          (frame,cantFil,*valores):
+    
+    for i in range(cantFil):
+        e = valores[i]
+        frame.rowconfigure(i,weight = e)    
+def TamanyoMenos            ():
+    
+    global TamanyoLetra
+    if  TamanyoLetra == 0:
+        
+        return
+    
+    TamanyoLetra -= 1  
+    RepintaTodoTextoTamanyo()  
+def TamanyoMas              ():
+    global TamanyoLetra
+    if  TamanyoLetra == 15:
+        
+        return
+    
+    TamanyoLetra += 1 
+    RepintaTodoTextoTamanyo()
+def RepintaTodoTextoTamanyo ():
+    
+    global TamanyoLetra
+    tamanyoFont = TamanyoLetra + 15
+    textMenu.config(font=("Helvetica", tamanyoFont,"bold"))
+    for i in range (1,12):
+        globals()["BM" + str(i)].config(font=("Helvetica", tamanyoFont))
+    
+    tamanyoFont = TamanyoLetra + 10
+    for i in range (1,24):
+        globals()["LR" + str(i)].config(font=("Helvetica", tamanyoFont))
+        globals()['LRR%s' % (i) + '1'].config(font=("Helvetica", tamanyoFont))
+        globals()['LRR%s' % (i) + '2'].config(font=("Helvetica", tamanyoFont))
+    
+    LRR1.config(font=("Helvetica", tamanyoFont))
+    LRR5.config(font=("Helvetica", tamanyoFont))
+    LRR6.config(font=("Helvetica", tamanyoFont))
+    LRR73.config(font=("Helvetica", tamanyoFont))
+    LRR213.config(font=("Helvetica", tamanyoFont))
+
+def MiraFecha               (uno):
+
+    # Comprueba si diafecha, mesfecha y anyofecha contienen las fechas del dia de hoy
+    if diaFecha.get() == diaGlobal and mesFecha.get() == mesGlobal and anyoFecha.get() == anyoGlobal:
+        
+        frameFecha.config(bg = "#b7b493")
+        textFecha.config(bg = "#b7b493")
+        textBarra1.config(bg = "#b7b493")
+        textBarra2.config(bg = "#b7b493")
+        textSpace.config(bg = "#b7b493")    
+    else:
+        
+        frameFecha.config(bg = "red")
+        textFecha.config(bg = "red")
+        textBarra1.config(bg = "red")
+        textBarra2.config(bg = "red")
+        textSpace.config(bg = "red")
+def FechaActualIncrustada   ():
+    
+    # Introducimos el valor de la fecha actual en los campos de fecha
+    LRR12.insert(0,diaGlobal)
+    LRR22.insert(0,mesGlobal)
+    LRR32.insert(0,anyoGlobal)
+    
+    # Colocamos el foco en la siguiente label
+    LRR41.focus()
+def FechaActualIncrustadaInc():
+    
+    # Introducimos el valor de la fecha actual en los campos de fecha
+    LRR22.insert(0,diaGlobal)
+    LRR32.insert(0,mesGlobal)
+    LRR42.insert(0,anyoGlobal)
+def FechaActualIncrustadaPax():
+    
+    # Introducimos el valor de la fecha actual en los campos de fecha
+    LRR12.insert(0,anyoGlobal)
+    LRR22.insert(0,mesGlobal)
+def FechaActualIncrustadaGru():
+    
+    # Introducimos el valor de la fecha actual en los campos de fecha
+    LRR12.insert(0,"1")
+    LRR22.insert(0,mesGlobal)
+    LRR32.insert(0,anyoGlobal)
+    LRR42.insert(0,"31")
+    LRR52.insert(0,mesGlobal)
+    LRR62.insert(0,anyoGlobal)
+            
+def LimpiaElegibles         ():
+    
+    for i in range(1,24):
+    
+        globals()['LRR%s' % (i) + '1'].config(state = "readandwrite")
+        globals()['LRR%s' % (i) + '1'].delete(first=0,last="end")
+        globals()['LRR%s' % (i) + '1'].config(state = "readonly")
+        
+        globals()['LRR%s' % (i) + '2'].delete(first=0,last="end")
+        globals()['LRR%s' % (i) + '2'].config(state = "normal",show="")      
+
+    LRR1.config(text ="")
+    LRR5.config(text ="")
+    LRR6.config(text ="")
+    LRR73.delete(1.0,END)
+    LRR213.delete(1.0,END)
+def LimpiaLabelsRellena     ():
+
+    for i in range(1,24):
+            
+        globals()['LR%s' % (i)].config(text = "")
+        globals()['LRR%s' % (i) + '1'].grid_forget()
+        globals()['LRR%s' % (i) + '2'].grid_forget()
+    
+    LRR1.grid_forget() 
+    LRR5.grid_forget()  
+    LRR6.grid_forget()  
+    LRR73.grid_forget()  
+    LRR213.grid_forget()
+    
+    LimpiaElegibles()
+    borra_datos()
+    BB4.config(fg="#27779d", bg="#27779d",command = regresaSinNada)
+    BB5.config(fg="#27779d", bg="#27779d", command = regresaSinNada)
+    BB6.config(fg="#27779d", bg="#27779d", command = regresaSinNada)
+    BB7.config(fg="#27779d", bg="#27779d", command = regresaSinNada)
+    
+    cambiaPasaEncima(BB4,"grey","#27779d")        
+    cambiaPasaEncima(BB5,"grey","#27779d")        
+    cambiaPasaEncima(BB6,"grey","#27779d")        
+    cambiaPasaEncima(BB7,"grey","#27779d")        
+def salirInicio             ():
+        
+        CopiaSeguridadGlobal()
+        # Cierra tkinter
+        raiz.destroy()  
+def abreLasListas           ():
+    
+    # --- origenes ---
+    global origenes
+    origenes = ""
+    lista = open("files/ORIGENS.DAT")
+    for i in lista:        
+        separa = i.split(",")        
+        origenes = origenes + separa[0] + ','
+    
+    origenes = origenes[:-2]
+    origenes = list(map(str,origenes.split(',')))
+    
+    lista.close() 
+    
+    # --- horas ---
+    global horas
+    horas = ""
+    
+    lista = open("files/HORARIS.DAT")
+    for i in lista:        
+        separa = i.split(",")        
+        horas = horas + separa[0] + ','
+    
+    horas = horas[:-2]
+    horas = list(map(str,horas.split('\n,')))
+    
+    lista.close() 
+
+    # --- idiomas ---
+    global idiomas
+    idiomas = ""
+    
+    lista = open("files/IDIOMES.DAT")
+    for i in lista:        
+        separa = i.split(",")        
+        idiomas = idiomas + separa[0] + ','
+    
+    idiomas = idiomas[:-2]
+    idiomas = list(map(str,idiomas.split('\n,')))
+    
+    lista.close()
+        
+    # --- descripciones ---
+    global descripciones
+    descripciones = ""
+    
+    lista = open("files/DESCRIPCIONS.DAT")
+    for i in lista:        
+        separa = i.split("\n")        
+        descripciones = descripciones + separa[0] + ','
+    
+    descripciones = descripciones[:-2]
+    descripciones = list(map(str,descripciones.split(',')))
+    
+    lista.close()  
+    
+    # --- estados ---
+    global estados
+    estados = ""
+    
+    lista = open("files/ESTATS.DAT")
+    for i in lista:        
+        separa = i.split("\n")        
+        estados = estados + separa[0] + ','
+    
+    estados = estados[:-2]
+    estados = list(map(str,estados.split(',')))
+    
+    lista.close()  
+    
+    # --- fuentes ---
+    global fuentes
+    fuentes = ""
+    
+    lista = open("files/FONTS.DAT")
+    for i in lista:        
+        separa = i.split("\n")        
+        fuentes = fuentes + separa[0] + ','
+    
+    fuentes = fuentes[:-2]
+    fuentes = list(map(str,fuentes.split(',')))
+    
+    lista.close()  
+                
+    # --- formas de pago ---
+    global tiposPago
+    tiposPago = ""
+    
+    lista = open("files/MODES PAGAMENT.DAT")
+    for i in lista:        
+        separa = i.split("\n")        
+        tiposPago = tiposPago + separa[0] + ','
+    
+    tiposPago = tiposPago[:-1]
+    tiposPago = list(map(str,tiposPago.split(',')))
+    
+    lista.close() 
+    
+    # --- Productos ---
+    global productos
+    productos = ""
+    
+    try:
+        cursor = sqlite3.connect('databases/basesDeDatosDatos.db').cursor()
+        cursor.execute("SELECT NOM FROM bd_productos")
+        datos = cursor.fetchall()
+            
+        datos = str(datos)
+        separa = datos.split("',), ('")
+        separa = str(separa).replace("[('","")
+        separa = str(separa).replace("',)]","")
+        productos = separa
+        productos = str(productos).replace(" '","")
+        productos = str(productos).replace("'","")
+        productos = str(productos).replace(' "',"")
+        productos = str(productos).replace('"',"")
+        productos = str(productos).replace('[',"")
+        productos = str(productos).replace(']',"")
+        
+        productos = list(map(str,productos.split(',')))
+        productos.sort()
+        cursor.close()    
+
+    except:
+        pass
+    # --- Productos registrables---
+    global productosR
+    productosR = ""
+    
+    try:
+        cursor = sqlite3.connect('databases/basesDeDatosDatos.db').cursor()
+        cursor.execute("SELECT NOM FROM bd_productos WHERE REGISTRABLE = 'Registre'")
+        datos = cursor.fetchall()
+            
+        datos = str(datos)
+        separa = datos.split("',), ('")
+        separa = str(separa).replace("[('","")
+        separa = str(separa).replace("',)]","")
+        productosR = separa
+        productosR = str(productosR).replace(" '","")
+        productosR = str(productosR).replace("'","")
+        productosR = str(productosR).replace(' "',"")
+        productosR = str(productosR).replace('"',"")
+        productosR = str(productosR).replace('[',"")
+        productosR = str(productosR).replace(']',"")
+        
+        productosR = list(map(str,productosR.split(',')))
+        productosR.sort()
+        cursor.close()    
+
+    except:
+        pass
+    # --- Productos stockables---
+    global productosS
+    productosS = ""
+    
+    try:
+        cursor = sqlite3.connect('databases/basesDeDatosDatos.db').cursor()
+        cursor.execute("SELECT NOM FROM bd_productos WHERE REGISTRABLE = 'Stock'")
+        datos = cursor.fetchall()
+            
+        datos = str(datos)
+        separa = datos.split("',), ('")
+        separa = str(separa).replace("[('","")
+        separa = str(separa).replace("',)]","")
+        productosS = separa
+        productosS = str(productosS).replace(" '","")
+        productosS = str(productosS).replace("'","")
+        productosS = str(productosS).replace(' "',"")
+        productosS = str(productosS).replace('"',"")
+        productosS = str(productosS).replace('[',"")
+        productosS = str(productosS).replace(']',"")
+        
+        productosS = list(map(str,productosS.split(',')))
+        productosS.sort()
+        cursor.close()    
+
+    except:
+        pass
+    # --- Clientes ---  
+    global clientes
+    clientes = ""
+    
+    try:
+        cursor = sqlite3.connect('databases/basesDeDatosClientes.db').cursor()
+        cursor.execute("SELECT NOM FROM bd_clientes")
+        datos = cursor.fetchall()
+            
+        datos = str(datos)
+        separa = datos.split("',), ('")
+        separa = str(separa).replace("[('","")
+        separa = str(separa).replace("',)]","")
+        clientes = separa
+        clientes = str(clientes).replace(" '","")
+        clientes = str(clientes).replace("'","")
+        clientes = str(clientes).replace(' "',"")
+        clientes = str(clientes).replace('"',"")
+        clientes = str(clientes).replace('[',"")
+        clientes = str(clientes).replace(']',"")
+        
+        clientes = list(map(str,clientes.split(',')))
+        clientes.sort()
+        cursor.close()  
+    
+    except:
+        pass    
+def cargaUsuario            ():
+
+    # Si no existe ningún usuario, ejecuta la introducción de uno.
+    # Crea la base de datos o conecta con ella
+    base_datos_datos = sqlite3.connect('databases/basesDeDatosDatos.db')
+        
+    # Crea el cursor
+    cursor = base_datos_datos.cursor()
+    
+    # Coge el valor del ultimo oid
+    cursor.execute("SELECT *, oid FROM bd_usuarios")
+    
+    try:
+        datos = cursor.fetchall()
+        dato = datos[-1]
+        idAdecuado = dato[7]
+        variable_circunstancial = True
+    except:
+        
+        raiz.deiconify()
+        menuDatosUsuarioIntroducir()
+        textMenu.config(text = "PRIMER USUARI") 
+        menusBotones("Tancar",salirInicio)
+        variable_circunstancial = False
+    
+    if variable_circunstancial == False:
+        return
+        
+    raiz.iconify()
+
+    rUsuario = Tk()
+    rUsuario.title("Identificació d'usuari")
+    rUsuario.iconbitmap("image/icono.ico")
+    rUsuario.config(bg="#b7b493")
+    rUsuario.config(bd=10)
+    rUsuario.config(relief="groove")
+    rUsuario.config(width = 300, heigh = 300)   
+    rUsuario.deiconify()
+    
+    # Si en cualquier momento se pulsan las teclas CTRL + ESC se fuerza el pulsado del botón SALIR 
+    rUsuario.bind("<Escape>", lambda event: salir())   
+    # Si en cualquier momento se pulsan las teclas CTRL + INTRO se fuerza el pulsado del botón VALIDAR
+    rUsuario.bind("<Control-Return>", lambda event: regreso())
+
+    # --- Usuarios ---  
+    global usoUsuarios
+    global usuariosO
+    usoUsuarios = ""
+    
+    cursor = sqlite3.connect('databases/basesDeDatosDatos.db').cursor()
+    cursor.execute("SELECT NOM FROM bd_usuarios")
+    datos = cursor.fetchall()
+        
+    datos = str(datos)
+    separa = datos.split("',), ('")
+    separa = str(separa).replace("[('","")
+    separa = str(separa).replace("',)]","")
+    usoUsuarios = separa
+    usoUsuarios = str(usoUsuarios).replace(" '","")
+    usoUsuarios = str(usoUsuarios).replace("'","")
+    usoUsuarios = str(usoUsuarios).replace(' "',"")
+    usoUsuarios = str(usoUsuarios).replace('"',"")
+    usoUsuarios = str(usoUsuarios).replace('[',"")
+    usoUsuarios = str(usoUsuarios).replace(']',"")
+    
+    usoUsuarios = list(map(str,usoUsuarios.split(',')))
+    usoUsuarios.sort()
+    usuariosO = usoUsuarios
+    cursor.close()   
+    
+    def salir():
+    
+        rUsuario.destroy()
+        raiz.destroy()  
+              
+    def regreso():
+        
+        global usuarioNivel
+        global usuarioReal
+        usuarioFinal = CBUsuario.get()
+        claveFinal = EClave.get()
+        
+        if usuarioFinal == "":
+            
+            LMensaje.config(text = "No s'ha definit cap usuari")
+            CBUsuario.focus()
+            return
+        
+        elif claveFinal == "":
+            
+            LMensaje.config(text = "No s'ha definit cap clau")
+            EClave.focus()
+            return
+        
+        else:
+
+            cursor = sqlite3.connect('databases/basesDeDatosDatos.db').cursor()
+            cursor.execute("SELECT CLAVE FROM bd_usuarios WHERE (NOM = '" + usuarioFinal+"')")
+            datos = cursor.fetchall()
+            datos = str(datos).replace("[('","")
+            datos = str(datos).replace("',)]","")
+            
+            if datos == claveFinal:
+                
+                usuarioReal = usuarioFinal
+                cursor.execute("SELECT NIVEL FROM bd_usuarios WHERE (NOM = '" + usuarioFinal+"')")
+                datos = cursor.fetchall()
+                datos = str(datos).replace("[('","")
+                datos = str(datos).replace("',)]","")
+                usuarioNivel = datos
+                
+                cursor.execute("SELECT * FROM bd_usuarios WHERE (NOM = '" + usuarioFinal+"')")
+                datos = cursor.fetchall()
+                DatosUsuario = datos
+                
+                rUsuario.destroy()
+                raiz.deiconify()
+                nomUsuario.config(text = usuarioReal)           
+                MenuInicial()      
+                return(DatosUsuario)
+            
+        LMensaje.config(text = "Clau incorrecte")
+        
+        # Limpia el campo de la clave
+        EClave.delete(0, END)
+        # Pone el foco en el campo de la clave            
+        EClave.focus()
+        return
+        
+
+    # Botones
+    LUsuario = Label(rUsuario,text="Usuari:")
+    LUsuario.grid(row=0, column=0,rowspan=1,columnspan=1)
+    LUsuario.config(padx = 5,bg="#b7b493",fg="#FFFFFF", anchor = E, font=("Helvetica", 15,"bold"),width = 15)
+    CBUsuario = Combobox(rUsuario,state="readonly")
+    CBUsuario.grid(rowspan=1,columnspan=1)
+    CBUsuario.config(font=("Helvetica", 15),width = 15)
+    CBUsuario.grid(row=0, column=1) 
+    CBUsuario['values'] = (usuariosO) 
+    CBUsuario.focus()
+    
+    LClave = Label(rUsuario,text="Clau d'accés:")
+    LClave.grid(row=1, column=0,rowspan=1,columnspan=1)
+    LClave.config(padx = 5,bg="#b7b493",fg="#FFFFFF", anchor = E, font=("Helvetica", 15,"bold"),width = 15)
+    EClave = Entry(rUsuario,show="*")
+    EClave.grid(row=1,column=1,rowspan=1,columnspan=1)
+    EClave.config(font=("Helvetica", 15),width = 15)
+    
+    BValidaUsuario = Button(rUsuario, text="Valida", command=regreso, font=(10))
+    BValidaUsuario.grid(row=2, column=0,columnspan=2)
+    BValidaUsuario.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 5)
+    BValidaUsuario.grid(pady = 2)
+    cambiaPasaEncima(BValidaUsuario,"green","#27779d")
+    
+    BSalir = Button(rUsuario, text="Sortir", command=salir, font=(10))
+    BSalir.grid(row=3, column=0,columnspan=2)
+    BSalir.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 5)
+    BSalir.grid(pady = 2)
+    cambiaPasaEncima(BSalir,"green","#27779d")
+    
+    LMensaje = Label(rUsuario,text="")
+    LMensaje.grid(row=4, column=0,rowspan=1,columnspan=2)
+    LMensaje.config(padx = 5,bg="#b7b493",fg="red", font=("Helvetica", 18,"bold"),width = 30)
+
+    rUsuario.mainloop()
+def regresaSinNada          ():
+    
+    return 
+def cambioUsuario           ():
+    if  nomUsuario.cget("text") == "":
+
+        return
+    global DatosUsuario
+    DatosUsuario = ()
+    usuarioReal = ""
+    nomUsuario.config(text = usuarioReal)
+    CopiaSeguridadGlobal()           
+    cargaUsuario()
+
+def BotonValidarForzado     ():
+    
+    BB4.invoke()
+def BotonImprimirForzado    ():
+    
+    BB7.invoke()
+def BotonSubirForzado       ():
+    BB4.focus()
+    BB5.invoke()
+def BotonBajarForzado       ():
+    BB4.focus()    
+    BB6.invoke()
+def BotonRegresarForzado    ():
+    
+    BM11.invoke()        
+
+def Boton4activado          (Destino):
+    
+    BB4.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 5, command = Destino)
+    cambiaPasaEncima(BB4,"green","#27779d") 
+def Boton5activado          (Destino):
+    
+    BB5.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 5, command = Destino)
+    cambiaPasaEncima(BB5,"green","#27779d") 
+def Boton6activado          (Destino):
+    
+    BB6.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 5, command = Destino)
+    cambiaPasaEncima(BB6,"green","#27779d")
+def Boton7activado          (Destino):
+    
+    BB7.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 5, command = Destino)
+    cambiaPasaEncima(BB7,"green","#27779d")              
+        
+def crea_espacios_info      (frame,a,b):
+                 
+    for dato in range(a):
+        
+        for data in range(b):
+            
+            num = "0" + str(dato) + "0" + str(data)
+        
+            globals()['VIEW%s' % num] = Label(frame, text="",bg="#b7b493", fg="#293337",width = 10, height = 1)
+            globals()['VIEW%s' % num].grid(row=data+1,column=dato)
+            
+    columna = 0
+    for dato in range (a):
+        
+        num = "0" + str(columna) + "00"
+        globals()['VIEW%s' % num].config(text = "                    ",bg = "#5d5b45",fg = "#FFFFFF")
+        columna += 1
+    ConfiguraColumnas(frameLista,1,1,1,1,1,1,1,1,1,1)  
+def destruye_espacios_info  (a,b):
+                 
+    for dato in range(a):
+        
+        for data in range(b):
+            
+            num = "0" + str(dato) + "0" + str(data)
+        
+            globals()['VIEW%s' % num].destroy()
+def ajusta_espacios_info    (a,b,*ancho):
+                 
+    for dato in range(a):
+        
+        for data in range(b):
+            
+            num = "0" + str(dato) + "0" + str(data)
+        
+            globals()['VIEW%s' % num].config(width = ancho[dato])
+
+def borra_datos             ():
+                  
+    for dato in range(10):
+        
+        for data in range(22):
+            
+            num = "0" + str(dato) + "0" + str(data)
+            
+            globals()['VIEW%s' % num].config(text = "                              ")            
+def menusBotones            (texto11="",enlace11=regresaSinNada,
+                             texto1="",enlace1=regresaSinNada,
+                             texto2="",enlace2=regresaSinNada,
+                             texto3="",enlace3=regresaSinNada,
+                             texto4="",enlace4=regresaSinNada,
+                             texto5="",enlace5=regresaSinNada,
+                             texto6="",enlace6=regresaSinNada,
+                             texto7="",enlace7=regresaSinNada,
+                             texto8="",enlace8=regresaSinNada,
+                             texto9="",enlace9=regresaSinNada,
+                             texto10="",enlace10=regresaSinNada,
+                             texto12="",enlace12=regresaSinNada,
+                             texto0="",enlace0=regresaSinNada
+                             ):
+    
+    botones = [
+        {'texto': texto1, 'enlace': enlace1},
+        {'texto': texto2, 'enlace': enlace2},
+        {'texto': texto3, 'enlace': enlace3},   
+        {'texto': texto4, 'enlace': enlace4},    
+        {'texto': texto5, 'enlace': enlace5},    
+        {'texto': texto6, 'enlace': enlace6},    
+        {'texto': texto7, 'enlace': enlace7},    
+        {'texto': texto8, 'enlace': enlace8},    
+        {'texto': texto9, 'enlace': enlace9},    
+        {'texto': texto10, 'enlace': enlace10},
+        {'texto': texto11, 'enlace': enlace11},
+        {'texto': texto12, 'enlace': enlace12}
+        ]
+
+    for i, boton in enumerate(botones):
+        texto = boton['texto']
+        enlace = boton['enlace']
+        if texto == "":
+            globals()['BM%s' % (i+1)].config(text = " ",bg = "#b7b493",command = regresaSinNada,relief='flat')
+            cambiaPasaEncima(globals()['BM%s' % (i+1)],"#b7b493","#b7b493")
+            # Cambia el color del botón cuando está enfocado
+            globals()['BM%s' % (i+1)].bind("<FocusIn>", lambda event, i=i: globals()['BM%s' % (i+1)].config(bg="#b7b493"))
+            # Devuelve el color original si el botón no está enfocado
+            globals()['BM%s' % (i+1)].bind("<FocusOut>", lambda event, i=i: globals()['BM%s' % (i+1)].config(bg="#b7b493"))
+            globals()['BM%s' % (i+1)].config(takefocus = False)
+        else:
+            globals()['BM%s' % (i+1)].config(text = texto,bg = "#27779d",command = enlace,relief='groove')
+            cambiaPasaEncima(globals()['BM%s' % (i+1)],"green","#27779d")
+            # Cambia el color del botón cuando está enfocado
+            globals()['BM%s' % (i+1)].bind("<FocusIn>", lambda event, i=i: globals()['BM%s' % (i+1)].config(bg="#87779d"))
+            # Devuelve el color original si el botón no está enfocado
+            globals()['BM%s' % (i+1)].bind("<FocusOut>", lambda event, i=i: globals()['BM%s' % (i+1)].config(bg="#27779d"))
+            globals()['BM%s' % (i+1)].config(takefocus = True)
+        BM0.config(text = " ",bg = "#b7b493",command = regresaSinNada,relief='flat')
+        cambiaPasaEncima(BM0,"#b7b493","#b7b493")
+def query_registros         ():
+    
+    # Creamos la base de datos o conectamos con una
+    base_datos = sqlite3.connect('databases/basesDeDatosRegistros.db')
+    busqueda = "SELECT *, oid FROM bd_registros ORDER BY oid DESC"
+    columnas = 8
+    global puntero
+    query(base_datos,busqueda,columnas,"ID","","DATA","DESCRIPCIÓ","ORIGEN","HORA","PRODUCTE","FONT","")
+def prequery_registros      ():
+    
+    global puntero
+    if puntero <= 0:
+        puntero = 0
+        query_registros_busca()
+        return
+    else:
+        puntero -= 42
+        query_registros_busca()
+def query_registros_Inv     ():
+    
+    # Creamos la base de datos o conectamos con una
+    base_datos = sqlite3.connect('databases/basesDeDatosRegistros.db')
+    busqueda = "SELECT *, oid FROM bd_registros ORDER BY FECHA DESC, oid DESC"
+    columnas = 8
+    global puntero
+    puntero = 0
+    query(base_datos,busqueda,columnas,"ID","","DATA","DESCRIPCIÓ","ORIGEN","HORA","PRODUCTE","FONT","")
+def query_registros_busca0  ():
+    
+    global puntero
+    puntero = 0
+    query_registros_busca()
+def query_registros_busca   ():
+    
+    # Si LRR12 mide 1, le añadimos un 0 delante
+    if len(LRR12.get()) == 1:
+        LRR12.insert(0,"0")
+    # Lo mismo con LRR22
+    if len(LRR22.get()) == 1:
+        LRR22.insert(0,"0")
+    
+    v1 = LRR12.get()
+    v2 = LRR22.get()
+    v3 = LRR32.get()
+    v4 = LRR12.get()+"/"+LRR22.get()+"/"+LRR32.get()
+    v5 = LRR41.get()
+    v6 = LRR51.get()
+    v7 = LRR61.get()
+    v8 = LRR71.get()
+    v9 = LRR81.get()
+    v10= LRR91.get()
+    v11= LRR101.get()
+       
+    # Creamos la base de datos o conectamos con una
+    base_datos = sqlite3.connect('databases/basesDeDatosRegistros.db')
+    busqueda = "SELECT *, oid FROM bd_registros WHERE ((FECHA LIKE '" + v3 + "/%' or '" + v3 + "' = '') AND (FECHA LIKE '%/" + v2 + "/%' or '" + v2 + "' = '') AND (FECHA LIKE '%/" + v1 + "' or '" + v1 + "' = '') AND (USUARIO = '" + v11 + "' or '" + v11 + "' = '') AND (DESCRIPCION = '" + v5 + "' or '" + v5 + "' = '') AND (ORIGEN = '" + v6 + "' or '" + v6 + "' = '') AND (HORA >= '" + v7 + "' or '" + v7 + "' = '')  AND (HORA <= '" + v8 + "' or '" + v8 + "' = '')  AND (PRODUCTO = '" + v9 + "' or '" + v9 + "' = '')   AND (FUENTE = '" + v10 + "' or '" + v10 + "' = '')) ORDER BY FECHA"
+    columnas = 8
+    global puntero
+    query(base_datos,busqueda,columnas,"ID","","DATA","DESCRIPCIÓ","ORIGEN","HORA","PRODUCTE","FONT","")
+def registroCorrigeUno      ():
+
+    global val1
+    val1 = LRR12.get()
+    global val2
+    val2 = usuarioReal
+    global diaGlobal
+    diaGlobal = diaGlobaltk.get()
+    global mesGlobal
+    mesGlobal = mesGlobaltk.get()
+    global anyoGlobal
+    anyoGlobal = anyoGlobaltk.get()
+
+    if  val1 == "":
+        return
+                       
+    # Limpia las cajas
+    LimpiaElegibles
+    
+	# Crea una base de datos o se conecta a una
+    base_datos = sqlite3.connect('databases/basesDeDatosRegistros.db')
+
+	# Crea cursor
+    c = base_datos.cursor()
+    
+	# Query the database
+    c.execute("SELECT * FROM bd_registros WHERE oid = " + val1)
+    records = c.fetchall()
+    
+    menuRegistrosIntroducir()
+      
+    # Creando las variables globales
+    global descripcion
+    global origen
+    global hora
+    global producto
+    global fuente
+    global notas
+    global val6
+    
+      
+    # Loop para volcar los resultados
+    
+    for record in records:
+        notillas = record[7]
+        notillas = notillas.rstrip()
+              
+        LRR1.config(text = val1)
+        LRR21.config(state = "readandwrite")
+        LRR21.insert(0,record[2])
+        LRR21.config(state = "readonly")
+        LRR31.config(state = "readandwrite")
+        LRR31.insert(0,record[3])
+        LRR41.config(state = "readandwrite")
+        LRR41.insert(0,record[4])
+        LRR41.config(state = "readonly")
+        LRR51.config(state = "readandwrite")
+        LRR51.insert(0,record[5])
+        LRR51.config(state = "readonly")
+        LRR61.config(state = "readandwrite")
+        LRR61.insert(0,record[6])
+        LRR61.config(state = "readonly")
+        LRR73.config(state = NORMAL)
+        LRR73.insert(1.0,notillas+" - "+usuarioReal+" fa canvis el "+diaGlobal+"/"+mesGlobal+"/"+anyoGlobal+": ")
+        nomUsuario.config(text = record[0])
+        val6 =record[1]
+        val7 = []
+        for t in val6.split("/"):
+            val7.append(t)
+        anyoGlobaltk.set(val7[0])
+        mesGlobaltk.set(val7[1])
+        diaGlobaltk.set(val7[2])
+        diaFecha.config(text = diaGlobaltk)
+        mesFecha.config(text = mesGlobaltk)
+        anyoFecha.config(text = anyoGlobaltk)
+        MiraFecha(anyoFecha)
+        
+    # Centramos el cursor
+    LRR21.focus()
+
+    Boton4activado(RegistroSalvaCorreccion)
+def RegistroSalvaCorreccion ():
+    
+    global origenes
+    global usuarioReal
+    global diaGlobal
+    global mesGlobal
+    global anyoGlobal
+    
+    # Rescata valores
+    v1 = LRR21.get()
+    v2 = LRR31.get()
+    v3 = LRR41.get()
+    v4 = LRR51.get()
+    v5 = LRR61.get()
+    v6 = LRR73.get(1.0,END)
+    v7 = anyoGlobaltk.get() + "/" + mesGlobaltk.get() + "/" + diaGlobaltk.get()
+    
+    
+        
+    # Coteja fallos
+    if v1 == "" or v2 == "" or v3 == "" or v4 == "" or v5 == "":
+            
+        LR23.config(text = "Registre incomplert")
+        return
+        
+    a = 0
+    for i in origenes:
+        if i == v2:    
+            a = 1
+    if  a == 0:
+        LR23.config(text = "Origen incorrecte")
+        LRR31.focus()
+        return
+        
+    # Crea una base de datos o abre la existente
+    base_datos = sqlite3.connect('databases/basesDeDatosRegistros.db')
+    
+    # Conecta el cursor
+    c = base_datos.cursor()
+    
+    c.execute("""UPDATE bd_registros SET
+              USUARIO = :usuario,
+              FECHA = :fecha,
+              DESCRIPCION = :descripcion,
+              ORIGEN = :origen,
+              HORA = :hora,
+              PRODUCTO = :producto,
+              FUENTE = :fuente,
+              NOTAS = :notas
+                            
+              WHERE oid = :val1""",
+              {
+              'usuario': nomUsuario.cget("text"),
+              'fecha': v7,
+              'descripcion': LRR21.get(),
+              'origen': LRR31.get(),
+              'hora': LRR41.get(),
+              'producto': LRR51.get(),
+              'fuente': LRR61.get(),
+              'notas': LRR73.get(1.0,END),
+              'val1': val1
+                  })
+    
+    #Asegura los cambios
+    base_datos.commit()
+
+	# Cierra la conexión 
+    base_datos.close()  
+
+    # Vuelve a pintar usuario y fecha
+    nomUsuario.config(text = val2)
+    
+    # Recupera en las variables tk los datos de fecha salvados en diaGlobal, mesGlobal y anyoGlobal
+    anyoGlobaltk.set(anyoGlobal)
+    mesGlobaltk.set(mesGlobal)
+    diaGlobaltk.set(diaGlobal)
+    # Los vuelca a los labels
+    diaFecha.config(text = diaGlobaltk)
+    mesFecha.config(text = mesGlobaltk)
+    anyoFecha.config(text = anyoGlobaltk)
+    MiraFecha(anyoFecha)
+	# Vuelve hacia atrás
+    menuRegistroCorregir()
+def registroBorraUno        ():
+
+    # Creamos la base de datos o conectamos con una
+    base_datos = sqlite3.connect('databases/basesDeDatosRegistros.db')
+    busqueda = "SELECT *, oid FROM bd_registros WHERE (oid = '" + LRR12.get() + "')"
+    columnas = 8
+    global puntero
+    query(base_datos,busqueda,columnas,"ID","","DATA","DESCRIPCIÓ","ORIGEN","HORA","PRODUCTE","FONT","")
+    
+    val1 = LRR12.get()
+
+    # si no ha puesto ningún id, no hará nada
+    if val1 == "":
+        
+        return
+    
+    # Ventana de aviso
+    # Preparamos la ventana Tk donde trabajaremos
+    global ventana2
+    ventana2 = Tk()
+    ventana2.title('Atenció!!!')
+    ventana2.geometry("270x60")
+    ventana2.configure(bg='red')
+    ventana2.iconbitmap("image/icono.ico")
+    ventana2.deiconify()
+    
+    aviso = Label(ventana2,text = ("Aixó esborrarà el registre amb id "+
+                                   val1 +", si existeix."),
+                  anchor = "center",
+                  background = "red")
+    aviso.grid(column=0, row = 0, columnspan = 2, pady=(5, 0))
+    
+    yes_btn = Button(ventana2, text="SI", command=del_register_yes)
+    yes_btn.grid(row=1, column=0,  ipadx=5)      
+    
+    no_btn = Button(ventana2, text="NO", command=del_no)
+    no_btn.grid(row=1, column=1, ipadx=5)
+    
+    no_btn.focus()
+    
+    ventana2.mainloop()  
+def del_register_yes        ():
+
+    # Creamos base de datos o conectamos a una
+    base_datos = sqlite3.connect('databases/basesDeDatosRegistros.db')
+    
+	# Creamos el cursor
+    c = base_datos.cursor()
+
+	# Borra el registro
+    c.execute("DELETE from bd_registros WHERE oid = " + LRR12.get())
+
+    LimpiaElegibles()
+    
+	#Asegura los cambios
+    base_datos.commit()
+
+	# Cierra la conexión 
+    base_datos.close()
+    
+    ventana2.destroy()
+
+    # Borramos los datos del listado de registros
+    query_registros() 
+
+def query_incidencias       ():
+    
+    # Creamos la base de datos o conectamos con una
+    base_datos = sqlite3.connect('databases/basesDeDatosIncidencias.db')
+    busqueda = "SELECT *, oid FROM bd_incidencias ORDER BY oid DESC"
+    columnas = 8
+    global puntero
+    query(base_datos,busqueda,columnas,"ID","DATA","HORA","PAX","PAX","PRODUCTE","IDIOMA","TELÈFON","ESTAT")
+def prequery_incidencias    ():
+    
+    global puntero
+    if puntero <= 0:
+        puntero = 0
+        query_incidencias_busca()
+        return
+    else:
+        puntero -= 42
+        query_incidencias_busca()
+def query_incidencias_Inv   ():
+    
+    # Creamos la base de datos o conectamos con una
+    base_datos = sqlite3.connect('databases/basesDeDatosIncidencias.db')
+    busqueda = "SELECT *, oid FROM bd_incidencias ORDER BY FECHA_CREA DESC, oid DESC"
+    columnas = 8
+    global puntero
+    puntero = 0
+    query(base_datos,busqueda,columnas,"ID","DATA","HORA","PAX","PAX","PRODUCTE","IDIOMA","TELÈFON","ESTAT")
+def query_incidencias_busca0():
+    
+    global puntero
+    puntero = 0
+    query_incidencias_busca()
+def query_incidencias_busca ():
+    
+    v1 = LRR11.get()
+    v2 = LRR22.get()
+    v3 = LRR32.get()
+    v4 = LRR42.get()
+    v5 = LRR51.get()
+    v6 = LRR61.get()
+    v7 = LRR71.get()
+    v8 = LRR82.get()
+    v9 = LRR92.get()
+    v10= LRR102.get()
+    v11= LRR112.get()
+    v12= LRR121.get()
+    # Creamos la base de datos o conectamos con una
+    base_datos = sqlite3.connect('databases/basesDeDatosIncidencias.db')
+    busqueda = "SELECT *, oid FROM bd_incidencias WHERE ((CLIENTE = '" + v1 + "' or '" + v1 + "' = '') AND (FECHA LIKE '" + v2 + "/%' or '" + v2 + "' = '') AND (FECHA LIKE '%/" + v3 + "/%' or '" + v3 + "' = '') AND (FECHA LIKE '%/" + v4 + "' or '" + v4 + "' = '') AND (PRODUCTO = '" + v5 + "' or '" + v5 + "' = '') AND (IDIOMA = '" + v6 + "' or '" + v6 + "' = '') AND (AGENDADO = '" + v7 + "' or '" + v7 + "' = '') AND (FECHA_REV LIKE '" + v8 + "/%' or '" + v8 + "' = '') AND (FECHA_REV LIKE '%/" + v9 + "/%' or '" + v9 + "' = '')  AND (FECHA_REV LIKE '%/" + v10 + "' or '" + v10 + "' = '') AND (FACTURA = '" + v11 + "' or '" + v11 + "' = '')  AND (ESTADO = '" + v12 + "' or '" + v12 + "' = '')) ORDER BY FECHA"
+    columnas = 8
+    global puntero
+    query(base_datos,busqueda,columnas,"ID","DATA","HORA","PAX","PAX","PRODUCTE","IDIOMA","TELÈFON","ESTAT")
+def incidenciasCorrigeUno   ():
+
+    global val1
+    val1 = LRR12.get()
+    global val2
+    val2 = usuarioReal
+    global diaGlobal
+    diaGlobal = diaGlobaltk.get()
+    global mesGlobal
+    mesGlobal = mesGlobaltk.get()
+    global anyoGlobal
+    anyoGlobal = anyoGlobaltk.get()
+    global usuarioNivel
+    if  val1 == "":
+        return
+                       
+    # Limpia las cajas
+    LimpiaElegibles
+    
+	# Crea una base de datos o se conecta a una
+    base_datos = sqlite3.connect('databases/basesDeDatosIncidencias.db')
+
+	# Crea cursor
+    c = base_datos.cursor()
+    
+	# Query the database
+    c.execute("SELECT * FROM bd_incidencias WHERE oid = " + val1)
+    records = c.fetchall()
+    
+    menuIncidenciasIntroducir()
+      
+    # Creando las variables globales
+    global  fecha
+    global  hora
+    global  pax1
+    global  pax2
+    global  producto
+    global  idioma
+    global  tel_extra
+    global  estado
+    global  usuario
+    global  fecha_cre
+    global  cliente
+    global  mail_extra
+    global  precio1
+    global  tipo1
+    global  precio2
+    global  tipo2
+    global  agendado
+    global  fecha_rev
+    global  pagat
+    global  notas
+    global  factura               
+    global  val6
+    
+      
+    # Loop para volcar los resultados
+    
+    for record in records:
+        notillas = record[20]
+        notillas = notillas.rstrip()
+              
+        LRR1.config(text = val1)
+        LRR22.insert(0,record[0])
+        LRR31.config(state = "readandwrite")
+        LRR31.insert(0,record[10])
+        LRR42.insert(0,record[6])
+        LRR52.insert(0,record[11])
+        LRR61.config(state = "readandwrite")
+        LRR61.insert(0,record[1])
+        LRR61.config(state = "readonly")
+        LRR72.insert(0,record[2])
+        LRR82.insert(0,record[12])
+        LRR92.insert(0,record[13])
+        LRR102.insert(0,record[3])
+        LRR112.insert(0,record[14])
+        LRR122.insert(0,record[15])
+        LRR131.config(state = "readandwrite")
+        LRR131.insert(0,record[4])
+        LRR131.config(state = "readonly")
+        LRR141.config(state = "readandwrite")
+        LRR141.insert(0,record[5])
+        LRR141.config(state = "readonly")
+        LRR161.config(state = "readandwrite")
+        LRR161.insert(0,record[16])
+        LRR161.config(state = "readonly")
+        LRR172.insert(0,record[17])
+        LRR181.config(state = "readandwrite")
+        LRR181.insert(0,record[18])
+        LRR181.config(state = "readonly")        
+        LRR192.insert(0,record[19])
+        LRR201.config(state = "readandwrite")
+        LRR201.insert(0,record[7])
+        LRR201.config(state = "readonly")                
+        LRR213.config(state = NORMAL)
+        LRR213.insert(1.0,notillas+" - "+usuarioReal+" fa canvis el "+diaGlobal+"/"+mesGlobal+"/"+anyoGlobal+": ")
+
+        nomUsuario.config(text = record[8])
+        val6 =record[9]
+        val7 = []
+        for t in val6.split("/"):
+            val7.append(t)
+        anyoGlobaltk.set(val7[0])
+        mesGlobaltk.set(val7[1])
+        diaGlobaltk.set(val7[2])
+        diaFecha.config(text = diaGlobaltk)
+        mesFecha.config(text = mesGlobaltk)
+        anyoFecha.config(text = anyoGlobaltk)
+        MiraFecha(anyoFecha)
+    # Centramos el cursor
+    LRR21.focus()    
+    if int(usuarioNivel) >=3:
+        LRR22.configure(state = "readonly")
+        LRR31.config(state = "disabled")
+        LRR42.config(state = "readonly")
+        LRR52.config(state = "readonly")
+        LRR61.config(state = "disabled")
+        LRR72.config(state = "readonly")
+        LRR82.config(state = "readonly")
+        LRR92.config(state = "readonly")
+        LRR102.config(state = "readonly")
+        LRR112.config(state = "readonly")
+        LRR122.config(state = "readonly")
+        LRR131.config(state = "disabled")
+        LRR141.config(state = "disabled")
+        LRR161.config(state = "disabled")
+        LRR172.config(state = "readonly")
+        LRR181.config(state = "disabled")
+        LRR192.config(state = "readonly")
+        LRR201.focus()
+            
+    Boton4activado(IncidenciasSalvaCorrecc)
+def IncidenciasSalvaCorrecc ():
+    
+    global origenes
+    global usuarioReal
+    global diaGlobal
+    global mesGlobal
+    global anyoGlobal
+    
+    # Rescata valores
+    v1 = LR1.cget("text")
+    v2 = LRR22.get()
+    v3 = LRR31.get()
+    v4 = LRR42.get()
+    v5 = LRR52.get()
+    v6 = LRR61.get()
+    v7 = LRR72.get()
+    v8 = LRR82.get()
+    v9 = LRR92.get()
+    v10 = LRR102.get()
+    v11 = LRR112.get()
+    v12 = LRR122.get()
+    v13 = LRR131.get()
+    v14 = LRR141.get()
+    v16 = LRR161.get()
+    v17 = LRR172.get()
+    v18 = LRR181.get()
+    v19 = LRR213.get(1.0,END)
+    v20 = LRR201.get()
+    v21 = LRR192.get()   
+    v22 = anyoGlobaltk.get() + "/" + mesGlobaltk.get() + "/" + diaGlobaltk.get()
+            
+    # Si el principio de v2 no es 2 dígitos y "/"
+    if v2[0:2].isdigit() == False or v2[2] != "/":
+        LR23.config(text = "Dia incorrecte")
+        LRR22.focus()
+        return
+    # Si v2 no contiene "/" dos digitos y "/"
+    if v2[3:5].isdigit() == False or v2[5] != "/":
+        LR23.config(text = "Mes incorrecte")
+        LRR22.focus()
+        return
+    # Si v2 no acaba en "/" y 4 dígitos
+    if v2[6:10].isdigit() == False or len(v2) != 10:
+        LR23.config(text = "Any incorrecte")
+        LRR22.focus()
+        return
+    # Si el principio de v17 no es 2 dígitos y "/"
+    if v17 != "" and (v17[0:2].isdigit() == False or v17[2] != "/"):
+        LR23.config(text = "Dia incorrecte")
+        LRR172.focus()
+        return
+    # Si v17 no contiene "/" dos digitos y "/"
+    if v17 != "" and (v17[3:5].isdigit() == False or v17[5] != "/"):
+        LR23.config(text = "Mes incorrecte")
+        LRR172.focus()
+        return
+    # Si v17 no acaba en "/" y 4 dígitos
+    if v17 != "" and (v17[6:10].isdigit() == False or len(v17) != 10):
+        LR23.config(text = "Any incorrecte")
+        LRR172.focus()
+        return
+        
+    # Crea una base de datos o abre la existente
+    base_datos = sqlite3.connect('databases/basesDeDatosIncidencias.db')
+    
+    # Conecta el cursor
+    c = base_datos.cursor()
+    
+    c.execute("""UPDATE bd_incidencias SET
+            FECHA           = :fecha,
+            HORA            = :hora,
+            PAX1            = :pax1,
+            PAX2            = :pax2,
+            PRODUCTO        = :producto,
+            IDIOMA          = :idioma,
+            TEL_EXTRA       = :tel_extra,
+            ESTADO          = :estado,
+            USUARIO         = :usuario,
+            FECHA_CREA      = :fecha_crea,
+            CLIENTE         = :cliente,
+            MAIL_EXTRA      = :mail_extra,
+            PRECIO1         = :precio1,
+            TIPO1           = :tipo1,
+            PRECIO2         = :precio2,
+            TIPO2           = :tipo2,
+            AGENDADO        = :agendado,
+            FECHA_REV       = :fecha_rev,
+            PAGAT           = :pagat,
+            NOTAS           = :notas,
+            FACTURA         = :factura
+                            
+            WHERE oid = :val1""",
+              {
+                'fecha': v2,
+                'hora': v6,
+                'pax1': v7,
+                'pax2': v10,
+                'producto': v13,
+                'idioma': v14,
+                'tel_extra': v4,
+                'estado': v20,
+                'usuario': nomUsuario.cget("text"),
+                'fecha_crea': v22,
+                'cliente': v3,
+                'mail_extra': v5,
+                'precio1': v8,
+                'tipo1' : v9,
+                'precio2': v11,
+                'tipo2': v12,
+                'agendado': v16,
+                'fecha_rev': v17,
+                'pagat': v18,
+                'notas' : v21,
+                'factura'   : v19,
+                'val1': val1
+                  })
+    
+    #Asegura los cambios
+    base_datos.commit()
+
+	# Cierra la conexión 
+    base_datos.close()  
+
+    # Vuelve a pintar usuario y fecha
+    nomUsuario.config(text = val2)
+    
+    # Recupera en las variables tk los datos de fecha salvados en diaGlobal, mesGlobal y anyoGlobal
+    anyoGlobaltk.set(anyoGlobal)
+    mesGlobaltk.set(mesGlobal)
+    diaGlobaltk.set(diaGlobal)
+    # Los vuelca a los labels
+    diaFecha.config(text = diaGlobaltk)
+    mesFecha.config(text = mesGlobaltk)
+    anyoFecha.config(text = anyoGlobaltk)
+    MiraFecha(anyoFecha)
+	# Vuelve hacia atrás
+    menuIncidenciasCorregir()
+def incidenciasBorraUno     ():
+
+    # Creamos la base de datos o conectamos con una
+    base_datos = sqlite3.connect('databases/basesDeDatosIncidencias.db')
+    busqueda = "SELECT *, oid FROM bd_incidencias WHERE (oid = '" + LRR12.get() + "')"
+    columnas = 8
+    global puntero
+    query(base_datos,busqueda,columnas,"ID","DATA","HORA","PAX","PAX","PRODUCTE","IDIOMA","TELÈFON","ESTAT")
+    
+    val1 = LRR12.get()
+
+    # si no ha puesto ningún id, no hará nada
+    if val1 == "":
+        
+        return
+    
+    # Ventana de aviso
+    # Preparamos la ventana Tk donde trabajaremos
+    global ventana2
+    ventana2 = Tk()
+    ventana2.title('Atenció!!!')
+    ventana2.geometry("270x60")
+    ventana2.configure(bg='red')
+    ventana2.iconbitmap("image/icono.ico")
+    ventana2.deiconify()
+    aviso = Label(ventana2,text = ("Aixó esborrarà la incidència amb id "+
+                                   val1 +", si existeix."),
+                  anchor = "center",
+                  background = "red")
+    aviso.grid(column=0, row = 0, columnspan = 2, pady=(5, 0))
+    
+    yes_btn = Button(ventana2, text="SI", command=del_incidence_yes)
+    yes_btn.grid(row=1, column=0,  ipadx=5)      
+    
+    no_btn = Button(ventana2, text="NO", command=del_no)
+    no_btn.grid(row=1, column=1, ipadx=5)
+    
+    no_btn.focus()
+    
+    ventana2.mainloop()  
+def del_incidence_yes       ():
+
+    # Creamos base de datos o conectamos a una
+    base_datos = sqlite3.connect('databases/basesDeDatosIncidencias.db')
+    
+	# Creamos el cursor
+    c = base_datos.cursor()
+
+	# Borra el registro
+    c.execute("DELETE from bd_incidencias WHERE oid = " + LRR12.get())
+
+    LimpiaElegibles()
+    
+	#Asegura los cambios
+    base_datos.commit()
+
+	# Cierra la conexión 
+    base_datos.close()
+    
+    ventana2.destroy()
+
+    # Borramos los datos del listado de registros
+    query_incidencias()
+    
+    # Foco
+    LRR12.focus() 
+
+def ProformaProduceUno      ():
+    
+    global VieneDeIncGrups
+    VieneDeIncGrups = LRR12.get()
+    global val1
+    val1 = LRR12.get()
+
+    if  val1 == "":
+        return
+                       
+    # Limpia las cajas
+    LimpiaElegibles
+    
+	# Crea una base de datos o se conecta a una
+    base_datos = sqlite3.connect('databases/basesDeDatosIncidencias.db')
+
+	# Crea cursor
+    c = base_datos.cursor()
+    
+	# Query the database
+    c.execute("SELECT * FROM bd_incidencias WHERE oid = " + val1)
+    records = c.fetchall()
+    
+    # Cerramos incidencias
+    base_datos.close()
+    
+    menuIncidenciasFacturaProformaIntroducirCrear()
+      
+    # Creando las variables globales
+    global  fecha
+    global  fechaPro
+    global  NumPro
+    global  Cliente
+    global  Cant1
+    global  concept1
+    global  Precio1
+    global  Cant2
+    global  Concept2
+    global  Precio2
+    global  Iva
+    global  TipoIva
+    global  IncluidoIva
+    global  IdIncidencia
+     
+    # Loop para volcar los resultados    
+    for record in records:
+             
+        LRR1.config(text = val1)
+        LRR31.config(state = "readandwrite")
+        LRR31.insert(0,record[10])
+        LRR42.insert(0,record[0])
+        LRR52.insert(0,record[2])
+        LRR62.insert(0,record[13])
+        LRR72.insert(0,record[12])
+        LRR82.insert(0,record[3])
+        LRR92.insert(0,record[15])
+        LRR102.insert(0,record[14])
+        
+    # Centramos el cursor
+    LRR22.focus()    
+def ProformaClonaUno        ():
+        
+    global VieneDeIncGrups
+    VieneDeIncGrups = LRR12.get()
+    global val1
+    val1 = LRR12.get()
+
+    if  val1 == "":
+        return
+                       
+    # Limpia las cajas
+    LimpiaElegibles
+    
+	# Crea una base de datos o se conecta a una
+    base_datos = sqlite3.connect('databases/basesDeDatosProforma.db')
+
+	# Crea cursor
+    c = base_datos.cursor()
+    
+	# Query the database
+    c.execute("SELECT * FROM bd_proforma WHERE oid = " + val1)
+    records = c.fetchall()
+    
+    # Cerramos incidencias
+    base_datos.close()
+    
+    menuIncidenciasFacturaProformaIntroducirCrear()
+      
+    # Creando las variables globales
+    global  fecha
+    global  fechaPro
+    global  NumPro
+    global  Cliente
+    global  Cant1
+    global  concept1
+    global  Precio1
+    global  Cant2
+    global  Concept2
+    global  Precio2
+    global  Iva
+    global  TipoIva
+    global  IncluidoIva
+    global  IdIncidencia
+     
+    # Loop para volcar los resultados    
+    for record in records:
+             
+        LRR1.config(text = val1)
+        LRR31.config(state = "readandwrite")
+        LRR31.insert(0,record[3])
+        LRR42.insert(0,record[0])
+        LRR52.insert(0,record[4])
+        LRR62.insert(0,record[5])
+        LRR72.insert(0,record[6])
+        LRR82.insert(0,record[7])
+        LRR92.insert(0,record[8])
+        LRR102.insert(0,record[9])
+        
+    # Centramos el cursor
+    LRR22.focus()
+def query_proforma          ():
+    
+    # Creamos la base de datos o conectamos con una
+    base_datos = sqlite3.connect('databases/basesDeDatosProforma.db')
+    busqueda = "SELECT *, oid FROM bd_proforma ORDER BY NUM_PRO"
+    columnas = 8
+    global puntero
+    query(base_datos,busqueda,columnas,"ID","DATA","","PROFORMA","CLIENT","QUANTITAT","CONCEPTE","PREU","")
+def prequery_proforma       ():
+    
+    global puntero
+    
+    if puntero == 0:
+        query_proforma_busca()
+        return
+    else:
+        puntero -= 21
+        query_proforma_busca()
+def query_proforma_Inv      ():
+
+# Creamos la base de datos o conectamos con una
+    base_datos = sqlite3.connect('databases/basesDeDatosProforma.db')
+    busqueda = "SELECT *, oid FROM bd_proforma ORDER BY NUM_PRO DESC"
+    columnas = 8
+    global puntero
+    puntero = 0
+    query(base_datos,busqueda,columnas,"ID","DATA","","PROFORMA","CLIENT","QUANTITAT","CONCEPTE","PREU","")
+def query_proforma_busca0   ():
+    
+    global puntero
+    puntero = 0
+    query_proforma_busca()
+def query_proforma_busca    ():
+    # Canviar esto en base a búsqueda
+    v1 = LRR12.get() # PROFORMA
+    v2 = LRR21.get() # CLIENT
+    v3 = LRR32.get() # DIA
+    v4 = LRR42.get() # MES
+    v5 = LRR52.get() # ANY
+    v6 = LRR62.get() # QUANTITAT
+    v7 = LRR72.get() # PREU
+    # Si v4 sólo tiene un dígito, le añadimos un 0 delante
+    if len(v4) == 1:
+        v4 = "0" + v4
+    # Si v3 sólo tiene un dígito, le añadimos un 0 delante
+    if len(v3) == 1:
+        v3 = "0" + v3
+    # Si v5 tiene 2 dígitos, le añadimos un 20 delante
+    if len(v5) == 2:
+        v5 = "20" + v5
+        
+    # Cambiar esto en base a búsqueda   
+    # Creamos la base de datos o conectamos con una
+    base_datos = sqlite3.connect('databases/basesDeDatosProforma.db')
+    busqueda = "SELECT *, oid FROM bd_Proforma WHERE ((NUM_PRO = '" + v1 + "' or '" + v1 + "' = '') AND (CLIENTE ='" + v2 + "' or '" + v2 + "' = '') AND ((PRECIO_1 = '" + v7 + "' or '" + v7 + "' = '') OR (PRECIO_2 = '" + v7 + "' OR '" + v7 + "' = '')) AND  ((CANT_1 = '" + v6 + "' OR '" + v6 + "' = '') OR (CANT_2 = '" + v6 + "' or '" + v6 + "' = '')) AND (FECHA LIKE '" + v3 + "/%' or '" + v3 + "' = '') AND (FECHA LIKE '%/" + v4 + "/%' or '" + v4 + "' = '') AND (FECHA LIKE '%/" + v5 + "' or '" + v5 + "' = '')) ORDER BY NUM_PRO DESC"
+    columnas = 8
+    global puntero
+    query(base_datos,busqueda,columnas,"ID","DATA","","PROFORMA","CLIENT","QUANTITAT","CONCEPTE","PREU","")
+def ProformaCorrigeUno      ():
+    
+    global val1
+    val1 = LRR12.get()
+    global val2
+    val2 = usuarioReal
+    global diaGlobal
+    diaGlobal = diaGlobaltk.get()
+    global mesGlobal
+    mesGlobal = mesGlobaltk.get()
+    global anyoGlobal
+    anyoGlobal = anyoGlobaltk.get()
+
+    if  val1 == "":
+        return
+                       
+    # Limpia las cajas
+    LimpiaElegibles
+    
+	# Crea una base de datos o se conecta a una
+    base_datos = sqlite3.connect('databases/basesDeDatosProforma.db')
+
+	# Crea cursor
+    c = base_datos.cursor()
+    
+	# Query the database
+    c.execute("SELECT * FROM bd_proforma WHERE oid = " + val1)
+    records = c.fetchall()
+    
+    menuIncidenciasFacturaProformaIntroducirCrear()
+      
+    # Creando las variables globales
+    global  fecha
+    global  fechaPro
+    global  NumPro
+    global  Cliente
+    global  Cant1
+    global  concept1
+    global  Precio1
+    global  Cant2
+    global  Concept2
+    global  Precio2
+    global  Iva
+    global  TipoIva
+    global  IncluidoIva
+    global  IdIncidencia
+    
+      
+    # Loop para volcar los resultados
+    
+    for record in records:
+              
+        LRR1.config(text = val1)
+        LRR22.insert(0,record[2])
+        LRR31.config(state = "readandwrite")
+        LRR31.insert(0,record[3])
+        LRR42.insert(0,record[0])
+        LRR52.insert(0,record[4])
+        LRR62.insert(0,record[5])
+        LRR72.insert(0,record[6])
+        LRR82.insert(0,record[7])
+        LRR92.insert(0,record[8])
+        LRR102.insert(0,record[9])
+        LRR111.config(state = "readandwrite")
+        LRR111.insert(0,record[10])
+        LRR111.config(state = "readonly")
+        LRR122.insert(0,record[11])
+        LRR131.config(state = "readandwrite")
+        LRR131.insert(0,record[12])
+        LRR131.config(state = "readonly")        
+        
+        val6 =record[0]
+        val7 = []
+        for t in val6.split("/"):
+            val7.append(t)
+        diaGlobaltk.set(val7[0])
+        mesGlobaltk.set(val7[1])
+        anyoGlobaltk.set(val7[2])
+        diaFecha.config(text = diaGlobaltk)
+        mesFecha.config(text = mesGlobaltk)
+        anyoFecha.config(text = anyoGlobaltk)
+        MiraFecha(anyoFecha)
+    
+    # Si en cualquier momento se pulsan las teclas CTRL + P se fuerza la impresión de PDF
+    raiz.bind("<Control-p>", lambda event: BotonImprimirForzado())
+    raiz.bind("<Control-P>", lambda event: BotonImprimirForzado())     
+    Boton7activado(PDFProforma)    
+
+    # Centramos el cursor
+    LRR22.focus()
+
+    Boton4activado(ProformaSalvaCorrecc)
+def ProformaSalvaCorrecc    ():
+    
+    global origenes
+    global usuarioReal
+    global diaGlobal
+    global mesGlobal
+    global anyoGlobal
+    
+
+    # Rescata los valores de los campos
+    v1 = LRR1.cget("text")
+    v2 = LRR22.get()
+    v3 = LRR31.get()
+    v4 = LRR42.get()
+    v5 = LRR52.get()
+    v6 = LRR62.get()
+    v7 = LRR72.get()
+    v8 = LRR82.get()
+    v9 = LRR92.get()
+    v10 = LRR102.get()
+    v11 = LRR111.get()
+    v12 = LRR122.get()
+    v13 = LRR131.get()
+    # Guardamos en v14 el valor de ID de incedències/grups si existe
+    v14 = VieneDeIncGrups
+            
+    # Coteja errores
+    # Miramos si v2 está vacío
+    if v2 == "":
+        LR23.config(text = "Falta proforma")
+        LRR22.focus()
+        return
+    
+    # Miramos si v2 existe como NUM_PRO
+    # Abrimos la tabla de proformas
+    conn = sqlite3.connect('databases/basesDeDatosProforma.db')
+    c = conn.cursor()
+    # Bucle revisando todas las proformas
+    for row in c.execute('SELECT *, oid FROM bd_Proforma'):
+        # Si el NUM_PRO coincide con v2 y el ID no coincide con v1
+            
+        if row[2] == v2 and row[-1] != int(v1):
+
+            
+            # Cerramos la tabla
+            conn.close()
+            # Mostramos el error
+            LR23.config(text = "Proforma duplicat")
+            # Ponemos el foco en NUM_PRO
+            LRR22.focus()
+            return
+    
+    # Si en v2 hay el símbolo "/" avisamos que no es válido
+    if "/" in v2:
+        LR23.config(text = "No es pot posar '/' al nom de proforma")
+        LRR22.focus()
+        return   
+    # Miramos si ha puesto un cliente
+    if v3 == "":
+        LR23.config(text = "Falta Client")
+        LRR31.focus()
+        return
+        
+    # Miramos si el cliente existe
+    # Abrimos la tabla de clientes
+    conn = sqlite3.connect('databases/basesDeDatosProforma.db')
+    c = conn.cursor()
+    # Bucle revisando todos los clientes
+    exist = False
+    for row in c.execute('SELECT * FROM bd_Proforma'):
+        # Si el ID coincide con v3
+        if row[3] == v3:
+            # Cerramos la tabla
+            conn.close()
+            # Ponemos la variable exist en True
+            exist = True
+            # Salimos del bucle
+            break
+    if exist == False:
+        LR23.config(text = "Client inexistent")
+        LRR31.focus()
+        return  
+        
+    # Miramos que la fecha esté bien escrita
+    try:
+        # Si el principio de v4 es 1 dígito y "/"
+        if v4[1] == "/":
+            #Añadimos un 0 delante
+            v4 = "0" + v4
+        # Si el principio de v4 no es 2 dígitos y "/"
+        if v4[0:2].isdigit() == False:
+            LR23.config(text = "Dia incorrecte")
+            LRR42.focus()
+            return
+
+        # Si la posición 4 es "/"
+        if v4[4] == "/":
+            # Añadimos un 0 entre la posición 2 y 3
+            v4 = v4[0:3] + "0" + v4[3:]
+        # Si v4 no contiene "/" dos digitos y "/"
+        if v4[3:5].isdigit() == False:
+            LR23.config(text = "Mes incorrecte")
+            LRR42.focus()
+            return
+
+        # Si el largo de la cadena v4 es inferior a 10 caracteres
+        if len(v4) <= 9:
+            # Añadimos 20 entre las posiciones 5 y 6
+            v4 = v4[0:6] + "20" + v4[6:] 
+        # Si v4 no acaba en 4 dígitos
+        if v4[6:10].isdigit() == False:
+            LR23.config(text = "Any incorrecte")
+            LRR42.focus()
+            return
+        # Si el largo es superior a 10 caracteres
+        if len(v4) > 10:
+            LR23.config(text = "DOta incorrecte")
+            LRR42.focus()
+            return
+    except:
+            LR23.config(text = "Data incorrecte")
+            LRR42.focus() 
+            return 
+
+    # Si v5 no es un número y no está en blanco
+    if v5 != "" and v5.isdigit() == False:
+        LR23.config(text = "Quantitat incorrecte")
+        LRR52.focus()
+        return
+        
+    # Si v7 no es un número y no está en blanco
+    if v7 != "" and v7.isdigit() == False:
+        LR23.config(text = "Preu incorrecte")
+        LRR72.focus()
+        return
+        
+    # Si v8 no es un número y no está en blanco
+    if v8 != "" and v8.isdigit() == False:
+        LR23.config(text = "Quantitat incorrecte")
+        LRR82.focus()
+        return
+        
+    # Si v10 no es un número y no está en blanco
+    if v10 != "" and v10.isdigit() == False:
+        LR23.config(text = "Preu incorrecte")
+        LRR102.focus()
+        return
+        
+    # Si v11 está vacío
+    if v11 == "":
+        LR23.config(text = "hi ha IVA?")
+        LRR111.focus()
+        return
+        
+    # Si v11 es sí y v12 está vacío
+    if  v11 == "Si" and v12 == "":
+        LR23.config(text = "% d'IVA?")
+        LRR122.focus()
+        return
+        
+    # Si v11 es sí y v12 no es un número
+    if  v11 == "Si" and v12.isdigit() == False:
+        LR23.config(text = "L'IVA ha de ser número")
+        LRR122.focus()
+        return
+        
+    # Si v11 es sí y v13 está vacío
+    if  v11 == "Si" and v13 == "":
+        LR23.config(text = "No sabem si l'IVA està inclòs")
+        LRR131.focus()
+        return
+                    
+    # Salva datos
+    # Crea la base de datos o conecta con ella
+    baseData = sqlite3.connect('databases/basesDeDatosProforma.db')
+          
+    # Crea el cursor
+    c = baseData.cursor()   
+    # A partir de aquí se ha de revisar entero
+    c.execute("""UPDATE bd_proforma SET
+            FECHA_PRO          = :fechaPro,
+            NUM_PRO            = :numPro,
+            CLIENTE            = :cliente,
+            CANT_1             = :cant1,
+            CONCEPT_1          = :concept1,
+            PRECIO_1           = :precio1,
+            CANT_2             = :cant2,
+            CONCEPT_2          = :concept2,
+            PRECIO_2           = :precio2,
+            IVA                = :iva,
+            TIPO_IVA           = :tipoIva,
+            INCLUIDO_IVA       = :incluidoIva 
+
+            WHERE oid = :val1""",
+              {
+                'fechaPro': v4,
+                'numPro': v2,
+                'cliente': v3,
+                'cant1': v5,
+                'concept1': v6,
+                'precio1': v7,
+                'cant2': v8,
+                'concept2': v9,
+                'precio2': v10,
+                'iva': v11,
+                'tipoIva': v12,
+                'incluidoIva': v13,
+                'val1': val1
+                  })
+    
+    #Asegura los cambios
+    baseData.commit()
+
+	# Cierra la conexión 
+    baseData.close()  
+
+    # Vuelve a pintar usuario y fecha
+    nomUsuario.config(text = val2)
+    
+    # Recupera en las variables tk los datos de fecha salvados en diaGlobal, mesGlobal y anyoGlobal
+    anyoGlobaltk.set(anyoGlobal)
+    mesGlobaltk.set(mesGlobal)
+    diaGlobaltk.set(diaGlobal)
+    # Los vuelca a los labels
+    diaFecha.config(text = diaGlobaltk)
+    mesFecha.config(text = mesGlobaltk)
+    anyoFecha.config(text = anyoGlobaltk)
+    MiraFecha(anyoFecha)
+	# Vuelve hacia atrás
+    menuIncidenciasFacturaProformaCorregir()
+def ProformaBorraUno        ():
+    # Creamos la base de datos o conectamos con una
+    base_datos = sqlite3.connect('databases/basesDeDatosProforma.db')
+    busqueda = "SELECT *, oid FROM bd_proforma WHERE (oid = '" + LRR12.get() + "')"
+    columnas = 8
+    global puntero
+    query(base_datos,busqueda,columnas,"ID","DATA","","PROFORMA","CLIENT","QUANTITAT","CONCEPTE","PREU","")
+    
+    val1 = LRR12.get()
+
+    # si no ha puesto ningún id, no hará nada
+    if val1 == "":
+        
+        return
+    
+    # Ventana de aviso
+    # Preparamos la ventana Tk donde trabajaremos
+    global ventana2
+    ventana2 = Tk()
+    ventana2.title('Atenció!!!')
+    ventana2.geometry("270x60")
+    ventana2.configure(bg='red')
+    ventana2.iconbitmap("image/icono.ico")
+    ventana2.deiconify()
+    aviso = Label(ventana2,text = ("Aixó esborrarà la proforma amb id "+
+                                   val1 +", si existeix."),
+                  anchor = "center",
+                  background = "red")
+    aviso.grid(column=0, row = 0, columnspan = 2, pady=(5, 0))
+    
+    yes_btn = Button(ventana2, text="SI", command=del_proform_yes)
+    yes_btn.grid(row=1, column=0,  ipadx=5)      
+    
+    no_btn = Button(ventana2, text="NO", command=del_no)
+    no_btn.grid(row=1, column=1, ipadx=5)
+    
+    no_btn.focus()
+    
+    ventana2.mainloop()  
+def del_proform_yes         ():
+
+    # Creamos base de datos o conectamos a una
+    base_datos = sqlite3.connect('databases/basesDeDatosProforma.db')
+    
+	# Creamos el cursor
+    c = base_datos.cursor()
+
+	# Borra el registro
+    c.execute("DELETE from bd_proforma WHERE oid = " + LRR12.get())
+
+    LimpiaElegibles()
+    
+	#Asegura los cambios
+    base_datos.commit()
+
+	# Cierra la conexión 
+    base_datos.close()
+    
+    ventana2.destroy()
+
+    # Borramos los datos del listado de registros
+    query_proforma()
+    
+    # Foco
+    LRR12.focus() 
+
+def query_productos         ():
+    
+    # Creamos la base de datos o conectamos con una
+    base_datos = sqlite3.connect('databases/basesDeDatosDatos.db')
+    busqueda = "SELECT *, oid FROM bd_productos ORDER BY NOM"
+    columnas = 4
+    global puntero
+    query(base_datos,busqueda,columnas,"ID","NOM","PREU REAL","PREU ACTUAL","TIPUS")
+def prequery_productos      ():
+    
+    global puntero
+    
+    if puntero == 0:
+        query_productos_busca()
+        return
+    else:
+        puntero -= 21
+        query_productos_busca()
+def query_productos_Inv     ():
+    
+    # Creamos la base de datos o conectamos con una
+    base_datos = sqlite3.connect('databases/basesDeDatosDatos.db')
+    busqueda = "SELECT *, oid FROM bd_productos ORDER BY oid DESC"
+    columnas = 4
+    global puntero
+    puntero = 0
+    query(base_datos,busqueda,columnas,"ID","NOM","PREU REAL","PREU ACTUAL","TIPUS")
+def query_productos_busca0  ():
+    
+    global puntero
+    puntero = 0
+    query_productos_busca()
+def query_productos_busca   ():
+    
+    v1 = LRR11.get()
+    v2 = LRR22.get()
+    v3 = LRR32.get()
+    v4 = LRR41.get()
+       
+    # Creamos la base de datos o conectamos con una
+    base_datos = sqlite3.connect('databases/basesDeDatosDatos.db')
+    busqueda = "SELECT *, oid FROM bd_productos WHERE ((NOM = '" + v1 + "' or '" + v1 + "' = '') AND (PREU_HABITUAL = '" + v2 + "' or '" + v2 + "' = '') AND (PREU_ACTUAL = '" + v3 + "' or '" + v3 + "' = '') AND (REGISTRABLE = '" + v4 + "' or '" + v4 + "' = '')) ORDER BY NOM"
+    columnas = 4
+    global puntero
+    query(base_datos,busqueda,columnas,"ID","NOM","PREU REAL","PREU ACTUAL","TIPUS")
+def productoCorrigeUno      ():
+
+    global val1
+    val1 = LRR12.get()
+    
+    # Limpia las cajas
+    LimpiaElegibles
+    
+	# Crea una base de datos o se conecta a una
+    base_datos = sqlite3.connect('databases/basesDeDatosDatos.db')
+
+	# Crea cursor
+    c = base_datos.cursor()
+    
+	# Query the database
+    c.execute("SELECT * FROM bd_productos WHERE oid = " + val1)
+    records = c.fetchall()
+    
+    MenuDatosProductoIntroducir()
+      
+    # Creando las variables globales
+    global nombre
+    global precio
+    global precioact
+    global regsto
+        
+    # Loop para volcar los resultados
+    
+    for record in records:
+       
+        LRR1.config(text = val1)
+        LRR22.insert(0,record[0])
+        LRR32.insert(0,record[1])
+        LRR42.insert(0,record[2])
+        LRR51.config(state = "readandwrite")
+        LRR51.insert(0,record[3])
+        LRR51.config(state = "readonly")
+        
+    # Centramos el cursor
+    LRR22.focus()
+
+    Boton4activado(ProductoSalvaCorreccion)
+def ProductoSalvaCorreccion ():
+
+    # Rescata valores
+    v1 = LRR22.get()
+    v2 = LRR32.get()
+    v3 = LRR42.get()
+    v4 = LRR51.get()
+                
+    # Coteja fallos
+    if v1 == "" or v2 == "" or v3 == "" or v4 == "":
+            
+        LR23.config(text = "Registre incomplert")
+        return
+        
+    try:
+            
+        circunstancial = int(v2)
+            
+    except:
+            
+        LR23.config(text = "Valor no numéric")
+        LRR32.focus()
+        return
+            
+    try:
+            
+        circunstancial = int(v3)
+            
+    except:
+            
+        LR23.config(text = "Valor no numéric")
+        LRR42.focus()
+        return
+        
+    # Crea una base de datos o abre la existente
+    base_datos = sqlite3.connect('databases/basesDeDatosDatos.db')
+    
+    # Conecta el cursor
+    c = base_datos.cursor()
+    
+    c.execute("""UPDATE bd_productos SET
+              NOM = :nombre,
+              PREU_HABITUAL = :precio,
+              PREU_ACTUAL = :precioact,
+              REGISTRABLE = :regsto
+                            
+              WHERE oid = :val1""",
+              {
+              'nombre': LRR22.get(),
+              'precio': LRR32.get(),
+              'precioact': LRR42.get(),
+              'regsto': LRR51.get(),
+              'val1': val1
+                  })
+    
+    #Asegura los cambios
+    base_datos.commit()
+
+	# Cierra la conexión 
+    base_datos.close()  
+
+    # Actualiza las bases de datos
+    abreLasListas()
+
+	# Vuelve hacia atrás
+    MenuDatosProductoCorregir()
+def productoBorraUno        ():
+    
+    # Creamos la base de datos o conectamos con una
+    base_datos = sqlite3.connect('databases/basesDeDatosDatos.db')
+    busqueda = "SELECT *, oid FROM bd_productos WHERE (oid = '" + LRR12.get() + "')"
+    columnas = 4
+    global puntero
+    query(base_datos,busqueda,columnas,"ID","NOM","PREU REAL","PREU ACTUAL","TIPUS")
+
+    val1 = LRR12.get()
+
+    # si no ha puesto ningún id, no hará nada
+    if val1 == "":
+        
+        return
+    
+    # Ventana de aviso
+    # Preparamos la ventana Tk donde trabajaremos
+    global ventana2
+    ventana2 = Tk()
+    ventana2.title('Atenció!!!')
+    ventana2.geometry("270x60")
+    ventana2.configure(bg='red')
+    ventana2.iconbitmap("image/icono.ico")
+    ventana2.deiconify()
+    
+    aviso = Label(ventana2,text = ("Aixó esborrarà el producte amb id "+
+                                   val1 +", si existeix."),
+                  anchor = "center",
+                  background = "red")
+    aviso.grid(column=0, row = 0, columnspan = 2, pady=(5, 0))
+    
+    yes_btn = Button(ventana2, text="SI", command=del_product_yes)
+    yes_btn.grid(row=1, column=0,  ipadx=5)      
+    
+    no_btn = Button(ventana2, text="NO", command=del_no)
+    no_btn.grid(row=1, column=1, ipadx=5)
+    
+    no_btn.focus()
+    
+    ventana2.mainloop()  
+def del_product_yes         ():
+
+    # Creamos base de datos o conectamos a una
+    base_datos = sqlite3.connect('databases/basesDeDatosDatos.db')
+    
+	# Creamos el cursor
+    c = base_datos.cursor()
+
+	# Borra el registro
+    c.execute("DELETE from bd_productos WHERE oid = " + LRR12.get())
+
+    LimpiaElegibles()
+    
+	#Asegura los cambios
+    base_datos.commit()
+
+	# Cierra la conexión 
+    base_datos.close()
+    
+    ventana2.destroy()
+
+    # Borramos los datos del listado de registros
+    query_productos() 
+
+def query_clientes          ():
+    
+    # Creamos la base de datos o conectamos con una
+    base_datos = sqlite3.connect('databases/basesDeDatosClientes.db')
+    busqueda = "SELECT *, oid FROM bd_clientes ORDER BY NOM"
+    columnas = 7
+    global puntero
+    query(base_datos,busqueda,columnas,"ID","NOM","","","CIUTAT/PAIS","TELÈFON","MAIL","NIF/CIF")
+def prequery_clientes       ():
+    
+    global puntero
+    
+    if puntero == 0:
+        query_clientes_busca()
+        return
+    else:
+        puntero -= 21
+        query_clientes_busca()
+def query_clientes_Inv      ():
+    
+    # Creamos la base de datos o conectamos con una
+    base_datos = sqlite3.connect('databases/basesDeDatosClientes.db')
+    busqueda = "SELECT *, oid FROM bd_clientes ORDER BY oid DESC"
+    columnas = 7
+    global puntero
+    puntero = 0
+    query(base_datos,busqueda,columnas,"ID","NOM","","","CIUTAT/PAIS","TELÈFON","MAIL","NIF/CIF")
+def query_clientes_busca0   ():
+    
+    global puntero
+    puntero = 0
+    query_clientes_busca()
+def query_clientes_busca    ():
+    
+    v1 = LRR11.get()
+    v2 = LRR22.get()
+    v3 = LRR32.get()
+    v4 = LRR42.get()
+       
+    # Creamos la base de datos o conectamos con una
+    base_datos = sqlite3.connect('databases/basesDeDatosClientes.db')
+    busqueda = "SELECT *, oid FROM bd_clientes WHERE ((NOM = '" + v1 + "' or '" + v1 + "' = '') AND (TELEFONO = '" + v2 + "' or '" + v2 + "' = '') AND (MAIL = '" + v3 + "' or '" + v3 + "' = '') AND (NIFCIF = '" + v4 + "' or '" + v4 + "' = '')) ORDER BY NOM"
+    columnas = 7
+    global puntero
+    query(base_datos,busqueda,columnas,"ID","NOM","","","CIUTAT/PAIS","TELÈFON","MAIL","NIF/CIF")
+def clienteCorrigeUno       ():
+
+    global val1
+    val1 = LRR12.get()
+    
+    # Limpia las cajas
+    LimpiaElegibles
+    
+	# Crea una base de datos o se conecta a una
+    base_datos = sqlite3.connect('databases/basesDeDatosClientes.db')
+
+	# Crea cursor
+    c = base_datos.cursor()
+    
+	# Query the database
+    c.execute("SELECT * FROM bd_clientes WHERE oid = " + val1)
+    records = c.fetchall()
+    
+    MenuDatosClienteIntroducir()
+      
+    # Creando las variables globales
+    global nombre
+    global dir1
+    global dir2
+    global dir3
+    global telefono
+    global mail
+    global nifcif
+    global contacto
+    global telfcontacto
+        
+    # Loop para volcar los resultados
+    
+    for record in records:
+       
+        LRR1.config(text = val1)
+        LRR22.insert(0,record[0])
+        LRR32.insert(0,record[1])
+        LRR42.insert(0,record[2])
+        LRR52.insert(0,record[3])
+        LRR62.insert(0,record[4])
+        LRR72.insert(0,record[5])
+        LRR82.insert(0,record[6])
+        LRR92.insert(0,record[7])
+        LRR102.insert(0,record[8])
+        
+    # Centramos el cursor
+    LRR22.focus()
+
+    Boton4activado(ClienteSalvaCorreccion)
+def ClienteSalvaCorreccion  ():
+
+    # Rescata valores
+    v1 = LRR22.get()
+    v4 = LRR62.get()
+                
+    # Coteja fallos
+    if v1 == "":
+            
+        LR23.config(text = "Nom del client obligatori")
+        LRR22.focus()
+        return
+        
+    if v4 != "":
+        try:
+                
+            circunstancial = int(v4)
+                
+        except:
+                
+            LR23.config(text = "Telèfon erroni")
+            LRR52.focus()
+            return
+            
+    # Crea una base de datos o abre la existente
+    base_datos = sqlite3.connect('databases/basesDeDatosClientes.db')
+    
+    # Conecta el cursor
+    c = base_datos.cursor()
+    
+    c.execute("""UPDATE bd_clientes SET
+              NOM = :nombre,
+              DIRECCION1    = :dir1,
+              DIRECCION2    = :dir2,
+              DIRECCION3    = :dir3,
+              TELEFONO      = :telefono,
+              MAIL          = :mail,
+              NIFCIF        = :nifcif,
+              CONTACTO      = :contacto,
+              TELFCONTACTO  = :telfcontacto
+                            
+              WHERE oid     = :val1""",
+              {
+              'nombre':     LRR22.get(),
+              'dir1':       LRR32.get(),
+              'dir2':       LRR42.get(),
+              'dir3':       LRR52.get(),
+              'telefono':   LRR62.get(),
+              'mail':       LRR72.get(),
+              'nifcif':     LRR82.get(),
+              'contacto':   LRR92.get(),
+              'telfcontacto': LRR102.get(),
+              'val1':       val1
+                  })
+    
+    #Asegura los cambios
+    base_datos.commit()
+
+	# Cierra la conexión 
+    base_datos.close()  
+
+    # Actualiza las bases de datos
+    abreLasListas()
+
+	# Vuelve hacia atrás
+    MenuDatosClienteCorregir()
+def clienteBorraUno         ():
+    
+    # Creamos la base de datos o conectamos con una
+    base_datos = sqlite3.connect('databases/basesDeDatosClientes.db')
+    busqueda = "SELECT *, oid FROM bd_clientes WHERE (oid = '" + LRR12.get() + "')"
+    columnas = 7
+    global puntero
+    query(base_datos,busqueda,columnas,"ID","NOM","","","CIUTAT/PAIS","TELÈFON","MAIL","NIF/CIF")
+
+    val1 = LRR12.get()
+
+    # si no ha puesto ningún id, no hará nada
+    if val1 == "":
+        
+        return
+    
+    # Ventana de aviso
+    # Preparamos la ventana Tk donde trabajaremos
+    global ventana2
+    ventana2 = Tk()
+    ventana2.title('Atenció!!!')
+    ventana2.geometry("270x60")
+    ventana2.configure(bg='red')
+    ventana2.iconbitmap("image/icono.ico")
+    ventana2.deiconify()
+    
+    aviso = Label(ventana2,text = ("Aixó esborrarà el client amb id "+
+                                   val1 +", si existeix."),
+                  anchor = "center",
+                  background = "red")
+    aviso.grid(column=0, row = 0, columnspan = 2, pady=(5, 0))
+    
+    yes_btn = Button(ventana2, text="SI", command=del_client_yes)
+    yes_btn.grid(row=1, column=0,  ipadx=5)      
+    
+    no_btn = Button(ventana2, text="NO", command=del_no)
+    no_btn.grid(row=1, column=1, ipadx=5)
+    
+    no_btn.focus()
+    
+    ventana2.mainloop()   
+def del_client_yes          ():
+
+    # Creamos base de datos o conectamos a una
+    base_datos = sqlite3.connect('databases/basesDeDatosClientes.db')
+    
+	# Creamos el cursor
+    c = base_datos.cursor()
+
+	# Borra el registro
+    c.execute("DELETE from bd_clientes WHERE oid = " + LRR12.get())
+
+    LimpiaElegibles()
+    
+	#Asegura los cambios
+    base_datos.commit()
+
+	# Cierra la conexión 
+    base_datos.close()
+    
+    ventana2.destroy()
+
+    # Borramos los datos del listado de registros
+    query_clientes() 
+
+def query_usuarios          ():
+    
+    # Creamos la base de datos o conectamos con una
+    base_datos = sqlite3.connect('databases/basesDeDatosDatos.db')
+    busqueda = "SELECT *, oid FROM bd_usuarios ORDER BY NOM"
+    columnas = 7
+    global puntero
+    query(base_datos,busqueda,columnas,"ID","NOM","CLAU","NIVELL","ANGLÈS","CASTELLÀ"," CATALÀ","FRANCÈS")
+def prequery_usuarios       ():
+    
+    global puntero
+    
+    if puntero == 0:
+        query_usuarios_busca()
+        return
+    else:
+        puntero -= 21
+        query_usuarios_busca()
+def query_usuarios_Inv      ():
+    
+    # Creamos la base de datos o conectamos con una
+    base_datos = sqlite3.connect('databases/basesDeDatosDatos.db')
+    busqueda = "SELECT *, oid FROM bd_usuarios ORDER BY oid DESC"
+    columnas = 7
+    global puntero
+    puntero = 0
+    query(base_datos,busqueda,columnas,"ID","NOM","CLAU","NIVELL","ANGLÈS","CASTELLÀ"," CATALÀ","FRANCÈS")
+def query_usuarios_busca0   ():
+    
+    global puntero
+    puntero = 0
+    query_usuarios_busca()
+def query_usuarios_busca    ():
+
+    v1 = LRR11.get()
+    v2 = LRR21.get()
+    v3 = LRR31.get()
+    v4 = LRR41.get()
+    v5 = LRR51.get()
+    v6 = LRR61.get()
+    
+       
+    # Creamos la base de datos o conectamos con una
+    base_datos = sqlite3.connect('databases/basesDeDatosDatos.db')
+    busqueda = "SELECT *, oid FROM bd_usuarios WHERE ((NOM = '" + v1 + "' or '" + v1 + "' = '') AND (NIVEL = '" + v2 + "' or '" + v2 + "' = '') AND (INGLES = '" + v3 + "' or '" + v3 + "' = '') AND (CASTELLANO = '" + v4 + "' or '" + v4 + "' = '') AND (CATALAN = '" + v5 + "' or '" + v5 + "' = '') AND (FRANCES = '" + v6 + "' or '" + v6 + "' = '')) ORDER BY NOM"    
+    columnas = 7
+    global puntero
+    query(base_datos,busqueda,columnas,"ID","NOM","CLAU","NIVELL","ANGLÈS","CASTELLÀ"," CATALÀ","FRANCÈS")
+def usuariosCorrigeUno      ():
+
+    global val1
+    val1 = LRR12.get()
+    
+    # Limpia las cajas
+    LimpiaElegibles
+    
+	# Crea una base de datos o se conecta a una
+    base_datos = sqlite3.connect('databases/basesDeDatosDatos.db')
+
+	# Crea cursor
+    c = base_datos.cursor()
+    
+	# Query the database
+    c.execute("SELECT * FROM bd_usuarios WHERE oid = " + val1)
+    records = c.fetchall()
+    
+    menuDatosUsuarioIntroducir()
+      
+    # Creando las variables globales
+    global nombre
+    global clave
+    global nivel
+    global ingl
+    global cast
+    global cata
+    global fran
+        
+    # Loop para volcar los resultados
+    
+    for record in records:
+       
+        LRR12.insert(0,record[0])
+        LRR22.insert(0,record[1])
+        LRR32.insert(0,record[1])
+        LRR41.config(state = "readandwrite")
+        LRR41.insert(0,record[2])
+        LRR41.config(state = "readonly")
+        LRR51.config(state = "readandwrite")
+        LRR51.insert(0,record[3])
+        LRR51.config(state = "readonly")
+        LRR61.config(state = "readandwrite")
+        LRR61.insert(0,record[4])
+        LRR61.config(state = "readonly")
+        LRR71.config(state = "readandwrite")
+        LRR71.insert(0,record[5])
+        LRR71.config(state = "readonly")
+        LRR81.config(state = "readandwrite")
+        LRR81.insert(0,record[6])
+        LRR81.config(state = "readonly")
+        
+    # Centramos el cursor
+    LRR12.focus()
+
+    Boton4activado(UsuarioSalvaCorreccion)
+def UsuarioSalvaCorreccion  ():
+
+    # Rescata valores
+    v1 = LRR12.get()
+    v2 = LRR22.get()
+    v3 = LRR32.get()
+    v4 = LRR41.get()
+    v5 = LRR51.get()
+    v6 = LRR61.get()
+    v7 = LRR71.get()
+    v8 = LRR81.get()
+
+    # Coteja fallos
+    if v1 == "" or v2 == "" or v3 == "" or v4 == "" or v5 == "" or v6 == "" or v7 == "" or v8 == "":
+            
+        LR23.config(text = "S'han d'omplir tots els espais")
+        return
+        
+    if v2 != v3:
+            
+        LR23.config(text = "Clau incorrecte")
+        LRR22.focus()       
+        return
+        
+    # Crea una base de datos o abre la existente
+    base_datos = sqlite3.connect('databases/basesDeDatosDatos.db')
+    
+    # Conecta el cursor
+    c = base_datos.cursor()
+    
+    c.execute("""UPDATE bd_usuarios SET
+              NOM = :nombre,
+              CLAVE = :clave,
+              NIVEL = :nivel,
+              INGLES = :ingl,
+              CASTELLANO = :cast,
+              CATALAN = :cata,
+              FRANCES = :fran
+                            
+              WHERE oid = :val1""",
+              {
+              'nombre': LRR12.get(),
+              'clave': LRR22.get(),
+              'nivel': LRR41.get(),
+              'ingl': LRR51.get(),
+              'cast': LRR61.get(),
+              'cata': LRR71.get(),
+              'fran': LRR81.get(),
+              'val1': val1
+                  })
+    
+    #Asegura los cambios
+    base_datos.commit()
+
+	# Cierra la conexión 
+    base_datos.close()  
+
+    # Actualiza las bases de datos
+    abreLasListas()
+
+	# Vuelve hacia atrás
+    menuDatosUsuarioCorregir()
+def usuariosBorraUno        ():
+
+    # Creamos la base de datos o conectamos con una
+    base_datos = sqlite3.connect('databases/basesDeDatosDatos.db')
+    busqueda = "SELECT *, oid FROM bd_usuarios WHERE (oid = '" + LRR12.get() + "')"
+    columnas = 7
+    global puntero
+    query(base_datos,busqueda,columnas,"ID","NOM","CLAU","NIVELL","ANGLÈS","CASTELLÀ"," CATALÀ","FRANCÈS")
+
+    val1 = LRR12.get()
+
+    # si no ha puesto ningún id, no hará nada
+    if val1 == "":
+        
+        return
+    
+    # Ventana de aviso
+    # Preparamos la ventana Tk donde trabajaremos
+    global ventana2
+    ventana2 = Tk()
+    ventana2.title('Atenció!!!')
+    ventana2.geometry("270x60")
+    ventana2.configure(bg='red')
+    ventana2.iconbitmap("image/icono.ico")
+    ventana2.deiconify()
+    
+    aviso = Label(ventana2,text = ("Aixó esborrarà l'usuari amb id "+
+                                   val1 +", si existeix."),
+                  anchor = "center",
+                  background = "red")
+    aviso.grid(column=0, row = 0, columnspan = 2, pady=(5, 0))
+    
+    yes_btn = Button(ventana2, text="SI", command=del_user_yes)
+    yes_btn.grid(row=1, column=0,  ipadx=5)      
+    
+    no_btn = Button(ventana2, text="NO", command=del_no)
+    no_btn.grid(row=1, column=1, ipadx=5)
+    
+    no_btn.focus()
+    
+    ventana2.mainloop()
+def del_user_yes            ():
+
+    # Creamos base de datos o conectamos a una
+    base_datos = sqlite3.connect('databases/basesDeDatosDatos.db')
+    
+	# Creamos el cursor
+    c = base_datos.cursor()
+
+	# Borra el registro
+    c.execute("DELETE from bd_usuarios WHERE oid = " + LRR12.get())
+
+    LimpiaElegibles()
+    
+	#Asegura los cambios
+    base_datos.commit()
+
+	# Cierra la conexión 
+    base_datos.close()
+    
+    ventana2.destroy()
+
+    # Borramos los datos del listado de registros
+    query_usuarios() 
+
+def query                   (seleccion,busc,columnas,*enunciados):
+    
+    # Definimos a puntero como global para que se guarde su valor fuera de la función
+    global puntero
+        
+	# Crea el cursor
+    cursor = seleccion.cursor()
+
+	# Muestra la base de datos
+    cursor.execute(busc)
+    datos = cursor.fetchall()
+    cant_registros = len(datos)
+    LR22.config(text = str(cant_registros) + " registres")
+    borra_datos()
+    
+    columna = 0
+    for dato in enunciados:
+        
+        num = "0" + str(columna) + "00"
+        globals()['VIEW%s' % num].config(text = str(dato),bg = "#5d5b45",fg = "#FFFFFF",font=("Helvetica",9,"bold"))
+        columna += 1
+    columna = 0
+    puntero2 = 0
+    # Loop para todos los datos
+    for dato in datos:
+        
+        # Si el dato que mira es inferior al puntero, no se muestra
+        if puntero2 < puntero:
+
+            puntero2 += 1
+            continue
+
+        num = "000" + str(columna+1)
+        globals()['VIEW%s' % num].config(text = str(dato[-1]))
+        
+        for i in range (columnas):
+            
+            if  enunciados[i+1] == "CLAU":
+                num = "0" + str(i+1) + "0" + str(columna+1)
+                globals()['VIEW%s' % num].config(text = "********")
+            elif enunciados[i+1] == "":
+                num = "0" + str(i+1) + "0" + str(columna+1)
+            else:
+                num = "0" + str(i+1) + "0" + str(columna+1)
+                globals()['VIEW%s' % num].config(text = str(dato[i]))
+        
+        columna += 1
+        
+        if columna == 21:
+            
+            # Situamos el puntero para la siguiente vuelta
+            puntero += 21
+            break            
+
+	# Asegura los cambios
+    seleccion.commit()
+
+	# Cierra la conexión con la base de datos
+    seleccion.close()
+    
+    return
+def del_no                  ():
+    
+    ventana2.destroy()
+    
+    return
+
+def PDFTablasPax            ():
+    
+    # Creamos el nombre del archivo de salida
+    Nombre = "pdf/Pax "+ LRR22.get() + " " + LRR12.get() + ".pdf"
+    
+    # Creamos el documento, DIN A4 y apaisado
+    PDF = canvas.Canvas(Nombre, pagesize=landscape(A4))
+    
+    # Imágenes en el documento
+    PDF.drawImage('image/LOGO PARA PDF.bmp',5*mm,5*mm,width=35,height=35)
+    PDF.drawImage('image/MARCA PARA PDF.bmp',260*mm,5*mm,width=100,height =14)
+
+    # Tipografía y tamaño
+    pdfmetrics.registerFont(TTFont('Boecklins Universe','image/Boecklins Universe.ttf'))
+    PDF.setFont('Boecklins Universe',18)
+    PDF.setFillColorRGB(0.4,0.1,0.3)
+    PDF.drawString(22*mm,200*mm,"Tabla de Pax: "+ LRR22.get() + "/" + LRR12.get() + " - Total: "+globals()['VIEW039032'].cget("text"))
+    
+    # Espacios
+    columna = 0
+    
+    for columnas in range(9,289,7):
+        fila = 32
+        alterna = True
+        for filas in range(25,190,5):
+            
+            if filas == 25 or columnas == 9+39*7:
+                PDF.setFillColorRGB(0.9,0.9,0.9)
+            elif filas == 25+32*5 or columnas == 9:
+                PDF.setFillColorRGB(0.4,0.7,0.6)               
+            else:
+                if alterna == True:
+                    PDF.setFillColorRGB(1,1,1)
+                    alterna = False
+                else:
+                    PDF.setFillColorRGB(0.8,0.8,1)
+                    alterna = True
+            PDF.setStrokeColorRGB(0,0,0)
+            PDF.rect(columnas*mm,filas*mm,7*mm,5*mm,fill = True)
+            num = "0" + str(columna) + "0" + str(fila)
+            valor = globals()['VIEW%s' % num].cget("text")
+            if  columnas == 9 and filas > 25 and filas != 25+32*5 or filas == 25+32*5:
+                PDF.setFillColorRGB(1,1,1)
+            
+            else:
+                PDF.setFillColorRGB(0,0,0)    
+            PDF.setFont('Helvetica',8)
+            PDF.drawCentredString(columnas*mm+10,filas*mm+4,valor)
+            fila -= 1
+        columna += 1     
+    # Muestra el PDF
+    PDF.showPage()
+    
+    # Salva el PDF
+    PDF.save()
+    
+    # Salimos de tabla pax
+    ventanaTabla.destroy()
+    preMenuTablas()
+def PDFTablasVGrupos        ():
+    # Creamos el nombre del archivo de salida
+    Nombre = "pdf/Pax per zones "+ LRR12.get() + " " + LRR22.get() + " " + LRR32.get() + "   " + LRR42.get() + " " + LRR52.get() + " " + LRR62.get() + ".pdf"
+    
+    # Creamos el documento, DIN A4 y apaisado
+    PDF = canvas.Canvas(Nombre, pagesize=landscape(A4))
+    
+    # Imágenes en el documento
+    PDF.drawImage('image/LOGO PARA PDF.bmp',5*mm,5*mm,width=35,height=35)
+    PDF.drawImage('image/MARCA PARA PDF.bmp',260*mm,5*mm,width=100,height =14)
+
+    # Tipografía y tamaño
+    pdfmetrics.registerFont(TTFont('Boecklins Universe','image/Boecklins Universe.ttf'))
+    PDF.setFont('Boecklins Universe',18)
+    PDF.setFillColorRGB(0.4,0.1,0.3)
+    PDF.drawString(22*mm,200*mm,"Pax per zones: "+ LRR12.get() + "/" + LRR22.get() + "/" + LRR32.get() + " - " + LRR42.get() + "/" + LRR52.get() + "/" + LRR62.get())
+
+    # Espacios
+    columna = 0
+    
+    for columnas in range(90,205,40):
+        fila = 34
+        alterna = True
+        for filas in range(20,195,5):
+            
+            if filas == 190:
+                PDF.setFillColorRGB(0.9,0.9,0.9) 
+            elif filas == 70 or filas == 125 or filas == 180 or filas == 185 or columnas == 90 and filas!= 190:
+                PDF.setFillColorRGB(0.4,0.7,0.6)               
+            else:
+                if alterna == True:
+                    PDF.setFillColorRGB(1,1,1)
+                    alterna = False
+                else:
+                    PDF.setFillColorRGB(0.8,0.8,1)
+                    alterna = True
+            PDF.setStrokeColorRGB(0,0,0)
+            PDF.rect(columnas*mm,filas*mm,40*mm,5*mm,fill = True)
+            num = "0" + str(columna) + "0" + str(fila)
+            valor = globals()['VIEW%s' % num].cget("text")
+            
+            if  columnas == 90 and filas != 190 or filas == 70 or filas == 125 or filas == 180 or filas == 185:
+                PDF.setFillColorRGB(1,1,1)
+            
+            else:
+                PDF.setFillColorRGB(0,0,0)    
+            
+            PDF.setFont('Helvetica',8)
+            PDF.drawCentredString(columnas*mm+57,filas*mm+4,str(valor))
+            fila -= 1
+        columna += 1     
+    # Muestra el PDF
+    PDF.showPage()
+    
+    # Salva el PDF
+    PDF.save()
+    
+    # Salimos de tabla pax
+    ventanaTabla.destroy()
+    preMenuTablas()
+def PDFTablasVProvincias    ():
+    # Creamos el nombre del archivo de salida
+    Nombre = "pdf/Pax per províncies "+ LRR12.get() + " " + LRR22.get() + " " + LRR32.get() + "   " + LRR42.get() + " " + LRR52.get() + " " + LRR62.get() + ".pdf"
+    
+    # Creamos el documento, DIN A4 y apaisado
+    PDF = canvas.Canvas(Nombre, pagesize=landscape(A4))
+    
+    # Imágenes en el documento
+    PDF.drawImage('image/LOGO PARA PDF.bmp',5*mm,5*mm,width=35,height=35)
+    PDF.drawImage('image/MARCA PARA PDF.bmp',260*mm,5*mm,width=100,height =14)
+
+    # Tipografía y tamaño
+    pdfmetrics.registerFont(TTFont('Boecklins Universe','image/Boecklins Universe.ttf'))
+    PDF.setFont('Boecklins Universe',18)
+    PDF.setFillColorRGB(0.4,0.1,0.3)
+    PDF.drawString(22*mm,200*mm,"Tabla de Pax per províncies: "+ LRR12.get() + "/" + LRR22.get() + "/" + LRR32.get() + " - " + LRR42.get() + "/" + LRR52.get() + "/" + LRR62.get())
+
+    # Espacios
+    columna = 0
+    
+    for columnas in range(70,225,40):
+        fila = 4
+        alterna = True
+        for filas in range(120,145,5):
+            
+            if filas == 145:
+                PDF.setFillColorRGB(0.9,0.9,0.9) 
+            elif columnas == 70:
+                PDF.setFillColorRGB(0.4,0.7,0.6)               
+            else:
+                if alterna == True:
+                    PDF.setFillColorRGB(1,1,1)
+                    alterna = False
+                else:
+                    PDF.setFillColorRGB(0.8,0.8,1)
+                    alterna = True
+            PDF.setStrokeColorRGB(0,0,0)
+            PDF.rect(columnas*mm,filas*mm,40*mm,5*mm,fill = True)
+            num = "0" + str(columna) + "0" + str(fila)
+            valor = globals()['VIEW%s' % num].cget("text")
+            
+            if  columnas == 70 or filas == 145:
+                PDF.setFillColorRGB(1,1,1)
+            
+            else:
+                PDF.setFillColorRGB(0,0,0)    
+            
+            PDF.setFont('Helvetica',8)
+            PDF.drawCentredString(columnas*mm+57,filas*mm+4,str(valor))
+            fila -= 1
+        columna += 1     
+    # Muestra el PDF
+    PDF.showPage()
+    
+    # Salva el PDF
+    PDF.save()
+    
+    # Salimos de tabla pax
+    ventanaTabla.destroy()
+    preMenuTablas()
+def PDFTablasVComarcas      ():
+# Creamos el nombre del archivo de salida
+    Nombre = "pdf/Pax per comarques "+ LRR12.get() + " " + LRR22.get() + " " + LRR32.get() + "   " + LRR42.get() + " " + LRR52.get() + " " + LRR62.get() + ".pdf"
+    
+    # Creamos el documento, DIN A4 y apaisado
+    PDF = canvas.Canvas(Nombre, pagesize=landscape(A4))
+    
+    # Imágenes en el documento
+    PDF.drawImage('image/LOGO PARA PDF.bmp',5*mm,5*mm,width=35,height=35)
+    PDF.drawImage('image/MARCA PARA PDF.bmp',260*mm,5*mm,width=100,height =14)
+
+    # Tipografía y tamaño
+    pdfmetrics.registerFont(TTFont('Boecklins Universe','image/Boecklins Universe.ttf'))
+    PDF.setFont('Boecklins Universe',18)
+    PDF.setFillColorRGB(0.4,0.1,0.3)
+    PDF.drawString(22*mm,200*mm,"Tabla de Pax per comarques: "+ LRR12.get() + "/" + LRR22.get() + "/" + LRR32.get() + " - " + LRR42.get() + "/" + LRR52.get() + "/" + LRR62.get())
+
+    # Espacios
+    columna = 0
+    
+    for columnas in range(70,190,40):
+        fila = 10
+        alterna = True
+        for filas in range(120,175,5):
+            
+            if filas == 170:
+                PDF.setFillColorRGB(0.9,0.9,0.9) 
+            elif columnas == 70:
+                PDF.setFillColorRGB(0.4,0.7,0.6)               
+            else:
+                if alterna == True:
+                    PDF.setFillColorRGB(1,1,1)
+                    alterna = False
+                else:
+                    PDF.setFillColorRGB(0.8,0.8,1)
+                    alterna = True
+            PDF.setStrokeColorRGB(0,0,0)
+            PDF.rect(columnas*mm,filas*mm,40*mm,5*mm,fill = True)
+            num = "0" + str(columna) + "0" + str(fila)
+            valor = globals()['VIEW%s' % num].cget("text")
+            
+            if  columnas == 70 and filas < 170:
+                PDF.setFillColorRGB(1,1,1)
+            
+            else:
+                PDF.setFillColorRGB(0,0,0)    
+            
+            PDF.setFont('Helvetica',8)
+            PDF.drawCentredString(columnas*mm+57,filas*mm+4,str(valor))
+            fila -= 1
+        columna += 1     
+    # Muestra el PDF
+    PDF.showPage()
+    
+    # Salva el PDF
+    PDF.save()
+    
+    # Salimos de tabla pax
+    ventanaTabla.destroy()
+    preMenuTablas()
+def PDFTablasVPerfiles      ():
+# Creamos el nombre del archivo de salida
+    Nombre = "pdf/Pax per perfils "+ LRR12.get() + " " + LRR22.get() + " " + LRR32.get() + "   " + LRR42.get() + " " + LRR52.get() + " " + LRR62.get() + ".pdf"
+    
+    # Creamos el documento, DIN A4 y apaisado
+    PDF = canvas.Canvas(Nombre, pagesize=landscape(A4))
+    
+    # Imágenes en el documento
+    PDF.drawImage('image/LOGO PARA PDF.bmp',5*mm,5*mm,width=35,height=35)
+    PDF.drawImage('image/MARCA PARA PDF.bmp',260*mm,5*mm,width=100,height =14)
+
+    # Tipografía y tamaño
+    pdfmetrics.registerFont(TTFont('Boecklins Universe','image/Boecklins Universe.ttf'))
+    PDF.setFont('Boecklins Universe',18)
+    PDF.setFillColorRGB(0.4,0.1,0.3)
+    PDF.drawString(22*mm,200*mm,"Tabla de Pax per perfils: "+ LRR12.get() + "/" + LRR22.get() + "/" + LRR32.get() + " - " + LRR42.get() + "/" + LRR52.get() + "/" + LRR62.get())
+
+    # Espacios
+    columna = 0
+    
+    for columnas in range(70,190,40):
+        fila = 10
+        alterna = True
+        for filas in range(120,175,5):
+            
+            if filas == 170:
+                PDF.setFillColorRGB(0.9,0.9,0.9) 
+            elif columnas == 70:
+                PDF.setFillColorRGB(0.4,0.7,0.6)               
+            else:
+                if alterna == True:
+                    PDF.setFillColorRGB(1,1,1)
+                    alterna = False
+                else:
+                    PDF.setFillColorRGB(0.8,0.8,1)
+                    alterna = True
+            PDF.setStrokeColorRGB(0,0,0)
+            PDF.rect(columnas*mm,filas*mm,40*mm,5*mm,fill = True)
+            num = "0" + str(columna) + "0" + str(fila)
+            valor = globals()['VIEW%s' % num].cget("text")
+            
+            if  columnas == 70 and filas < 170:
+                PDF.setFillColorRGB(1,1,1)
+            
+            else:
+                PDF.setFillColorRGB(0,0,0)    
+            
+            PDF.setFont('Helvetica',8)
+            PDF.drawCentredString(columnas*mm+57,filas*mm+4,str(valor))
+            fila -= 1
+        columna += 1     
+    # Muestra el PDF
+    PDF.showPage()
+    
+    # Salva el PDF
+    PDF.save()
+    
+    # Salimos de tabla pax
+    ventanaTabla.destroy()
+    preMenuTablas()
+def PDFTablasVFuentes       ():
+# Creamos el nombre del archivo de salida
+    Nombre = "pdf/Pax per fonts "+ LRR12.get() + " " + LRR22.get() + " " + LRR32.get() + "   " + LRR42.get() + " " + LRR52.get() + " " + LRR62.get() + ".pdf"
+    
+    # Creamos el documento, DIN A4 y apaisado
+    PDF = canvas.Canvas(Nombre, pagesize=landscape(A4))
+    
+    # Imágenes en el documento
+    PDF.drawImage('image/LOGO PARA PDF.bmp',5*mm,5*mm,width=35,height=35)
+    PDF.drawImage('image/MARCA PARA PDF.bmp',260*mm,5*mm,width=100,height =14)
+
+    # Tipografía y tamaño
+    pdfmetrics.registerFont(TTFont('Boecklins Universe','image/Boecklins Universe.ttf'))
+    PDF.setFont('Boecklins Universe',18)
+    PDF.setFillColorRGB(0.4,0.1,0.3)
+    PDF.drawString(22*mm,200*mm,"Tabla de Pax per fonts: "+ LRR12.get() + "/" + LRR22.get() + "/" + LRR32.get() + " - " + LRR42.get() + "/" + LRR52.get() + "/" + LRR62.get())
+
+    # Espacios
+    columna = 0
+    
+    for columnas in range(70,190,40):
+        fila = 10
+        alterna = True
+        for filas in range(120,175,5):
+            
+            if filas == 170:
+                PDF.setFillColorRGB(0.9,0.9,0.9) 
+            elif columnas == 70:
+                PDF.setFillColorRGB(0.4,0.7,0.6)               
+            else:
+                if alterna == True:
+                    PDF.setFillColorRGB(1,1,1)
+                    alterna = False
+                else:
+                    PDF.setFillColorRGB(0.8,0.8,1)
+                    alterna = True
+            PDF.setStrokeColorRGB(0,0,0)
+            PDF.rect(columnas*mm,filas*mm,40*mm,5*mm,fill = True)
+            num = "0" + str(columna) + "0" + str(fila)
+            valor = globals()['VIEW%s' % num].cget("text")
+            
+            if  columnas == 70 and filas < 170:
+                PDF.setFillColorRGB(1,1,1)
+            
+            else:
+                PDF.setFillColorRGB(0,0,0)    
+            
+            PDF.setFont('Helvetica',8)
+            PDF.drawCentredString(columnas*mm+57,filas*mm+4,str(valor))
+            fila -= 1
+        columna += 1     
+    # Muestra el PDF
+    PDF.showPage()
+    
+    # Salva el PDF
+    PDF.save()
+    
+    # Salimos de tabla pax
+    ventanaTabla.destroy()
+    preMenuTablas()
+def PDFTablasVHoras         ():
+# Creamos el nombre del archivo de salida
+    Nombre = "pdf/Pax per hores "+ LRR12.get() + " " + LRR22.get() + " " + LRR32.get() + "   " + LRR42.get() + " " + LRR52.get() + " " + LRR62.get() + ".pdf"
+    
+    # Creamos el documento, DIN A4 y apaisado
+    PDF = canvas.Canvas(Nombre, pagesize=landscape(A4))
+    
+    # Imágenes en el documento
+    PDF.drawImage('image/LOGO PARA PDF.bmp',5*mm,5*mm,width=35,height=35)
+    PDF.drawImage('image/MARCA PARA PDF.bmp',260*mm,5*mm,width=100,height =14)
+
+    # Tipografía y tamaño
+    pdfmetrics.registerFont(TTFont('Boecklins Universe','image/Boecklins Universe.ttf'))
+    PDF.setFont('Boecklins Universe',18)
+    PDF.setFillColorRGB(0.4,0.1,0.3)
+    PDF.drawString(22*mm,200*mm,"Tabla de Pax per hores: "+ LRR12.get() + "/" + LRR22.get() + "/" + LRR32.get() + " - " + LRR42.get() + "/" + LRR52.get() + "/" + LRR62.get())
+
+    # Espacios
+    columna = 0
+    
+    for columnas in range(70,190,40):
+        fila = 10
+        alterna = True
+        for filas in range(120,175,5):
+            
+            if filas == 170:
+                PDF.setFillColorRGB(0.9,0.9,0.9) 
+            elif columnas == 70:
+                PDF.setFillColorRGB(0.4,0.7,0.6)               
+            else:
+                if alterna == True:
+                    PDF.setFillColorRGB(1,1,1)
+                    alterna = False
+                else:
+                    PDF.setFillColorRGB(0.8,0.8,1)
+                    alterna = True
+            PDF.setStrokeColorRGB(0,0,0)
+            PDF.rect(columnas*mm,filas*mm,40*mm,5*mm,fill = True)
+            num = "0" + str(columna) + "0" + str(fila)
+            valor = globals()['VIEW%s' % num].cget("text")
+            
+            if  columnas == 70 and filas < 170:
+                PDF.setFillColorRGB(1,1,1)
+            
+            else:
+                PDF.setFillColorRGB(0,0,0)    
+            
+            PDF.setFont('Helvetica',8)
+            PDF.drawCentredString(columnas*mm+57,filas*mm+4,str(valor))
+            fila -= 1
+        columna += 1     
+    # Muestra el PDF
+    PDF.showPage()
+    
+    # Salva el PDF
+    PDF.save()
+    
+    # Salimos de tabla pax
+    ventanaTabla.destroy()
+    preMenuTablas()
+def PDFTablasVDias          ():
+# Creamos el nombre del archivo de salida
+    Nombre = "pdf/Assitència per dies "+ LRR12.get() + " " + LRR22.get() + " " + LRR32.get() + "   " + LRR42.get() + " " + LRR52.get() + " " + LRR62.get() + ".pdf"
+    
+    # Creamos el documento, DIN A4 y apaisado
+    PDF = canvas.Canvas(Nombre, pagesize=landscape(A4))
+    
+    # Imágenes en el documento
+    PDF.drawImage('image/LOGO PARA PDF.bmp',5*mm,5*mm,width=35,height=35)
+    PDF.drawImage('image/MARCA PARA PDF.bmp',260*mm,5*mm,width=100,height =14)
+
+    # Tipografía y tamaño
+    pdfmetrics.registerFont(TTFont('Boecklins Universe','image/Boecklins Universe.ttf'))
+    PDF.setFont('Boecklins Universe',18)
+    PDF.setFillColorRGB(0.4,0.1,0.3)
+    PDF.drawString(22*mm,200*mm,"Assitència per dies: "+ LRR12.get() + "/" + LRR22.get() + "/" + LRR32.get() + " - " + LRR42.get() + "/" + LRR52.get() + "/" + LRR62.get())
+
+    # Espacios
+    columna = 0
+    
+    for columnas in range(70,190,40):
+        fila = 11
+        alterna = True
+        for filas in range(115,175,5):
+            
+            if filas == 170 or filas == 140:
+                PDF.setFillColorRGB(0.9,0.9,0.9) 
+            elif columnas == 70:
+                PDF.setFillColorRGB(0.4,0.7,0.6)               
+            else:
+                if alterna == True:
+                    PDF.setFillColorRGB(1,1,1)
+                    alterna = False
+                else:
+                    PDF.setFillColorRGB(0.8,0.8,1)
+                    alterna = True
+            PDF.setStrokeColorRGB(0,0,0)
+            PDF.rect(columnas*mm,filas*mm,40*mm,5*mm,fill = True)
+            num = "0" + str(columna) + "0" + str(fila)
+            valor = globals()['VIEW%s' % num].cget("text")
+            
+            if  columnas == 70 and filas < 170 and filas != 140:
+                PDF.setFillColorRGB(1,1,1)
+            
+            else:
+                PDF.setFillColorRGB(0,0,0)    
+            
+            PDF.setFont('Helvetica',8)
+            PDF.drawCentredString(columnas*mm+57,filas*mm+4,str(valor))
+            fila -= 1
+        columna += 1     
+    # Muestra el PDF
+    PDF.showPage()
+    
+    # Salva el PDF
+    PDF.save()
+    
+    # Salimos de tabla pax
+    ventanaTabla.destroy()
+    preMenuTablas()
+def PDFTablasVOrigen        ():
+ # Creamos el nombre del archivo de salida
+    Nombre = "pdf/Pax per origens "+ LRR12.get() + " " + LRR22.get() + " " + LRR32.get() + "   " + LRR42.get() + " " + LRR52.get() + " " + LRR62.get() + ".pdf"
+    
+    # Creamos el documento, DIN A4 y apaisado
+    PDF = canvas.Canvas(Nombre, pagesize=landscape(A4))
+    
+    # Imágenes en el documento
+    PDF.drawImage('image/LOGO PARA PDF.bmp',5*mm,5*mm,width=35,height=35)
+    PDF.drawImage('image/MARCA PARA PDF.bmp',260*mm,5*mm,width=100,height =14)
+
+    # Tipografía y tamaño
+    pdfmetrics.registerFont(TTFont('Boecklins Universe','image/Boecklins Universe.ttf'))
+    PDF.setFont('Boecklins Universe',18)
+    PDF.setFillColorRGB(0.4,0.1,0.3)
+    PDF.drawString(22*mm,200*mm,"Tabla de Pax per origens: "+ LRR12.get() + "/" + LRR22.get() + "/" + LRR32.get() + " - " + LRR42.get() + "/" + LRR52.get() + "/" + LRR62.get())
+
+    # Espacios
+    columna = 0
+    
+    for columnas in range(70,190,40):
+        fila = 10
+        alterna = True
+        for filas in range(120,175,5):
+            
+            if filas == 170:
+                PDF.setFillColorRGB(0.9,0.9,0.9) 
+            elif columnas == 70:
+                PDF.setFillColorRGB(0.4,0.7,0.6)               
+            else:
+                if alterna == True:
+                    PDF.setFillColorRGB(1,1,1)
+                    alterna = False
+                else:
+                    PDF.setFillColorRGB(0.8,0.8,1)
+                    alterna = True
+            PDF.setStrokeColorRGB(0,0,0)
+            PDF.rect(columnas*mm,filas*mm,40*mm,5*mm,fill = True)
+            num = "0" + str(columna) + "0" + str(fila)
+            valor = globals()['VIEW%s' % num].cget("text")
+            
+            if  columnas == 70 and filas < 170:
+                PDF.setFillColorRGB(1,1,1)
+            
+            else:
+                PDF.setFillColorRGB(0,0,0)    
+            
+            PDF.setFont('Helvetica',8)
+            PDF.drawCentredString(columnas*mm+57,filas*mm+4,str(valor))
+            fila -= 1
+        columna += 1     
+    # Muestra el PDF
+    PDF.showPage()
+    
+    # Salva el PDF
+    PDF.save()
+    
+    # Salimos de tabla pax
+    ventanaTabla.destroy()
+    preMenuTablas()
+def PDFProforma             ():
+
+    # Ventana de aviso
+    # Preparamos la ventana Tk donde trabajaremos
+    global ventana2
+    ventana2 = Tk()                         # Creamos la ventana
+    ventana2.title(" ")                     # Damos titulo a la ventana
+    ventana2.geometry("400x25")             # Damos tamaño a la ventana
+    ventana2.configure(bg='blue')           # Damos color de fondo a la ventana
+    ventana2.iconbitmap("image/icono.ico")  # Damos icono a la ventana
+    ventana2.deiconify()                    # Mostramos la ventana
+    ventana2label = Label(ventana2, text = "Generant PDF...", bg = "blue", fg = "white", font = ("Helvetica", 12))   
+    ventana2label.pack()                    # Coloca el label en la ventana
+    ventana2.overrideredirect(True)         # Quitamos el marco de la ventana
+    ventana2.update()                       # Actualiza la ventana
+    
+    try:
+        # Abrimos la base de datos de clientes
+        conn = sqlite3.connect('databases/basesDeDatosClientes.db')
+        c = conn.cursor()
+        # Elige el cliente con el mismo nombre que en la proforma
+        c.execute("SELECT * FROM bd_clientes WHERE NOM = ?", (LRR31.get(),))
+        # Guarda los datos del cliente en una variable
+        datosCliente = c.fetchall()    
+        
+        # Creamos el nombre del archivo de salida
+        Nombre = "pdf/Proforma "+LRR22.get()+" - "+LRR31.get()+".pdf"
+        
+        # Creamos el documento, DIN A4 y formato vertical
+        PDF = canvas.Canvas(Nombre, pagesize=A4)
+        
+        # Rectangulo magenta en la parte superior en escala a 255
+        PDF.setFillColorRGB(0.6,0.2,0.4)
+        PDF.setStrokeColorRGB(0.6,0.2,0.4)
+        PDF.rect(35*mm,265*mm,140*mm,7*mm,fill = True)
+        
+        # Imágenes en el documento
+        PDF.drawImage('image/LOGO PARA PDF.bmp',42*mm,235*mm,width=65,height=65)
+        PDF.drawImage('image/MARCA PARA PDF.bmp',35*mm,230*mm,width=100,height =14)
+
+        # Cambia texto a blanco
+        PDF.setFillColorRGB(1,1,1)
+        
+        # Escribe sobre el rectangulo "Factura Proforma"
+        PDF.setFont('Helvetica',13)
+        PDF.drawCentredString(65*mm,267*mm,"Factura Proforma")
+        
+        # Escribe sobre el rectangulo El número de factura
+        PDF.setFont('Helvetica',7)
+        PDF.drawCentredString(155*mm,267*mm,LRR22.get())
+        
+        # Cambiamos el texto a negro
+        PDF.setFillColorRGB(0,0,0)
+        
+        # Bajo MARCA escribimos "direccio@casanavas.cat"
+        PDF.setFont('Helvetica',7)
+        PDF.drawString(39*mm,227*mm,"direccio@casanavas.cat")
+        
+        # Pinta cuadrado negro vacío a la derecha de LOGO
+        PDF.setStrokeColorRGB(0,0,0)
+        PDF.rect(90*mm,225*mm,85*mm,35*mm,fill = False)
+        
+        # Escribe dentro del cuadrado  seis lineas de texto justificado a la izquierda
+        # Activamos negrita
+        PDF.setFont('Helvetica-Bold',8)
+        PDF.drawString(92*mm,255*mm,LRR31.get())
+        
+        # Desactivamos negrita
+        PDF.setFont('Helvetica',8)
+        PDF.drawString(92*mm,250*mm,datosCliente[0][1])
+        PDF.drawString(92*mm,245*mm,"C.P.: "+datosCliente[0][2]+ " "+datosCliente[0][3])
+        PDF.drawString(92*mm,240*mm,"nif/cif: "+datosCliente[0][6])
+        PDF.drawString(92*mm,235*mm,"Telèfon: "+datosCliente[0][4])
+        PDF.drawString(92*mm,230*mm,"Correu electrònic: "+datosCliente[0][5])
+        
+        # Ponemos color a la letra como el cuadrado
+        PDF.setFillColorRGB(0.6,0.2,0.4)
+        
+        # Debajo del cuadrado negro justificado a la izquierda escribimos "Data de la factura proforma"
+        PDF.setFont('Helvetica',9)
+        PDF.drawString(92*mm,220*mm,"Data de la factura proforma:")
+        
+        # Cambiamos el color a negro
+        PDF.setFillColorRGB(0,0,0)
+        
+        # A continuación de "Data de la factura proforma" escribimos la fecha
+        PDF.setFont('Helvetica',9)
+        PDF.drawString(132*mm,220*mm,str(fecha.day) + "/" + str(fecha.month) + "/" + str(fecha.year))
+        
+        # Cambiamos el color a gris para pintar cuadrados
+        PDF.setFillColorRGB(0.6,0.2,0.4)
+        PDF.setStrokeColorRGB(0.8,0.8,1)
+        
+        # Pinta el rectangulo gris global con sus celdas de colores
+        PDF.rect(35*mm,200*mm,140*mm,10*mm,fill = True)
+        PDF.rect(35*mm,180*mm,140*mm,10*mm,fill = False)
+        PDF.rect(35*mm,170*mm,140*mm,40*mm,fill = False)
+        PDF.rect(55*mm,170*mm,120*mm,40*mm,fill = False)
+        PDF.rect(125*mm,160*mm,50*mm,50*mm,fill = False)
+        PDF.rect(145*mm,160*mm,30*mm,50*mm,fill = False)
+        PDF.rect(145*mm,160*mm,30*mm,10*mm,fill = True)
+
+        # Color de letra a blanco
+        PDF.setFillColorRGB(1,1,1)
+        
+        # Escribe en las celdas de la primera fila: Quantitat, Descripció, Preu unitari, Import
+        PDF.setFont('Helvetica',8) 
+        PDF.drawCentredString(45*mm,204*mm,"Quantitat")
+        PDF.drawCentredString(90*mm,204*mm,"Descripció")
+        PDF.drawCentredString(135*mm,204*mm,"Preu unitari")
+        PDF.drawCentredString(159*mm,204*mm,"Import")
+        
+        # Color de letra a negro
+        PDF.setFillColorRGB(0,0,0)
+        
+        # Tercera columna de la quinta fila escribe: Total
+        PDF.setFont('Helvetica',9)
+        PDF.drawCentredString(138*mm,164*mm,"Total:")
+        
+        # Debajo de todo y centrado escribe: "S'ha d'efectuar l'ingrès una setmana abans de l'acte ES97 2100 0010 3202 0238 4644"
+        PDF.setFont('Helvetica',7)
+        PDF.drawCentredString(105*mm,30*mm,"S'ha d'efectuar l'ingrès una setmana abans de l'acte ES97 2100 0010 3202 0238 4644")
+        
+        # Primera columna de la segunda fila escribe los 4 datos de toda la fila
+        PDF.setFont('Helvetica',8)
+        PDF.drawString(43*mm,193*mm,LRR52.get())
+        PDF.drawString(60*mm,193*mm,LRR62.get())
+        if LRR72.get() != "":
+            PDF.drawString(133*mm,193*mm,LRR72.get()+" €")
+        PDF.drawString(43*mm,183*mm,LRR82.get())
+        PDF.drawString(60*mm,183*mm,LRR92.get())
+        if LRR102.get() != "":
+            PDF.drawString(133*mm,183*mm,LRR102.get()+" €")
+            
+        if LRR111.get() == "Si" and LRR131.get() == "Si":
+            try:
+                valor1 = (float(LRR52.get())*float(LRR72.get()))/((float(LRR122.get())/100)+1)
+            except:
+                valor1 = 0
+            try:
+                valor2 = (float(LRR82.get())*float(LRR102.get()))/((float(LRR122.get())/100)+1)
+            except:
+                valor2 = 0
+        else:
+            try:
+                valor1 = float(LRR52.get())*float(LRR72.get())
+            except:
+                valor1 = 0
+            try:
+                valor2 = float(LRR82.get())*float(LRR102.get())
+            except:
+                valor2 = 0    
+        # Redondeamos "valor" a dos decimales
+        valor1 = round(valor1,2)
+        valor2 = round(valor2,2)  
+        
+        if valor1 != 0:       
+            PDF.drawString(155*mm,193*mm,str(valor1)+" €")    
+        if valor2 != 0:
+            PDF.drawString(155*mm,183*mm,str(valor2)+" €")    
+
+        # IVA
+        if LRR111.get() == "Si":
+            PDF.drawString(60*mm,173*mm,"IVA del: " + str(LRR122.get()) + " %:")
+            try:
+                valor3 = (valor1 + valor2)*(int(LRR122.get())/100)
+                valor3 = round(valor3,2)
+                PDF.drawString(155*mm,173*mm,str(valor3)+" €")
+            except:
+                valor3 = 0    
+        else:
+            valor3 = 0
+
+        valor4 = valor1 + valor2 + valor3
+        
+        # Total
+        PDF.setFillColorRGB(1,1,1)
+        PDF.setFont('Helvetica-Bold',10)
+        PDF.drawString(155*mm,163*mm,str(valor4)+" €")
+                        
+        # Salva el PDF CON el nombre que le hemos dado
+        PDF.save()
+        
+        # Cerramos el proceso
+        ventana2label.config(text = "PDF generat", bg = "green")    
+        ventana2.config(bg = "green")       # Cambiamos el fondo del la ventana a verde
+        ventana2.update()                   # Actualizamos la ventana
+        
+        # Hacemos una pausa de 2 segundos
+        time.sleep(2)                       # 2 segundos de pausa
+        LRR22.focus()                       # Pone el foco en el campo de texto
+        
+        # Cerramos la ventana
+        ventana2.destroy()                  # Destruye la ventana
+
+    except:
+        
+        # Cerramos el proceso
+        ventana2label.config(text = "ERROR al generar el PDF", bg = "red")    
+        ventana2.config(bg = "red")       # Cambiamos el fondo del la ventana a verde
+        ventana2.update()                   # Actualizamos la ventana
+        
+        # Hacemos una pausa de 2 segundos
+        time.sleep(2)                       # 2 segundos de pausa
+        LRR22.focus()                       # Pone el foco en el campo de texto
+        
+        # Cerramos la ventana
+        ventana2.destroy()                  # Destruye la ventana        
+
+    ventana2.mainloop()                     # Bucle de la ventana
+    
+def preMenuTablas           ():
+    
+    try:
+
+        destruye_espacios_info(40,33)
+
+    except:
+
+        pass
+    
+    try:
+        
+        ventanaTabla.destroy()
+    
+    except:
+        
+        pass
+    crea_espacios_info(frameLista,10,22)
+    menuTablas()
+# ------------------------------ Menus -------------------------------
+
+def MenuInicial                             ():
+
+    global usuarioNivel
+    LimpiaLabelsRellena()
+    if int(usuarioNivel) == 0:
+        return
+    
+    textMenu.config(text = "MENU PRINCIPAL") 
+    menusBotones("Tornar",cambioUsuario,"Registre",menuRegistros,"Venda",menuVentas,"Taules",menuTablas,"Arqueijos",menuArqueos,"Stock",menuStocks,"Incidències/grups",menuIncidencias,"Calendaris",menuCalendarios,"Dades",menuDatos,"Seguretat",menuSeguridad)
+    BM1.focus()           
+
+    if int(usuarioNivel) >= 2:
+        BM9.config(text="")
+    if int(usuarioNivel) >= 3:
+        BM8.config(text="")
+        BM5.config(text="")
+    if int(usuarioNivel) >= 4:
+        BM4.config(text="")
+    if int(usuarioNivel) == 5:
+        BM2.config(text="")
+    
+def menuRegistros                               ():
+
+    # Si aquí se pulsan las teclas CTRL + D no pasa nada
+    raiz.bind("<Control-d>", lambda event: regresaSinNada())
+    raiz.bind("<Control-D>", lambda event: regresaSinNada())
+    
+    if  nomUsuario.cget("text") == "":
+
+        return
+    
+    nomUsuario.config(text = usuarioReal)
+    diaGlobaltk.set(diaGlobal)
+    mesGlobaltk.set(mesGlobal)
+    anyoGlobaltk.set(anyoGlobal)
+    MiraFecha(anyoFecha)
+
+    ajusta_espacios_info(10,22,7,1,12,20,19,7,16,16,1,1)
+    global puntero
+    puntero = 0
+    
+    textMenu.config(text = "MENU REGISTRE")            
+    LimpiaLabelsRellena()
+    menusBotones("Tornar",MenuInicial,"Introduir",menuRegistrosIntroducir,"Consultar",menuRegistrosConsultar,"Mirar/Corregir",menuRegistroCorregir,"Eliminar",menuRegistroEliminar)
+    BM1.focus()            
+def menuRegistrosIntroducir                         ():
+    ajusta_espacios_info(10,22,7,1,12,20,19,7,16,16,1,1)
+    textMenu.config(text = "MENU REGISTRE")            
+
+    def menuRegistrosIntroducirIntroduce ():
+        
+        # Rescata valores
+        v1 = LRR21.get()
+        v2 = LRR31.get()
+        v3 = LRR41.get()
+        v4 = LRR51.get()
+        v5 = LRR61.get()
+        v6 = LRR73.get(1.0,END)
+        v7 = anyoGlobaltk.get()
+        v8 = mesGlobaltk.get()
+        v9 = diaGlobaltk.get()
+        
+        # Hacemos que v8 tenga 2 cifras
+        if len(v8) == 1:
+            v8 = "0" + v8
+            
+        global origenes
+        
+        # Coteja fallos
+        
+        # Si v9 mide sólo 1, añadirle un 0 delante
+        if len(v9) == 1:
+            v9 = "0" + v9
+        # Lo mismo para v8
+        if len(v8) == 1:
+            v8 = "0" + v8
+        
+        if v7 == "":
+            
+            LR23.config(text = "Any inexistent")
+            anyoFecha.focus()
+            return
+        if len(v7) != 4:
+            
+            LR23.config(text = "Any no vàlid")
+            anyoFecha.focus()
+            return
+        if v8 == "":
+            
+            LR23.config(text = "Mes inexistent")
+            mesFecha.focus()
+            return
+
+        if int(v8) > 12 or int(v8) < 1 or len(v8) != 2:
+            
+            LR23.config(text = "Mes no vàlid")
+            mesFecha.focus()
+            return
+        if v9 == "":
+            
+            LR23.config(text = "Dia inexistent")
+            diaFecha.focus()
+            return        
+        if v8 == "" or int(v9) > 31 or int(v9) < 1:
+            
+            LR23.config(text = "Dia no vàlid")
+            diaFecha.focus()
+            return        
+        if v1 == "" or v2 == "" or v3 == "" or v4 == "" or v5 == "":
+            
+            LR23.config(text = "Registre incomplert")
+            LRR21.focus()
+            return        
+        a = 0
+        for i in origenes:
+            if i == v2:    
+                a = 1
+        if  a == 0:
+            LR23.config(text = "Origen incorrecte")
+            LRR31.focus()
+            return
+            
+        # Salva datos
+        # Crea la base de datos o conecta con ella
+        base_datos_datos = sqlite3.connect('databases/basesDeDatosRegistros.db')
+        
+        # Crea el cursor
+        cursor = base_datos_datos.cursor()   
+    
+        # Inserta en la base de tados
+        cursor.execute("""INSERT INTO bd_registros VALUES (:usuario, :fecha,
+                :descripcion, :origen, :hora, :producto, :fuente, :notas)""",
+                {
+                    'usuario':      usuarioReal,
+                    'fecha':        anyoGlobaltk.get() + "/" + mesGlobaltk.get() + "/" + diaGlobaltk.get(),
+                    'descripcion':  LRR21.get(),
+                    'origen':       LRR31.get(),
+                    'hora':         LRR41.get(),
+                    'producto':     LRR51.get(),
+                    'fuente':       LRR61.get(),
+                    'notas':        LRR73.get(1.0,END)
+                    })
+
+
+        # Asegura los cambios
+        base_datos_datos.commit()
+
+        # Cerrar conexion 
+        base_datos_datos.close() 
+                            
+        # Pinta datos en zona 3
+        query_registros_Inv()
+
+        # Limpia posibles mensajes anteriores innecesarios
+        LR23.config(text = "")
+
+        # Pinta la lista actualizada
+        # Crea la base de datos o conecta con ella
+        base_datos_datos = sqlite3.connect('databases/basesDeDatosRegistros.db')
+            
+        # Crea el cursor
+        cursor = base_datos_datos.cursor()
+        
+        # Coge el valor del ultimo oid
+        cursor.execute("SELECT *, oid FROM bd_registros")
+        
+        try:
+            datos = cursor.fetchall()
+            dato = datos[-1]
+            idAdecuado = dato[8]
+        except:
+            idAdecuado = 0
+            
+        idCorrecto = int(idAdecuado)+1
+        
+        # Cerrar conexion 
+        base_datos_datos.close() 
+            
+        LRR1.config(text = idCorrecto)
+
+        # Coloca foco
+        LRR21.focus()
+
+    # Crea la base de datos o conecta con ella
+    base_datos_datos = sqlite3.connect('databases/basesDeDatosRegistros.db')
+        
+    # Crea el cursor
+    cursor = base_datos_datos.cursor()
+    
+    # Coge el valor del ultimo oid
+    cursor.execute("SELECT *, oid FROM bd_registros")
+    
+    try:
+        datos = cursor.fetchall()
+        dato = datos[-1]
+        idAdecuado = dato[8]
+    except:
+        idAdecuado = 0
+        
+    idCorrecto = int(idAdecuado)+1
+    
+    # Cerrar conexion 
+    base_datos_datos.close() 
+             
+    menusBotones("Tornar",menuRegistros,"Introduir")
+    LimpiaLabelsRellena()
+    
+    LR1.config(text = "ID:")
+    LRR1.grid(row=0, column=1)  
+    LRR1.config(text = idCorrecto)            
+    LR2.config(text = "DESCRIPCIÓ:")
+    LRR21.grid(row=1, column=1)  
+    LRR21['values'] = (descripciones)  
+    LR3.config(text = "ORIGEN:")  
+    LRR31.grid(row=2, column=1)
+    LRR31.config(state = "readandwrite")
+    LRR31['values'] = (origenes)  
+    LR4.config(text = "HORA:")  
+    LRR41.grid(row=3, column=1)  
+    LRR41['values'] = (horas)  
+    LR5.config(text = "PRODUCTE:")  
+    LRR51.grid(row=4, column=1)  
+    LRR51['values'] = (productosR)  
+    LR6.config(text = "FONT:")  
+    LRR61.grid(row=5, column=1)  
+    LRR61['values'] = (fuentes)  
+    LR7.config(text = "NOTES:")  
+    LRR73.grid(row=6, column=1)
+
+    Boton4activado(menuRegistrosIntroducirIntroduce)
+    query_registros_Inv()  
+    LRR21.focus() 
+def menuRegistrosConsultar                          ():
+           
+    LimpiaLabelsRellena()    
+    menusBotones("Tornar",menuRegistros,"",regresaSinNada,"Consultar")
+
+    LR1.config(text = "DIA:")
+    LRR12.grid(row=0, column=1)
+    LR2.config(text = "MES:")
+    LRR22.grid(row=1, column=1)
+    LR3.config(text = "ANY:")  
+    LRR32.grid(row=2, column=1)
+    LR4.config(text = "DESCRIPCIO:")  
+    LRR41.grid(row=3, column=1)
+    LRR41['values'] = (descripciones)      
+    LR5.config(text = "ORIGEN:")  
+    LRR51.grid(row=4, column=1)
+    LRR51.config(state = "readandwrite")    
+    LRR51['values'] = (origenes)      
+    LR6.config(text = "desde HORA:")  
+    LRR61.grid(row=5, column=1)
+    LRR61['values'] = (horas)
+    LR7.config(text = "fins HORA:")
+    LRR71.grid(row=6, column=1)
+    LRR71['values'] = (horas)  
+    LR8.config(text = "PRODUCTE:")  
+    LRR81.grid(row=7, column=1)
+    LRR81['values'] = (productosR)  
+    LR9.config(text = "FONT:")
+    LRR91.grid(row=8, column=1)
+    LRR91['values'] = (fuentes)  
+    LR10.config(text = "USUARI:")
+    LRR101.grid(row=9, column=1)
+    LRR101['values'] = (usuariosO)
+
+    # Si aquí se pulsan las teclas CTRL + D se pone la fecha actual
+    raiz.bind("<Control-d>", lambda event: FechaActualIncrustada())
+    raiz.bind("<Control-D>", lambda event: FechaActualIncrustada())
+         
+    Boton4activado(query_registros_busca0)
+    Boton5activado(prequery_registros)
+    Boton6activado(query_registros_busca)
+    LRR12.focus()      
+def menuRegistroCorregir                            ():
+
+    MiraFecha(anyoFecha)
+
+    diaGlobaltk.set(diaGlobal)
+    mesGlobaltk.set(mesGlobal)
+    anyoGlobaltk.set(anyoGlobal) 
+       
+    LimpiaLabelsRellena()
+    menusBotones("Tornar",menuRegistros,"",regresaSinNada,"",regresaSinNada,"Mirar/Corregir")
+    
+    LR1.config(text = "ID:")
+    LRR12.grid(row=0, column=1)
+    
+    Boton4activado(registroCorrigeUno)
+    LRR12.focus() 
+def menuRegistroEliminar                            ():
+        
+    LimpiaLabelsRellena()
+    menusBotones("Tornar",menuRegistros,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Eliminar")
+    
+    LR1.config(text = "ID:")
+    LRR12.grid(row=0, column=1)
+    
+    Boton4activado(registroBorraUno)
+    LRR12.focus()       
+
+def menuVentas                                  ():
+    
+    return # Mientras no se haga el menu de ventas no se puede acceder a este menu
+    if  nomUsuario.cget("text") == "":
+
+        return
+    global usuarioNivel
+    if int(usuarioNivel) == 5:
+        return
+    
+    LimpiaLabelsRellena()
+    textMenu.config(text = "MENU VENDES")   
+    menusBotones("Tornar",MenuInicial,"Introduir",menuVentasIntroducir,"Consultar",menuVentasConsultar,"Mirar/Corregir",menuVentasCorregir,"Eliminar",menuVentasEliminar)
+    BM1.focus()
+def menuVentasIntroducir                            ():
+    textMenu.config(text = "MENU VENDES")   
+
+    LimpiaLabelsRellena()
+    menusBotones("Tornar",menuVentas,"Introduir")
+    
+    LR1.config(text = "ID:")
+    LRR1.grid(row=0, column=1)  
+    LR2.config(text = "CUANTITAT:")
+    LRR22.grid(row=1, column=1)  
+    LR3.config(text = "PRODUCTE:")  
+    LRR31.grid(row=2, column=1) 
+    LRR31['values'] = (productos)  
+    LR4.config(text = "MODE PAGAMENT:")  
+    LRR41.grid(row=3, column=1)  
+    LRR41['values'] = (tiposPago)  
+    LR5.config(text = "PREU UNITARI:")  
+    LRR5.grid(row=4, column=1)
+    LRR5.config(text = "Coge el valor del producto")  
+    LR6.config(text = "PREU TOTAL:")  
+    LRR6.grid(row=5, column=1)
+    LRR6.config(text = "multiplica valor por cantidad")
+    LR7.config(text = "NOTES:")  
+    LRR73.grid(row=6, column=1)
+    BB4.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 5)
+    cambiaPasaEncima(BB4,"green","#27779d")    
+    LRR22.focus()
+def menuVentasConsultar                             ():
+    
+    LimpiaLabelsRellena()    
+    menusBotones("Tornar",menuVentas,"",regresaSinNada,"Consultar")
+
+    LR1.config(text = "inici DIA:")
+    LRR12.grid(row=0, column=1)
+    LR2.config(text = "MES:")
+    LRR22.grid(row=1, column=1)
+    LR3.config(text = "ANY:")  
+    LRR32.grid(row=2, column=1)
+    LR4.config(text = "final DIA:")  
+    LRR42.grid(row=3, column=1)
+    LR5.config(text = "MES:")  
+    LRR52.grid(row=4, column=1)
+    LR6.config(text = "ANY:")  
+    LRR62.grid(row=5, column=1)
+    LR7.config(text = "PRODUCTE:")  
+    LRR71.grid(row=6, column=1)
+    LRR71['values'] = (productos)      
+    LR8.config(text = "MODE PAGAMENT:")  
+    LRR81.grid(row=7, column=1)
+    LRR81['values'] = (tiposPago)  
+    LR9.config(text = "PREU UNITARI:")  
+    LRR92.grid(row=8, column=1)
+
+    BB4.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 5)
+    cambiaPasaEncima(BB4,"green","#27779d")    
+    LRR12.focus()    
+def menuVentasCorregir                              ():
+
+    LimpiaLabelsRellena()
+    menusBotones("Tornar",menuVentas,"",regresaSinNada,"",regresaSinNada,"Mirar/Corregir")
+    
+    LR1.config(text = "ID:")
+    LRR12.grid(row=0, column=1)
+    
+    BB4.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 5)
+    cambiaPasaEncima(BB4,"green","#27779d")     
+    LRR12.focus()
+def menuVentasEliminar                              ():
+
+    LimpiaLabelsRellena()
+    menusBotones("Tornar",menuVentas,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Eliminar")
+    
+    LR1.config(text = "ID:")
+    LRR12.grid(row=0, column=1)
+    
+    BB4.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 5)
+    cambiaPasaEncima(BB4,"green","#27779d")     
+    LRR12.focus()       
+
+def menuTablas                                  ():
+
+    # Si aquí se pulsan las teclas CTRL + D no pasa nada
+    raiz.bind("<Control-d>", lambda event: regresaSinNada())
+    raiz.bind("<Control-D>", lambda event: regresaSinNada())
+    
+    if  nomUsuario.cget("text") == "":
+
+        return
+    LimpiaLabelsRellena()
+    textMenu.config(text = "MENU TAULES")   
+    menusBotones("Tornar",MenuInicial,"Pax",menuTablasPax,"Visitants per zona",menuTablasVGrupo,"Visitants per províncies",menuTablasVProvincia,"Visitants per comarca",menuTablasVComarca,"Visitants per perfil",menuTablasVPerfil,"Visitants per font",menuTablasVFuente,"Visitants per hora",menuTablasVHora,"Visitants per dia",menuTablasVDia,"Visitants per origen",menuTablasVOrigen)
+    # Hacemos prioritaria y visible la raiz
+    raiz.deiconify()
+    BM1.focus()
+def menuTablasPax                                   ():
+    
+    def menuTablasPaxMuestra ():
+        
+        # Rescata valores
+        v1 = LRR12.get()
+        v2 = LRR22.get()
+        
+        # Coteja fallos
+        if v1 == "":
+            
+            LR23.config(text = "Registre incomplert")
+            LRR12.focus()
+
+            return
+        
+        if v2 == "":
+            
+            LR23.config(text = "Registre incomplert")
+            LRR22.focus()
+
+            return
+        
+        if len(v1) != 4:
+            
+            LR23.config(text = "Estructura d'any no vàlida")
+            LRR12.focus()
+
+            return
+        """
+        if v2[0] == "0":
+            
+            LR23.config(text = "Estructura de mes no vàlida")
+            LRR22.focus()
+
+            return
+        """            
+        try:
+            
+            a=int(v1)
+            
+        except:
+            
+            LR23.config(text = "Dada no numèrica")
+            LRR12.focus()
+            return    
+
+        try:
+            
+            a=int(v2)
+            
+        except:
+            
+            LR23.config(text = "Dada no numèrica")
+            LRR22.focus()
+            return
+        
+        if  a<1 or a>12:
+            
+            LR23.config(text = "Dada sense lògica")
+            LRR22.focus()
+            return 
+        
+        # Si la cantidad de datos de v2 es 1, se le añade un 0 delante
+        if len(v2) == 1:
+                
+                v2 = "0" + v2
+                
+        # Limpia posibles mensajes anteriores innecesarios
+        LR23.config(text = "")
+        
+        # Importancia en la tabla
+        ventanaTabla.deiconify()
+        ventanaTabla.title('Taula Pax: any ' + v1 + '. Mes ' + v2 + '.')
+
+        # Terminamos de dibujar las necesidades de la tabla
+        columna = 1   
+        for data in range (1,32,2):
+            
+            fila = 0
+            for dato in range (39):
+                
+                num = "0" + str(fila) + "0" + str(columna)
+                            
+                globals()['VIEW%s' % num].config(bg = "#9A7048")
+                fila += 1   
+            
+            columna += 2        
+        columna = 0
+        for dato in range (33):
+            
+            num = "000" + str(columna)
+            
+            if num == "0000" or num == "00032":
+                
+                columna += 1
+                
+            else:
+                
+                globals()['VIEW%s' % num].config(text = str(dato),bg = "grey",fg = "#FFFFFF")
+                columna += 1
+        columna = 0
+        global horas
+        for dato in range (39):
+            
+            num = "0" + str(columna) + "00"
+            
+            if num == "0000" or num == "04000":
+                
+                columna += 1
+                
+            else:
+                
+                globals()['VIEW%s' % num].config(text = horas[dato-1])
+                columna += 1     
+        
+        # Abre archivo con los datos en el mes y año necesarios
+        # Crea una base de datos o se conecta a una
+        base_datos = sqlite3.connect('databases/basesDeDatosRegistros.db')
+        # Crea cursor
+        c = base_datos.cursor()
+        # Query the database
+        c.execute("SELECT * FROM bd_registros WHERE FECHA LIKE '" + v1 + "/" + v2 + "/%'")
+        records = c.fetchall()
+        
+        # Repasa dia / repasa hora para pegar datos
+        for columna in range (1,39):
+            
+            for fila in range (1,32):
+                valor = 0
+                for pax in records:
+                    fecha = pax[1].split("/")
+                    
+                    if str(int(fecha[2])) == str(fila):
+                        labelHora = "0" + str(columna) + "00"
+                        hora = globals()['VIEW%s' % labelHora].cget("text")
+                        if  hora == pax[4]:
+                            valor +=1
+                if valor == 0: valor = ""             
+                num = "0" + str(columna) + "0" + str(fila)
+                globals()['VIEW%s' % num].config(text = str(valor))    
+        
+        # Cierra archivo
+        base_datos.close()
+        
+        # Suma totales y pinta resultados
+        for columna in range(1,39): 
+            valor = 0           
+            for fila in range (1,32):
+                labelPax = "0" + str(columna) + "0" + str(fila)
+                pax = globals()['VIEW%s' % labelPax].cget("text")
+                if pax == "": pax = "0" 
+                valor += int(pax)
+            
+            num = "0" + str(columna) + "032"
+            globals()['VIEW%s' % num].config(text = str(valor)) 
+        
+        valorTotal = 0
+        for fila in range(1,32):
+            valor = 0           
+            for columna in range (1,39):
+                labelPax = "0" + str(columna) + "0" + str(fila)
+                pax = globals()['VIEW%s' % labelPax].cget("text")
+                if pax == "": pax = "0" 
+                valor += int(pax)
+                valorTotal += int(pax)
+            num = "0390" + str(fila)
+            globals()['VIEW%s' % num].config(text = str(valor)) 
+        
+        num = "039032"
+        globals()['VIEW%s' % num].config(text = str(valorTotal), font =("Helvetica",9,"bold"))          
+        
+        # Elimina columnas sin datos y limpia su casilla de hora
+        for columna in range(1,39):
+            num = "0" + str(columna) + "032"
+            pax = globals()['VIEW%s' % num].cget("text")
+            if pax == "0":
+                globals()['VIEW%s' % num].config(text = "")
+                num = "0" + str(columna) + "00"
+                globals()['VIEW%s' % num].config(text = "")
+                for fila in range (33):
+                    num = "0" + str(columna) + "0" + str(fila)
+                    globals()['VIEW%s' % num].config(width = 0)
+                    
+        # Activa boton pdf
+        Boton7activado(PDFTablasPax)
+                          
+    # Destruimos las labels de informacion para no sobrecargar el sistema
+    destruye_espacios_info(10,22)
+    
+    # Creamos ventana extra para esta tabla
+    global ventanaTabla
+    ventanaTabla = Tk()
+    ventanaTabla.title('Taula Pax')
+    #ventanaTabla.geometry("1500x700")
+    ventanaTabla.configure(bg='green')
+    ventanaTabla.iconbitmap("image/icono.ico")
+    frameTablaPax = Frame(ventanaTabla)
+    frames(frameTablaPax,0,0,3,300,50,"green")
+    # Si en cualquier momento se pulsan las teclas CTRL + CURSOR IZQUIERDA se fuerza el pulsado del botón REGRESAR
+    ventanaTabla.bind("<Control-Left>", lambda event: BotonRegresarForzado())
+    # Si en cualquier momento se pulsan las teclas CTRL + P se fuerza la impresión de PDF
+    ventanaTabla.bind("<Control-p>", lambda event: BotonImprimirForzado())
+    ventanaTabla.bind("<Control-P>", lambda event: BotonImprimirForzado())
+    # Importancia en la raiz
+    raiz.deiconify()
+    ventanaTabla.iconify()
+       
+    # Cramos las labels dentro de la tabla
+    crea_espacios_info(frameTablaPax,40,33)
+    ajusta_espacios_info(40,33,8,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,8)
+ 
+
+                     
+    # Preparamos la salida
+    menusBotones("Tornar",preMenuTablas,"Pax")
+
+    # Datos a rellenar
+    LR1.config(text = "ANY:")
+    LRR12.grid(row=0, column=1)  
+    LR2.config(text = "MES:")  
+    LRR22.grid(row=1, column=1)     
+
+    # Si aquí se pulsan las teclas CTRL + D se pone la fecha actual
+    raiz.bind("<Control-d>", lambda event: FechaActualIncrustadaPax())
+    raiz.bind("<Control-D>", lambda event: FechaActualIncrustadaPax())
+    # Foco en el año
+    LRR12.focus()
+
+    # Activa la tabla
+    Boton4activado(menuTablasPaxMuestra)
+def menuTablasVGrupo                                ():
+    
+    def menuTablasVGrupoMuestra ():
+        
+        # Rescata valores
+        v1 = LRR12.get()
+        v2 = LRR22.get()
+        v3 = LRR32.get()
+        v4 = LRR42.get()
+        v5 = LRR52.get()
+        v6 = LRR62.get()
+
+        # Coteja fallos
+        if v1 == "" or v2 == "" or v3 == "" or v4 == "" or v5 == "" or v6 == "":
+            
+            LR23.config(text = "Registre incomplert")
+            LRR12.focus()
+
+            return
+                
+        if len(v3) != 4 or len(v6) != 4:
+            
+            LR23.config(text = "Estructura d'any no vàlida")
+            LRR32.focus()
+
+            return
+
+        # Si v2 tiene len 1, le añadimos un 0 delante
+        if len(v2) == 1:
+            v2 = "0" + v2
+            LRR22.delete(0,END)
+            LRR22.insert(0,v2)
+
+        # Si v5 tiene len 1, le añadimos un 0 delante
+        if len(v5) == 1:
+            v5 = "0" + v5
+            LRR52.delete(0,END)
+            LRR52.insert(0,v5)
+        
+        # Si v1 tiene len 1, le añadimos un 0 delante
+        if len(v1) == 1:
+            v1 = "0" + v1
+            LRR12.delete(0,END)
+            LRR12.insert(0,v1)
+        
+        # Si v4 tiene len 1, le añadimos un 0 delante
+        if len(v4) == 1:
+            v4 = "0" + v4
+            LRR42.delete(0,END)
+            LRR42.insert(0,v4)
+                    
+        if len(v2) != 2 or len(v5) != 2:
+            
+            LR23.config(text = "Estructura de mes no vàlida")
+            LRR22.focus()
+
+            return
+        
+        if len(v1) != 2 or len(v4) != 2:
+            
+            LR23.config(text = "Estructura de dia no vàlida")
+            LRR12.focus()
+
+            return
+                            
+        try:
+            a = int(v1)
+            a = int(v2)
+            a = int(v3)
+            a = int(v4)
+            a = int(v5)
+            a = int(v6)
+        
+        except:
+            
+            LR23.config(text = "Dada no numèrica")
+            LRR12.focus()
+            return    
+
+        if int(v2) < 1 or int(v5) < 1 or int(v2) > 12 or int(v5) > 12:
+            
+            LR23.config(text = "Mes impossible")
+            LRR22.focus()
+
+            return
+
+        if int(v1) < 1 or int(v4) < 1 or int(v1) > 31 or int(v4) > 31:
+            
+            LR23.config(text = "Dia impossible")
+            LRR12.focus()
+
+            return
+         
+        # Limpia posibles mensajes anteriores innecesarios
+        LR23.config(text = "")
+        
+        # Importancia en la tabla
+        ventanaTabla.deiconify()
+        ventanaTabla.title('Taula per zones: desde ' +v1 + '/'+v2+'/'+v3+' fins '+v4+'/'+v5+'/'+v6+'.')
+
+        # Terminamos de dibujar las necesidades de la tabla
+        columna = 1   
+        for data in range (1,35,2):
+            
+            fila = 0
+            for dato in range (3):
+                
+                num = "0" + str(fila) + "0" + str(columna)
+                            
+                globals()['VIEW%s' % num].config(bg = "#9A7048")
+                fila += 1   
+            
+            columna += 2        
+        columna = 0
+        for dato in range (35):
+            
+            num = "000" + str(columna)
+            
+            if num == "0000":
+                
+                columna += 1
+                
+            else:
+                
+                globals()['VIEW%s' % num].config(bg = "grey",fg = "#FFFFFF")
+                columna += 1
+        columna = 0
+
+        # Pinta Casillas fijas
+        globals()['VIEW%s' % "0000"].config(text="ZONA")
+        globals()['VIEW%s' % "0100"].config(text="VISITANTS")
+        globals()['VIEW%s' % "0200"].config(text="TANT PER CENT")
+        globals()['VIEW%s' % "0001"].config(text="REUS")
+        globals()['VIEW%s' % "0002"].config(text="CATALUNYA")
+        globals()['VIEW%s' % "00013"].config(text="ESPANYA")
+        globals()['VIEW%s' % "00024"].config(text="INTERNACIONAL")
+        
+        # Preparamos las listas por grupos
+        todosOrigenes = open("files/origens.DAT")
+        todosOrigenes = list(todosOrigenes)
+        OrigenReus = 0
+        OrigenCatalunya = []
+        OrigenEspanya = []
+        OrigenInternacional = []
+
+        for todos in todosOrigenes:
+            
+            todosPartido = todos.split(",")
+            todosPartido = list(todosPartido)
+            try:
+                if todosPartido[1] == "CATALUNYA":
+                    OrigenCatalunya.append([todosPartido[0],0])
+                elif todosPartido[1] == "ESPANYA":
+                    OrigenEspanya.append([todosPartido[0],0])
+                elif todosPartido[1] == "INTERNACIONAL":
+                    OrigenInternacional.append([todosPartido[0],0])
+            except:
+                pass    
+        
+        
+        # Abre archivo con los datos en el mes y año necesarios
+        # Crea una base de datos o se conecta a una
+        base_datos = sqlite3.connect('databases/basesDeDatosRegistros.db')
+        # Crea cursor
+        c = base_datos.cursor()
+        # Query the database
+        c.execute("SELECT * FROM bd_registros WHERE FECHA >= '"+v3+"/"+v2+"/"+v1+"' and FECHA <= '"+v6+"/"+v5+"/"+v4+"'")
+        records = c.fetchall()
+    
+        # Repasa dia cada registro para poner sumar a la lista adecuada    
+        for reu in records:
+            
+            if reu[3] == "REUS":
+                OrigenReus += 1
+        suma = 0
+        for cat in OrigenCatalunya:
+            for cata in records:
+                if cata[3] != "REUS" and cata[3] == cat[0]:
+                    cat[1] += 1
+            suma +=1   
+        suma = 0
+        for esp in OrigenEspanya:
+            for espa in records:
+                if espa[3] == esp[0]:
+                    esp[1] += 1
+            suma +=1     
+        suma = 0
+        for inter in OrigenInternacional:
+            for inte in records:
+                if inte[3] == inter[0]:
+                    inter[1] += 1
+            suma +=1      
+        # Listas finales para usar y valor global de pax
+        OrigenCatalunya = sorted(OrigenCatalunya, key=lambda valor: valor[1],reverse = True)
+        OrigenEspanya = sorted(OrigenEspanya, key=lambda valor: valor[1],reverse = True)
+        OrigenInternacional = sorted(OrigenInternacional, key=lambda valor: valor[1],reverse = True)
+        CantidadRegistros = len(records)
+        
+        # Pintamos datos
+        globals()['VIEW%s' % "0101"].config(text=OrigenReus,font=("Helvetica",9,"bold"))
+        try:
+            circun = (OrigenReus*100)/CantidadRegistros
+            circun = round(circun,2)
+        except:
+            circun = 0
+        globals()['VIEW%s' % "0201"].config(text=str(circun)+" %",font=("Helvetica",9,"bold"))
+        
+        for a in range(10):
+            circun = list(OrigenCatalunya[a])
+            globals()['VIEW%s' % "000" + str(a+3)].config(text=str(circun[0]),foreground = "yellow")
+            globals()['VIEW%s' % "010" + str(a+3)].config(text=str(circun[1]))
+            try:
+                circun1 = (circun[1]*100)/CantidadRegistros
+                circun1 = round(circun1,2)
+            except:
+                circun1 = 0
+            globals()['VIEW%s' % "020" + str(a+3)].config(text=str(circun1)+" %")
+        TotalCat = 0
+        for a in OrigenCatalunya:
+            TotalCat += a[1]
+        globals()['VIEW%s' % "0102"].config(text=TotalCat,font=("Helvetica",9,"bold"))
+        try:
+            circun = (TotalCat*100)/CantidadRegistros
+            circun = round(circun,2)
+        except:
+            circun = 0
+        globals()['VIEW%s' % "0202"].config(text=str(circun)+" %",font=("Helvetica",9,"bold"))
+
+        for a in range(10):
+            circun = list(OrigenEspanya[a])
+            globals()['VIEW%s' % "000" + str(a+14)].config(text=str(circun[0]),foreground = "yellow")
+            globals()['VIEW%s' % "010" + str(a+14)].config(text=str(circun[1]))
+            try:
+                circun1 = (circun[1]*100)/CantidadRegistros
+                circun1 = round(circun1,2)
+            except:
+                circun1 = 0
+            globals()['VIEW%s' % "020" + str(a+14)].config(text=str(circun1)+" %")
+        TotalEsp = 0
+        for a in OrigenEspanya:
+            TotalEsp += a[1]
+        globals()['VIEW%s' % "01013"].config(text=TotalEsp,font=("Helvetica",9,"bold"))
+        try:
+            circun = (TotalEsp*100)/CantidadRegistros
+            circun = round(circun,2)
+        except:
+            circun = 0
+        globals()['VIEW%s' % "02013"].config(text=str(circun)+" %",font=("Helvetica",9,"bold"))
+        for a in range(10):
+            circun = list(OrigenInternacional[a])
+            globals()['VIEW%s' % "000" + str(a+25)].config(text=str(circun[0]),foreground = "yellow")
+            globals()['VIEW%s' % "010" + str(a+25)].config(text=str(circun[1]))
+            try:
+                circun1 = (circun[1]*100)/CantidadRegistros
+                circun1 = round(circun1,2)
+            except:
+                circun = 0        
+            globals()['VIEW%s' % "020" + str(a+25)].config(text=str(circun1)+" %")                        
+        TotalInt = 0
+        for a in OrigenInternacional:
+            TotalInt += a[1]
+        globals()['VIEW%s' % "01024"].config(text=TotalInt,font=("Helvetica",9,"bold"))
+        try:
+            circun = (TotalInt*100)/CantidadRegistros
+            circun = round(circun,2)
+        except:
+            circun = 0
+        globals()['VIEW%s' % "02024"].config(text=str(circun)+" %",font=("Helvetica",9,"bold"))
+        # Cierra archivo
+        base_datos.close()
+                 
+        # Activa boton pdf
+        Boton7activado(PDFTablasVGrupos)
+                          
+    # Destruimos las labels de informacion para no sobrecargar el sistema
+    destruye_espacios_info(10,22)
+    
+    # Creamos ventana extra para esta tabla
+    global ventanaTabla
+    ventanaTabla = Tk()
+    ventanaTabla.title('Taula zones')
+    #ventanaTabla.geometry("1500x700")
+    ventanaTabla.configure(bg='green')
+    ventanaTabla.iconbitmap("image/icono.ico")
+    frameTablaVGrupo = Frame(ventanaTabla)
+    frames(frameTablaVGrupo,0,0,1,300,50,"green")
+    # Si en cualquier momento se pulsan las teclas CTRL + CURSOR IZQUIERDA se fuerza el pulsado del botón REGRESAR
+    ventanaTabla.bind("<Control-Left>", lambda event: BotonRegresarForzado())
+    # Si en cualquier momento se pulsan las teclas CTRL + P se fuerza la impresión de PDF
+    ventanaTabla.bind("<Control-p>", lambda event: BotonImprimirForzado())
+    ventanaTabla.bind("<Control-P>", lambda event: BotonImprimirForzado())   
+    # Si en cualquier momento se pulsa la tecla ESCAPE se centra el foco en RAIZ
+    ventanaTabla.bind("<Escape>", lambda event: raiz.focus_force()) 
+       
+    # Importancia en la raiz
+    raiz.deiconify()
+    ventanaTabla.iconify()
+       
+    # Cramos las labels dentro de la tabla
+    crea_espacios_info(frameTablaVGrupo,3,35)
+    ajusta_espacios_info(3,35,20,15,15)
+                 
+    # Preparamos la salida
+    menusBotones("Tornar",preMenuTablas,"",regresaSinNada,"Visitants per zona")
+
+    # Datos a rellenar
+    LR1.config(text = "desde DIA:")
+    LRR12.grid(row=0, column=1)  
+    LR2.config(text = "MES:")
+    LRR22.grid(row=1, column=1)  
+    LR3.config(text = "ANY:")
+    LRR32.grid(row=2, column=1)  
+    LR4.config(text = "fins DIA:")
+    LRR42.grid(row=3, column=1)  
+    LR5.config(text = "MES:")
+    LRR52.grid(row=4, column=1)  
+    LR6.config(text = "ANY:")
+    LRR62.grid(row=5, column=1)  
+
+    # Si aquí se pulsan las teclas CTRL + D se pone la fecha actual
+    raiz.bind("<Control-d>", lambda event: FechaActualIncrustadaGru())
+    raiz.bind("<Control-D>", lambda event: FechaActualIncrustadaGru())
+    
+    # Foco en el año
+    LRR12.focus()
+
+    # Activa la tabla
+    Boton4activado(menuTablasVGrupoMuestra)
+def menuTablasVProvincia                            ():
+    def menuTablasVProvinciasMuestra ():
+        
+        # Rescata valores
+        v1 = LRR12.get()
+        v2 = LRR22.get()
+        v3 = LRR32.get()
+        v4 = LRR42.get()
+        v5 = LRR52.get()
+        v6 = LRR62.get()
+
+        # Coteja fallos
+        if v1 == "" or v2 == "" or v3 == "" or v4 == "" or v5 == "" or v6 == "":
+            
+            LR23.config(text = "Registre incomplert")
+            LRR12.focus()
+
+            return
+                
+        if len(v3) != 4 or len(v6) != 4:
+            
+            LR23.config(text = "Estructura d'any no vàlida")
+            LRR32.focus()
+
+            return
+
+                # Si v2 tiene len 1, le añadimos un 0 delante
+        if len(v2) == 1:
+            v2 = "0" + v2
+            LRR22.delete(0,END)
+            LRR22.insert(0,v2)
+
+        # Si v5 tiene len 1, le añadimos un 0 delante
+        if len(v5) == 1:
+            v5 = "0" + v5
+            LRR52.delete(0,END)
+            LRR52.insert(0,v5)
+        
+        # Si v1 tiene len 1, le añadimos un 0 delante
+        if len(v1) == 1:
+            v1 = "0" + v1
+            LRR12.delete(0,END)
+            LRR12.insert(0,v1)
+        
+        # Si v4 tiene len 1, le añadimos un 0 delante
+        if len(v4) == 1:
+            v4 = "0" + v4
+            LRR42.delete(0,END)
+            LRR42.insert(0,v4)
+            
+        if len(v2) != 2 or len(v5) != 2:
+            
+            LR23.config(text = "Estructura de mes no vàlida")
+            LRR22.focus()
+
+            return
+        
+        if len(v1) != 2 or len(v4) != 2:
+            
+            LR23.config(text = "Estructura de dia no vàlida")
+            LRR12.focus()
+
+            return
+                            
+        try:
+            a = int(v1)
+            a = int(v2)
+            a = int(v3)
+            a = int(v4)
+            a = int(v5)
+            a = int(v6)
+        
+        except:
+            
+            LR23.config(text = "Dada no numèrica")
+            LRR12.focus()
+            return    
+
+        if int(v2) < 1 or int(v5) < 1 or int(v2) > 12 or int(v5) > 12:
+            
+            LR23.config(text = "Mes impossible")
+            LRR22.focus()
+
+            return
+
+        if int(v1) < 1 or int(v4) < 1 or int(v1) > 31 or int(v4) > 31:
+            
+            LR23.config(text = "Dia impossible")
+            LRR12.focus()
+
+            return
+        
+        # Limpia posibles mensajes anteriores innecesarios
+        LR23.config(text = "")
+        
+        # Importancia en la tabla
+        ventanaTabla.deiconify()
+        ventanaTabla.title('Taula per Provincies: desde ' +v1 + '/'+v2+'/'+v3+' fins '+v4+'/'+v5+'/'+v6+'.')
+
+        # Terminamos de dibujar las necesidades de la tabla
+        columna = 1   
+        for data in range (1,5,2):
+            
+            fila = 0
+            for dato in range (4):
+                
+                num = "0" + str(fila) + "0" + str(columna)
+                            
+                globals()['VIEW%s' % num].config(bg = "#9A7048")
+                fila += 1   
+            
+            columna += 2        
+        columna = 0
+        for dato in range (5):
+            
+            num = "000" + str(columna)
+            
+            if num == "0000":
+                
+                columna += 1
+                
+            else:
+                
+                globals()['VIEW%s' % num].config(bg = "grey",fg = "#FFFFFF")
+                columna += 1
+        columna = 0
+
+        # Pinta Casillas fijas
+        globals()['VIEW%s' % "0000"].config(text="PROVÍNCIES")
+        globals()['VIEW%s' % "0100"].config(text="VISITANTS")
+        globals()['VIEW%s' % "0200"].config(text="TANT PER CENT")
+        globals()['VIEW%s' % "0300"].config(text="% GLOBAL")
+        globals()['VIEW%s' % "0001"].config(text="BARCELONA")
+        globals()['VIEW%s' % "0002"].config(text="TARRAGONA")
+        globals()['VIEW%s' % "0003"].config(text="LLEIDA")
+        globals()['VIEW%s' % "0004"].config(text="GIRONA")
+        
+        # Preparamos las listas por grupos
+        todosOrigenes = open("files/origens.DAT")
+        todosOrigenes = list(todosOrigenes)
+        todosBarcelona = open("files/BARCELONA.DAT")
+        todosBarcelona  = list(todosBarcelona)
+        todosTarragona = open("files/TARRAGONA.DAT")
+        todosTarragona  = list(todosTarragona)
+        todosLerida = open("files/LLEIDA.DAT")
+        todosLerida  = list(todosLerida)
+        todosGerona = open("files/GIRONA.DAT")
+        todosGerona  = list(todosGerona)
+        OrigenBarcelona = 0
+        OrigenTarragona = 0
+        OrigenLerida = 0
+        OrigenGerona = 0
+       
+        # Abre archivo con los datos en el mes y año necesarios
+        # Crea una base de datos o se conecta a una
+        base_datos = sqlite3.connect('databases/basesDeDatosRegistros.db')
+        # Crea cursor
+        c = base_datos.cursor()
+        # Query the database
+        c.execute("SELECT * FROM bd_registros WHERE FECHA >= '"+v3+"/"+v2+"/"+v1+"' and FECHA <= '"+v6+"/"+v5+"/"+v4+"'")
+        records = c.fetchall()
+
+        # Repasa dia cada registro para poner sumar a la lista adecuada    
+        for todos in records:
+        
+            for origenes in todosOrigenes:
+                
+                origenesPartido = origenes.split(",")
+                origenesPartido = list(origenesPartido)  
+                
+                try:
+
+                    if  todos[3] == origenesPartido[0]:
+                        if origenesPartido[2] in todosBarcelona:
+                            OrigenBarcelona +=1
+                        if origenesPartido[2] in todosTarragona:
+                            OrigenTarragona +=1
+                        if origenesPartido[2] in todosLerida:
+                            OrigenLerida +=1
+                        if origenesPartido[2] in todosGerona:
+                            OrigenGerona +=1
+                except:
+                    pass
+           
+        CantidadRegistros = len(records)
+        TotalCatalunya = OrigenBarcelona+OrigenTarragona+OrigenLerida+OrigenGerona
+        try:
+            PorcienBarcelona = str(round((OrigenBarcelona*100)/TotalCatalunya,2))+" %"
+        except:
+            PorcienBarcelona = "0.0 %"
+        try:
+            PorcienTarragona = str(round((OrigenTarragona*100)/TotalCatalunya,2))+" %"
+        except:
+            PorcienTarragona = "0.0 %"
+        try:
+            PorcienGerona = str(round((OrigenGerona*100)/TotalCatalunya,2))+" %"
+        except:
+            PorcienGerona = "0.0 %"
+        try:
+            PorcienLerida = str(round((OrigenLerida*100)/TotalCatalunya,2))+" %"
+        except:
+            PorcienLerida = "0.0 %"
+        try:
+            PorcienTotalBarcelona = str(round((OrigenBarcelona*100)/CantidadRegistros,2))+" %"
+        except:
+            PorcienTotalBarcelona = "0.0 %"
+        try:
+            PorcienTotalTarragona = str(round((OrigenTarragona*100)/CantidadRegistros,2))+" %"
+        except:
+            PorcienTotalTarragona = "0.0 %"
+        try:
+            PorcienTotalGerona = str(round((OrigenGerona*100)/CantidadRegistros,2))+" %"
+        except:
+            PorcienTotalGerona = "0.0 %"
+        try:
+            PorcienTotalLerida = str(round((OrigenLerida*100)/CantidadRegistros,2))+" %"
+        except:
+            PorcienTotalLerida = "0.0 %"
+
+        # Pintamos datos
+        globals()['VIEW%s' % "0101"].config(text=OrigenBarcelona)
+        globals()['VIEW%s' % "0102"].config(text=OrigenTarragona)
+        globals()['VIEW%s' % "0103"].config(text=OrigenLerida)
+        globals()['VIEW%s' % "0104"].config(text=OrigenGerona)
+
+        globals()['VIEW%s' % "0201"].config(text=PorcienBarcelona)
+        globals()['VIEW%s' % "0202"].config(text=PorcienTarragona)
+        globals()['VIEW%s' % "0203"].config(text=PorcienLerida)
+        globals()['VIEW%s' % "0204"].config(text=PorcienGerona)
+
+        globals()['VIEW%s' % "0301"].config(text=PorcienTotalBarcelona)
+        globals()['VIEW%s' % "0302"].config(text=PorcienTotalTarragona)
+        globals()['VIEW%s' % "0303"].config(text=PorcienTotalLerida)
+        globals()['VIEW%s' % "0304"].config(text=PorcienTotalGerona)
+
+        
+        # Cierra archivo
+        base_datos.close()
+                 
+        # Activa boton pdf
+        Boton7activado(PDFTablasVProvincias)
+                          
+    # Destruimos las labels de informacion para no sobrecargar el sistema
+    destruye_espacios_info(10,22)
+    
+    # Creamos ventana extra para esta tabla
+    global ventanaTabla
+    ventanaTabla = Tk()
+    ventanaTabla.title('Taula Províncies')
+    #ventanaTabla.geometry("1500x700")
+    ventanaTabla.configure(bg='green')
+    ventanaTabla.iconbitmap("image/icono.ico")
+    frameTablaVProvincia = Frame(ventanaTabla)
+    frames(frameTablaVProvincia,0,0,1,300,50,"green")
+    # Si en cualquier momento se pulsan las teclas CTRL + CURSOR IZQUIERDA se fuerza el pulsado del botón REGRESAR
+    ventanaTabla.bind("<Control-Left>", lambda event: BotonRegresarForzado())
+    # Si en cualquier momento se pulsan las teclas CTRL + P se fuerza la impresión de PDF
+    ventanaTabla.bind("<Control-p>", lambda event: BotonImprimirForzado())
+    ventanaTabla.bind("<Control-P>", lambda event: BotonImprimirForzado())   
+   
+    # Importancia en la raiz
+    raiz.deiconify()
+    ventanaTabla.iconify()
+       
+    # Cramos las labels dentro de la tabla
+    crea_espacios_info(frameTablaVProvincia,4,5)
+    ajusta_espacios_info(4,5,20,15,15,15)
+                 
+    # Preparamos la salida
+    menusBotones("Tornar",preMenuTablas,"",regresaSinNada,"",regresaSinNada,"Visitants per províncies")
+
+    # Datos a rellenar
+    LR1.config(text = "desde DIA:")
+    LRR12.grid(row=0, column=1)  
+    LR2.config(text = "MES:")
+    LRR22.grid(row=1, column=1)  
+    LR3.config(text = "ANY:")
+    LRR32.grid(row=2, column=1)  
+    LR4.config(text = "fins DIA:")
+    LRR42.grid(row=3, column=1)  
+    LR5.config(text = "MES:")
+    LRR52.grid(row=4, column=1)  
+    LR6.config(text = "ANY:")
+    LRR62.grid(row=5, column=1)  
+
+    # Si aquí se pulsan las teclas CTRL + D se pone la fecha actual
+    raiz.bind("<Control-d>", lambda event: FechaActualIncrustadaGru())
+    raiz.bind("<Control-D>", lambda event: FechaActualIncrustadaGru())
+    
+    # Foco en el año
+    LRR12.focus()
+
+    # Activa la tabla
+    Boton4activado(menuTablasVProvinciasMuestra)
+def menuTablasVComarca                              ():
+    def menuTablasVComarcasMuestra ():
+        
+        # Rescata valores
+        v1 = LRR12.get()
+        v2 = LRR22.get()
+        v3 = LRR32.get()
+        v4 = LRR42.get()
+        v5 = LRR52.get()
+        v6 = LRR62.get()
+
+        # Coteja fallos
+        if v1 == "" or v2 == "" or v3 == "" or v4 == "" or v5 == "" or v6 == "":
+            
+            LR23.config(text = "Registre incomplert")
+            LRR12.focus()
+
+            return
+                
+        if len(v3) != 4 or len(v6) != 4:
+            
+            LR23.config(text = "Estructura d'any no vàlida")
+            LRR32.focus()
+
+            return
+
+                # Si v2 tiene len 1, le añadimos un 0 delante
+        if len(v2) == 1:
+            v2 = "0" + v2
+            LRR22.delete(0,END)
+            LRR22.insert(0,v2)
+
+        # Si v5 tiene len 1, le añadimos un 0 delante
+        if len(v5) == 1:
+            v5 = "0" + v5
+            LRR52.delete(0,END)
+            LRR52.insert(0,v5)
+        
+        # Si v1 tiene len 1, le añadimos un 0 delante
+        if len(v1) == 1:
+            v1 = "0" + v1
+            LRR12.delete(0,END)
+            LRR12.insert(0,v1)
+        
+        # Si v4 tiene len 1, le añadimos un 0 delante
+        if len(v4) == 1:
+            v4 = "0" + v4
+            LRR42.delete(0,END)
+            LRR42.insert(0,v4)
+            
+        if len(v2) != 2 or len(v5) != 2:
+            
+            LR23.config(text = "Estructura de mes no vàlida")
+            LRR22.focus()
+
+            return
+        
+        if len(v1) != 2 or len(v4) != 2:
+            
+            LR23.config(text = "Estructura de dia no vàlida")
+            LRR12.focus()
+
+            return
+                            
+        try:
+            a = int(v1)
+            a = int(v2)
+            a = int(v3)
+            a = int(v4)
+            a = int(v5)
+            a = int(v6)
+        
+        except:
+            
+            LR23.config(text = "Dada no numèrica")
+            LRR12.focus()
+            return    
+
+        if int(v2) < 1 or int(v5) < 1 or int(v2) > 12 or int(v5) > 12:
+            
+            LR23.config(text = "Mes impossible")
+            LRR22.focus()
+
+            return
+
+        if int(v1) < 1 or int(v4) < 1 or int(v1) > 31 or int(v4) > 31:
+            
+            LR23.config(text = "Dia impossible")
+            LRR12.focus()
+
+            return
+         
+        # Limpia posibles mensajes anteriores innecesarios
+        LR23.config(text = "")
+        
+        # Importancia en la tabla
+        ventanaTabla.deiconify()
+        ventanaTabla.title('Taula per Comarca: desde ' +v1 + '/'+v2+'/'+v3+' fins '+v4+'/'+v5+'/'+v6+'.')
+
+        # Terminamos de dibujar las necesidades de la tabla
+        columna = 1   
+        for data in range (1,11,2):
+            
+            fila = 0
+            for dato in range (3):
+                
+                num = "0" + str(fila) + "0" + str(columna)
+                            
+                globals()['VIEW%s' % num].config(bg = "#9A7048")
+                fila += 1   
+            
+            columna += 2        
+        columna = 0
+        for dato in range (11):
+            
+            num = "000" + str(columna)
+            
+            if num == "0000":
+                
+                columna += 1
+                
+            else:
+                
+                globals()['VIEW%s' % num].config(bg = "grey",fg = "#FFFFFF")
+                columna += 1
+        columna = 0
+        def leeArchivo (archivo):
+                
+                # Abre el archivo
+                f = open(archivo,"r")
+                
+                # Lee el archivo
+                contenido = f.read()
+                
+                # Cierra el archivo
+                f.close()
+                
+                # Devuelve el contenido
+                return contenido
+            
+        # Pinta Casillas fijas
+        globals()['VIEW%s' % "0000"].config(text="COMARCA")
+        globals()['VIEW%s' % "0100"].config(text="PAX")
+        globals()['VIEW%s' % "0200"].config(text="TANT PER CENT")
+        
+        # Crea una lista de nombre 'lista'
+        lista = []
+        # Cada dato de la lista BARCELONA.DAT separado con '\n' lo añadimos como lista a la lista 'lista'
+        for i in leeArchivo("files/BARCELONA.DAT").split('\n'):
+                    
+                    lista.append(i.split(','))
+        # Cada dato de la lista TARRAGONA.DAT separado con '\n' lo añadimos como lista a la lista 'lista'
+        for i in leeArchivo("files/TARRAGONA.DAT").split('\n'):
+                    
+                    lista.append(i.split(','))                    
+        # Cada dato de la lista LLEIDA.DAT separado con '\n' lo añadimos como lista a la lista 'lista'
+        for i in leeArchivo("files/LLEIDA.DAT").split('\n'):
+                    
+                    lista.append(i.split(','))
+        # Cada dato de la lista GIRONA.DAT separado con '\n' lo añadimos como lista a la lista 'lista'
+        for i in leeArchivo("files/GIRONA.DAT").split('\n'):
+                    
+                    lista.append(i.split(','))         
+        
+        # Borra las listas vacias
+        for i in lista:
+                
+                if i == ['']:
+                    
+                    lista.remove(i)
+                    
+        # A cada lista dentro de la lista le añadimos un segundo valor que es un string de valor "0"
+        for i in lista:
+                
+                i.append("0")
+                 
+        # Abre archivo con los datos en el mes y año necesarios
+        # Crea una base de datos o se conecta a una
+        base_datos = sqlite3.connect('databases/basesDeDatosRegistros.db')
+        # Crea cursor
+        c = base_datos.cursor()
+        # Query the database
+        c.execute("SELECT * FROM bd_registros WHERE FECHA >= '"+v3+"/"+v2+"/"+v1+"' and FECHA <= '"+v6+"/"+v5+"/"+v4+"'")
+        records = c.fetchall()
+        # Guardamos el total de los registros de records
+        CantidadRegistros = len(records)     
+        
+        # Revisamos record 
+        for record in records:
+            
+            # Abrimos el archivo de ORIGENS.DAT
+            f = open("files/ORIGENS.DAT","r")
+            # Convierte a f en lista separando por '\n'
+            f = f.read().split('\n')
+            # Combierte cada dato de f en lista separando por ','
+            for i in range(len(f)):
+                f[i] = f[i].split(',')
+                
+            # Revisamos todos los datos de f
+            for linea in f:
+                
+                # Si el dato 1 del registro de ORIGENS.DAT es igual al registro 3 de records
+                if linea[0] == record[3]:
+                    
+                    # Buscamos el dato 1 de linea en lista
+                    for i in lista:
+                        # Si linea[0] y lista[i][0] son iguales
+                        if linea[2] == i[0]:
+                            # Aumentamos el valor de lista[i][1] en 1
+                            i[1] = str(int(i[1]) + 1)
+                            # Salimos del bucle
+                            break
+        # Organizamos lista de mayor a menor por el SEGUNDO elemento de sus listas  
+        lista = sorted(lista, key=lambda valor: int(valor[1]),reverse = True)
+     
+        # Pintamos datos      
+        for linea in range(10):
+            circun = lista[linea]
+            globals()['VIEW%s' % "000" + str(linea+1)].config(text=str(circun[0]),foreground = "yellow")
+            globals()['VIEW%s' % "010" + str(linea+1)].config(text=str(circun[1]))
+            try:
+                circun1 = int(circun[1])
+                circun1 = (circun1*100)/CantidadRegistros
+                circun1 = round(circun1,2)
+            except:
+                circun1 = 0
+
+            globals()['VIEW%s' % "020" + str(linea+1)].config(text=str(circun1)+" %")
+       
+        # Activa boton pdf
+        Boton7activado(PDFTablasVComarcas)
+                          
+    # Destruimos las labels de informacion para no sobrecargar el sistema
+    destruye_espacios_info(10,22)
+    
+    # Creamos ventana extra para esta tabla
+    global ventanaTabla
+    ventanaTabla = Tk()
+    ventanaTabla.title('Taula Comarques')
+    #ventanaTabla.geometry("1500x700")
+    ventanaTabla.configure(bg='green')
+    ventanaTabla.iconbitmap("image/icono.ico")
+    frameTablaVComarca = Frame(ventanaTabla)
+    frames(frameTablaVComarca,0,0,1,300,50,"green")
+    # Si en cualquier momento se pulsan las teclas CTRL + CURSOR IZQUIERDA se fuerza el pulsado del botón REGRESAR
+    ventanaTabla.bind("<Control-Left>", lambda event: BotonRegresarForzado())
+    # Si en cualquier momento se pulsan las teclas CTRL + P se fuerza la impresión de PDF
+    ventanaTabla.bind("<Control-p>", lambda event: BotonImprimirForzado())
+    ventanaTabla.bind("<Control-P>", lambda event: BotonImprimirForzado())   
+   
+    # Importancia en la raiz
+    raiz.deiconify()
+    ventanaTabla.iconify()
+       
+    # Cramos las labels dentro de la tabla
+    crea_espacios_info(frameTablaVComarca,3,11)
+    ajusta_espacios_info(3,11,20,15,15)
+                 
+    # Preparamos la salida
+    menusBotones("Tornar",preMenuTablas,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Visitants per comarca")
+
+    # Datos a rellenar
+    LR1.config(text = "desde DIA:")
+    LRR12.grid(row=0, column=1)  
+    LR2.config(text = "MES:")
+    LRR22.grid(row=1, column=1)  
+    LR3.config(text = "ANY:")
+    LRR32.grid(row=2, column=1)  
+    LR4.config(text = "fins DIA:")
+    LRR42.grid(row=3, column=1)  
+    LR5.config(text = "MES:")
+    LRR52.grid(row=4, column=1)  
+    LR6.config(text = "ANY:")
+    LRR62.grid(row=5, column=1)  
+
+    # Si aquí se pulsan las teclas CTRL + D se pone la fecha actual
+    raiz.bind("<Control-d>", lambda event: FechaActualIncrustadaGru())
+    raiz.bind("<Control-D>", lambda event: FechaActualIncrustadaGru())
+    
+    # Foco en el año
+    LRR12.focus()
+
+    # Activa la tabla
+    Boton4activado(menuTablasVComarcasMuestra)
+def menuTablasVPerfil                               ():
+    def menuTablasVPerfilesMuestra ():
+        
+        # Rescata valores
+        v1 = LRR12.get()
+        v2 = LRR22.get()
+        v3 = LRR32.get()
+        v4 = LRR42.get()
+        v5 = LRR52.get()
+        v6 = LRR62.get()
+
+        # Coteja fallos
+        if v1 == "" or v2 == "" or v3 == "" or v4 == "" or v5 == "" or v6 == "":
+            
+            LR23.config(text = "Registre incomplert")
+            LRR12.focus()
+
+            return
+                
+        if len(v3) != 4 or len(v6) != 4:
+            
+            LR23.config(text = "Estructura d'any no vàlida")
+            LRR32.focus()
+
+            return
+
+                # Si v2 tiene len 1, le añadimos un 0 delante
+        if len(v2) == 1:
+            v2 = "0" + v2
+            LRR22.delete(0,END)
+            LRR22.insert(0,v2)
+
+        # Si v5 tiene len 1, le añadimos un 0 delante
+        if len(v5) == 1:
+            v5 = "0" + v5
+            LRR52.delete(0,END)
+            LRR52.insert(0,v5)
+        
+        # Si v1 tiene len 1, le añadimos un 0 delante
+        if len(v1) == 1:
+            v1 = "0" + v1
+            LRR12.delete(0,END)
+            LRR12.insert(0,v1)
+        
+        # Si v4 tiene len 1, le añadimos un 0 delante
+        if len(v4) == 1:
+            v4 = "0" + v4
+            LRR42.delete(0,END)
+            LRR42.insert(0,v4)
+            
+        if len(v2) != 2 or len(v5) != 2:
+            
+            LR23.config(text = "Estructura de mes no vàlida")
+            LRR22.focus()
+
+            return
+        
+        if len(v1) != 2 or len(v4) != 2:
+            
+            LR23.config(text = "Estructura de dia no vàlida")
+            LRR12.focus()
+
+            return
+                            
+        try:
+            a = int(v1)
+            a = int(v2)
+            a = int(v3)
+            a = int(v4)
+            a = int(v5)
+            a = int(v6)
+        
+        except:
+            
+            LR23.config(text = "Dada no numèrica")
+            LRR12.focus()
+            return    
+
+        if int(v2) < 1 or int(v5) < 1 or int(v2) > 12 or int(v5) > 12:
+            
+            LR23.config(text = "Mes impossible")
+            LRR22.focus()
+
+            return
+
+        if int(v1) < 1 or int(v4) < 1 or int(v1) > 31 or int(v4) > 31:
+            
+            LR23.config(text = "Dia impossible")
+            LRR12.focus()
+
+            return
+         
+        # Limpia posibles mensajes anteriores innecesarios
+        LR23.config(text = "")
+        
+        # Importancia en la tabla
+        ventanaTabla.deiconify()
+        ventanaTabla.title('Taula per perfils: desde ' +v1 + '/'+v2+'/'+v3+' fins '+v4+'/'+v5+'/'+v6+'.')
+
+        # Terminamos de dibujar las necesidades de la tabla
+        columna = 1   
+        for data in range (1,11,2):
+            
+            fila = 0
+            for dato in range (3):
+                
+                num = "0" + str(fila) + "0" + str(columna)
+                            
+                globals()['VIEW%s' % num].config(bg = "#9A7048")
+                fila += 1   
+            
+            columna += 2        
+        columna = 0
+        for dato in range (11):
+            
+            num = "000" + str(columna)
+            
+            if num == "0000":
+                
+                columna += 1
+                
+            else:
+                
+                globals()['VIEW%s' % num].config(bg = "grey",fg = "#FFFFFF")
+                columna += 1
+        columna = 0
+
+        # Pinta Casillas fijas
+        globals()['VIEW%s' % "0000"].config(text="PERFIL")
+        globals()['VIEW%s' % "0100"].config(text="PAX")
+        globals()['VIEW%s' % "0200"].config(text="TANT PER CENT")
+        
+        # Abrimos el archivo de las descripciones
+        archivo = open("files/DESCRIPCIONS.DAT","r")
+        # Convertimos en lista de listas
+        lista = []
+        # itera sobre cada línea del archivo
+        for datos in archivo:
+        # divide cada línea en una lista utilizando la función split() y almacena
+        # el resultado en la lista de datos
+            lista.append(datos.split('\n'))
+        
+        # Revisa que todas las listas de lista tengan "0" en la posición 1
+        # Si no es así, le pone "0" en la posición 1
+        for i in lista:
+            if (i[1]) == "":
+                    i[1] = "0" 
+    
+      
+        # Cerramos el archivo
+        archivo.close()
+                    
+        # Abre archivo con los datos en el mes y año necesarios
+        # Crea una base de datos o se conecta a una
+        base_datos = sqlite3.connect('databases/basesDeDatosRegistros.db')
+        # Crea cursor
+        c = base_datos.cursor()
+        # Query the database
+        c.execute("SELECT * FROM bd_registros WHERE FECHA >= '"+v3+"/"+v2+"/"+v1+"' and FECHA <= '"+v6+"/"+v5+"/"+v4+"'")
+        records = c.fetchall()
+        # Guardamos el total de los registros de records
+        CantidadRegistros = len(records)
+        
+        # Revisamos record 
+        for record in records:
+                
+                # Revisamos la lista
+                for linea in lista:
+                    # Si coincide el campo 2 de record con el campo 1 de linea
+                    if record[2] == linea[0]:
+                        # +1 al campo 1 de linea
+                        try:
+                            valor = linea[1]
+                            valor = int(valor)
+                            valor += 1
+                            linea[1] = str(valor)
+                        except:
+                            linea[1] = 1
+
+                        # Salimos del bucle
+                        break
+                                           
+        # Organizamos lista de mayor a menor por el SEGUNDO elemento de sus listas  
+        lista = sorted(lista, key=lambda valor: str(valor[1]),reverse = True)
+     
+        # Pintamos datos      
+        for linea in range(10):
+            circun = lista[linea]
+            globals()['VIEW%s' % "000" + str(linea+1)].config(text=str(circun[0]),foreground = "yellow")
+            globals()['VIEW%s' % "010" + str(linea+1)].config(text=str(circun[1]))
+            try:
+                circun1 = int(circun[1])
+                circun1 = (circun1*100)/CantidadRegistros
+                circun1 = round(circun1,2)
+            except:
+                circun1 = 0
+
+            globals()['VIEW%s' % "020" + str(linea+1)].config(text=str(circun1)+" %")
+       
+        # Activa boton pdf
+        Boton7activado(PDFTablasVPerfiles)
+                          
+    # Destruimos las labels de informacion para no sobrecargar el sistema
+    destruye_espacios_info(10,22)
+    
+    # Creamos ventana extra para esta tabla
+    global ventanaTabla
+    ventanaTabla = Tk()
+    ventanaTabla.title('Taula perfils')
+    #ventanaTabla.geometry("1500x700")
+    ventanaTabla.configure(bg='green')
+    ventanaTabla.iconbitmap("image/icono.ico")
+    frameTablaVPerfil = Frame(ventanaTabla)
+    frames(frameTablaVPerfil,0,0,1,300,50,"green")
+    # Si en cualquier momento se pulsan las teclas CTRL + CURSOR IZQUIERDA se fuerza el pulsado del botón REGRESAR
+    ventanaTabla.bind("<Control-Left>", lambda event: BotonRegresarForzado())
+    # Si en cualquier momento se pulsan las teclas CTRL + P se fuerza la impresión de PDF
+    ventanaTabla.bind("<Control-p>", lambda event: BotonImprimirForzado())
+    ventanaTabla.bind("<Control-P>", lambda event: BotonImprimirForzado())   
+  
+    # Importancia en la raiz
+    raiz.deiconify()
+    ventanaTabla.iconify()
+       
+    # Cramos las labels dentro de la tabla
+    crea_espacios_info(frameTablaVPerfil,3,11)
+    ajusta_espacios_info(3,11,20,15,15)
+                 
+    # Preparamos la salida
+    menusBotones("Tornar",preMenuTablas,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Visitants per perfil")
+
+    # Datos a rellenar
+    LR1.config(text = "desde DIA:")
+    LRR12.grid(row=0, column=1)  
+    LR2.config(text = "MES:")
+    LRR22.grid(row=1, column=1)  
+    LR3.config(text = "ANY:")
+    LRR32.grid(row=2, column=1)  
+    LR4.config(text = "fins DIA:")
+    LRR42.grid(row=3, column=1)  
+    LR5.config(text = "MES:")
+    LRR52.grid(row=4, column=1)  
+    LR6.config(text = "ANY:")
+    LRR62.grid(row=5, column=1)  
+
+    # Si aquí se pulsan las teclas CTRL + D se pone la fecha actual
+    raiz.bind("<Control-d>", lambda event: FechaActualIncrustadaGru())
+    raiz.bind("<Control-D>", lambda event: FechaActualIncrustadaGru())
+    
+    # Foco en el año
+    LRR12.focus()
+
+    # Activa la tabla
+    Boton4activado(menuTablasVPerfilesMuestra)
+def menuTablasVFuente                               ():
+    def menuTablasVFuentesMuestra ():
+        
+        # Rescata valores
+        v1 = LRR12.get()
+        v2 = LRR22.get()
+        v3 = LRR32.get()
+        v4 = LRR42.get()
+        v5 = LRR52.get()
+        v6 = LRR62.get()
+
+        # Coteja fallos
+        if v1 == "" or v2 == "" or v3 == "" or v4 == "" or v5 == "" or v6 == "":
+            
+            LR23.config(text = "Registre incomplert")
+            LRR12.focus()
+
+            return
+                
+        if len(v3) != 4 or len(v6) != 4:
+            
+            LR23.config(text = "Estructura d'any no vàlida")
+            LRR32.focus()
+
+            return
+
+                # Si v2 tiene len 1, le añadimos un 0 delante
+        if len(v2) == 1:
+            v2 = "0" + v2
+            LRR22.delete(0,END)
+            LRR22.insert(0,v2)
+
+        # Si v5 tiene len 1, le añadimos un 0 delante
+        if len(v5) == 1:
+            v5 = "0" + v5
+            LRR52.delete(0,END)
+            LRR52.insert(0,v5)
+        
+        # Si v1 tiene len 1, le añadimos un 0 delante
+        if len(v1) == 1:
+            v1 = "0" + v1
+            LRR12.delete(0,END)
+            LRR12.insert(0,v1)
+        
+        # Si v4 tiene len 1, le añadimos un 0 delante
+        if len(v4) == 1:
+            v4 = "0" + v4
+            LRR42.delete(0,END)
+            LRR42.insert(0,v4)
+            
+        if len(v2) != 2 or len(v5) != 2:
+            
+            LR23.config(text = "Estructura de mes no vàlida")
+            LRR22.focus()
+
+            return
+        
+        if len(v1) != 2 or len(v4) != 2:
+            
+            LR23.config(text = "Estructura de dia no vàlida")
+            LRR12.focus()
+
+            return
+                            
+        try:
+            a = int(v1)
+            a = int(v2)
+            a = int(v3)
+            a = int(v4)
+            a = int(v5)
+            a = int(v6)
+        
+        except:
+            
+            LR23.config(text = "Dada no numèrica")
+            LRR12.focus()
+            return    
+
+        if int(v2) < 1 or int(v5) < 1 or int(v2) > 12 or int(v5) > 12:
+            
+            LR23.config(text = "Mes impossible")
+            LRR22.focus()
+
+            return
+
+        if int(v1) < 1 or int(v4) < 1 or int(v1) > 31 or int(v4) > 31:
+            
+            LR23.config(text = "Dia impossible")
+            LRR12.focus()
+
+            return
+         
+        # Limpia posibles mensajes anteriores innecesarios
+        LR23.config(text = "")
+        
+        # Importancia en la tabla
+        ventanaTabla.deiconify()
+        ventanaTabla.title('Taula per perfils: desde ' +v1 + '/'+v2+'/'+v3+' fins '+v4+'/'+v5+'/'+v6+'.')
+
+        # Terminamos de dibujar las necesidades de la tabla
+        columna = 1   
+        for data in range (1,11,2):
+            
+            fila = 0
+            for dato in range (3):
+                
+                num = "0" + str(fila) + "0" + str(columna)
+                            
+                globals()['VIEW%s' % num].config(bg = "#9A7048")
+                fila += 1   
+            
+            columna += 2        
+        columna = 0
+        for dato in range (11):
+            
+            num = "000" + str(columna)
+            
+            if num == "0000":
+                
+                columna += 1
+                
+            else:
+                
+                globals()['VIEW%s' % num].config(bg = "grey",fg = "#FFFFFF")
+                columna += 1
+        columna = 0
+
+        # Pinta Casillas fijas
+        globals()['VIEW%s' % "0000"].config(text="FONT")
+        globals()['VIEW%s' % "0100"].config(text="PAX")
+        globals()['VIEW%s' % "0200"].config(text="TANT PER CENT")
+        
+        # Abrimos el archivo de las descripciones
+        archivo = open("files/FONTS.DAT","r")
+        # Convertimos en lista de listas
+        lista = []
+        # itera sobre cada línea del archivo
+        for datos in archivo:
+        # divide cada línea en una lista utilizando la función split() y almacena
+        # el resultado en la lista de datos
+            lista.append(datos.split('\n'))
+        
+        # Revisa que todas las listas de lista tengan "0" en la posición 1
+        # Si no es así, le pone "0" en la posición 1
+        for i in lista:
+            if (i[1]) == "":
+                    i[1] = "0" 
+    
+      
+        # Cerramos el archivo
+        archivo.close()
+                    
+        # Abre archivo con los datos en el mes y año necesarios
+        # Crea una base de datos o se conecta a una
+        base_datos = sqlite3.connect('databases/basesDeDatosRegistros.db')
+        # Crea cursor
+        c = base_datos.cursor()
+        # Query the database
+        c.execute("SELECT * FROM bd_registros WHERE FECHA >= '"+v3+"/"+v2+"/"+v1+"' and FECHA <= '"+v6+"/"+v5+"/"+v4+"'")
+        records = c.fetchall()
+        # Guardamos el total de los registros de records
+        CantidadRegistros = len(records)
+        
+        # Revisamos record 
+        for record in records:
+                
+                # Revisamos la lista
+                for linea in lista:
+                    # Si coincide el campo 2 de record con el campo 1 de linea
+                    if record[6] == linea[0]:
+                        # +1 al campo 1 de linea
+                        try:
+                            valor = linea[1]
+                            valor = int(valor)
+                            valor += 1
+                            linea[1] = str(valor)
+                        except:
+                            linea[1] = 1
+
+                        # Salimos del bucle
+                        break
+                                           
+        # Organizamos lista de mayor a menor por el SEGUNDO elemento de sus listas  
+        lista = sorted(lista, key=lambda valor: int(valor[1]),reverse = True)
+     
+        # Pintamos datos      
+        for linea in range(10):
+            circun = lista[linea]
+            globals()['VIEW%s' % "000" + str(linea+1)].config(text=str(circun[0]),foreground = "yellow")
+            globals()['VIEW%s' % "010" + str(linea+1)].config(text=str(circun[1]))
+            try:
+                circun1 = int(circun[1])
+                circun1 = (circun1*100)/CantidadRegistros
+                circun1 = round(circun1,2)
+            except:
+                circun1 = 0
+
+            globals()['VIEW%s' % "020" + str(linea+1)].config(text=str(circun1)+" %")
+       
+        # Activa boton pdf
+        Boton7activado(PDFTablasVFuentes)
+                          
+    # Destruimos las labels de informacion para no sobrecargar el sistema
+    destruye_espacios_info(10,22)
+    
+    # Creamos ventana extra para esta tabla
+    global ventanaTabla
+    ventanaTabla = Tk()
+    ventanaTabla.title('Taula fonts')
+    #ventanaTabla.geometry("1500x700")
+    ventanaTabla.configure(bg='green')
+    ventanaTabla.iconbitmap("image/icono.ico")
+    frameTablaVFuente = Frame(ventanaTabla)
+    frames(frameTablaVFuente,0,0,1,300,50,"green")
+    # Si en cualquier momento se pulsan las teclas CTRL + CURSOR IZQUIERDA se fuerza el pulsado del botón REGRESAR
+    ventanaTabla.bind("<Control-Left>", lambda event: BotonRegresarForzado())
+    # Si en cualquier momento se pulsan las teclas CTRL + P se fuerza la impresión de PDF
+    ventanaTabla.bind("<Control-p>", lambda event: BotonImprimirForzado())
+    ventanaTabla.bind("<Control-P>", lambda event: BotonImprimirForzado())   
+   
+    # Importancia en la raiz
+    raiz.deiconify()
+    ventanaTabla.iconify()
+       
+    # Cramos las labels dentro de la tabla
+    crea_espacios_info(frameTablaVFuente,3,11)
+    ajusta_espacios_info(3,11,20,15,15)
+                 
+    # Preparamos la salida
+    menusBotones("Tornar",preMenuTablas,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Visitants per font")
+
+    # Datos a rellenar
+    LR1.config(text = "desde DIA:")
+    LRR12.grid(row=0, column=1)  
+    LR2.config(text = "MES:")
+    LRR22.grid(row=1, column=1)  
+    LR3.config(text = "ANY:")
+    LRR32.grid(row=2, column=1)  
+    LR4.config(text = "fins DIA:")
+    LRR42.grid(row=3, column=1)  
+    LR5.config(text = "MES:")
+    LRR52.grid(row=4, column=1)  
+    LR6.config(text = "ANY:")
+    LRR62.grid(row=5, column=1)  
+
+    # Si aquí se pulsan las teclas CTRL + D se pone la fecha actual
+    raiz.bind("<Control-d>", lambda event: FechaActualIncrustadaGru())
+    raiz.bind("<Control-D>", lambda event: FechaActualIncrustadaGru())
+    
+    # Foco en el año
+    LRR12.focus()
+
+    # Activa la tabla
+    Boton4activado(menuTablasVFuentesMuestra)
+def menuTablasVHora                                 ():
+    def menuTablasVHorasMuestra ():
+        
+        # Rescata valores
+        v1 = LRR12.get()
+        v2 = LRR22.get()
+        v3 = LRR32.get()
+        v4 = LRR42.get()
+        v5 = LRR52.get()
+        v6 = LRR62.get()
+
+        # Coteja fallos
+        if v1 == "" or v2 == "" or v3 == "" or v4 == "" or v5 == "" or v6 == "":
+            
+            LR23.config(text = "Registre incomplert")
+            LRR12.focus()
+
+            return
+                
+        if len(v3) != 4 or len(v6) != 4:
+            
+            LR23.config(text = "Estructura d'any no vàlida")
+            LRR32.focus()
+
+            return
+
+                # Si v2 tiene len 1, le añadimos un 0 delante
+        if len(v2) == 1:
+            v2 = "0" + v2
+            LRR22.delete(0,END)
+            LRR22.insert(0,v2)
+
+        # Si v5 tiene len 1, le añadimos un 0 delante
+        if len(v5) == 1:
+            v5 = "0" + v5
+            LRR52.delete(0,END)
+            LRR52.insert(0,v5)
+        
+        # Si v1 tiene len 1, le añadimos un 0 delante
+        if len(v1) == 1:
+            v1 = "0" + v1
+            LRR12.delete(0,END)
+            LRR12.insert(0,v1)
+        
+        # Si v4 tiene len 1, le añadimos un 0 delante
+        if len(v4) == 1:
+            v4 = "0" + v4
+            LRR42.delete(0,END)
+            LRR42.insert(0,v4)
+            
+        if len(v2) != 2 or len(v5) != 2:
+            
+            LR23.config(text = "Estructura de mes no vàlida")
+            LRR22.focus()
+
+            return
+        
+        if len(v1) != 2 or len(v4) != 2:
+            
+            LR23.config(text = "Estructura de dia no vàlida")
+            LRR12.focus()
+
+            return
+                            
+        try:
+            a = int(v1)
+            a = int(v2)
+            a = int(v3)
+            a = int(v4)
+            a = int(v5)
+            a = int(v6)
+        
+        except:
+            
+            LR23.config(text = "Dada no numèrica")
+            LRR12.focus()
+            return    
+
+        if int(v2) < 1 or int(v5) < 1 or int(v2) > 12 or int(v5) > 12:
+            
+            LR23.config(text = "Mes impossible")
+            LRR22.focus()
+
+            return
+
+        if int(v1) < 1 or int(v4) < 1 or int(v1) > 31 or int(v4) > 31:
+            
+            LR23.config(text = "Dia impossible")
+            LRR12.focus()
+
+            return
+         
+        # Limpia posibles mensajes anteriores innecesarios
+        LR23.config(text = "")
+        
+        # Importancia en la tabla
+        ventanaTabla.deiconify()
+        ventanaTabla.title('Taula per hores: desde ' +v1 + '/'+v2+'/'+v3+' fins '+v4+'/'+v5+'/'+v6+'.')
+
+        # Terminamos de dibujar las necesidades de la tabla
+        columna = 1   
+        for data in range (1,11,2):
+            
+            fila = 0
+            for dato in range (3):
+                
+                num = "0" + str(fila) + "0" + str(columna)
+                            
+                globals()['VIEW%s' % num].config(bg = "#9A7048")
+                fila += 1   
+            
+            columna += 2        
+        columna = 0
+        for dato in range (11):
+            
+            num = "000" + str(columna)
+            
+            if num == "0000":
+                
+                columna += 1
+                
+            else:
+                
+                globals()['VIEW%s' % num].config(bg = "grey",fg = "#FFFFFF")
+                columna += 1
+        columna = 0
+
+        # Pinta Casillas fijas
+        globals()['VIEW%s' % "0000"].config(text="HORES")
+        globals()['VIEW%s' % "0100"].config(text="PAX")
+        globals()['VIEW%s' % "0200"].config(text="TANT PER CENT")
+        
+        # Abrimos el archivo de las descripciones
+        archivo = open("files/HORARIS.DAT","r")
+        # Convertimos en lista de listas
+        lista = []
+        # itera sobre cada línea del archivo
+        for datos in archivo:
+        # divide cada línea en una lista utilizando la función split() y almacena
+        # el resultado en la lista de datos
+            lista.append(datos.split('\n'))
+        
+        # Revisa que todas las listas de lista tengan "0" en la posición 1
+        # Si no es así, le pone "0" en la posición 1
+        for i in lista:
+            if (i[1]) == "":
+                    i[1] = "0" 
+    
+      
+        # Cerramos el archivo
+        archivo.close()
+                    
+        # Abre archivo con los datos en el mes y año necesarios
+        # Crea una base de datos o se conecta a una
+        base_datos = sqlite3.connect('databases/basesDeDatosRegistros.db')
+        # Crea cursor
+        c = base_datos.cursor()
+        # Query the database
+        c.execute("SELECT * FROM bd_registros WHERE FECHA >= '"+v3+"/"+v2+"/"+v1+"' and FECHA <= '"+v6+"/"+v5+"/"+v4+"'")
+        records = c.fetchall()
+        # Guardamos el total de los registros de records
+        CantidadRegistros = len(records)
+        
+        # Revisamos record 
+        for record in records:
+                
+                # Revisamos la lista
+                for linea in lista:
+                    # Si coincide el campo 2 de record con el campo 1 de linea
+                    if record[4] == linea[0]:
+                        # +1 al campo 1 de linea
+                        try:
+                            valor = linea[1]
+                            valor = int(valor)
+                            valor += 1
+                            linea[1] = str(valor)
+                        except:
+                            linea[1] = 1
+
+                        # Salimos del bucle
+                        break
+                                           
+        # Organizamos lista de mayor a menor por el SEGUNDO elemento de sus listas  
+        lista = sorted(lista, key=lambda valor: int(valor[1]),reverse = True)
+     
+        # Pintamos datos      
+        for linea in range(10):
+            circun = lista[linea]
+            globals()['VIEW%s' % "000" + str(linea+1)].config(text=str(circun[0]),foreground = "yellow")
+            globals()['VIEW%s' % "010" + str(linea+1)].config(text=str(circun[1]))
+            try:
+                circun1 = int(circun[1])
+                circun1 = (circun1*100)/CantidadRegistros
+                circun1 = round(circun1,2)
+            except:
+                circun1 = 0
+
+            globals()['VIEW%s' % "020" + str(linea+1)].config(text=str(circun1)+" %")
+       
+        # Activa boton pdf
+        Boton7activado(PDFTablasVHoras)
+                          
+    # Destruimos las labels de informacion para no sobrecargar el sistema
+    destruye_espacios_info(10,22)
+    
+    # Creamos ventana extra para esta tabla
+    global ventanaTabla
+    ventanaTabla = Tk()
+    ventanaTabla.title('Taula hores')
+    #ventanaTabla.geometry("1500x700")
+    ventanaTabla.configure(bg='green')
+    ventanaTabla.iconbitmap("image/icono.ico")
+    frameTablaVHora = Frame(ventanaTabla)
+    frames(frameTablaVHora,0,0,1,300,50,"green")
+    # Si en cualquier momento se pulsan las teclas CTRL + CURSOR IZQUIERDA se fuerza el pulsado del botón REGRESAR
+    ventanaTabla.bind("<Control-Left>", lambda event: BotonRegresarForzado())
+    # Si en cualquier momento se pulsan las teclas CTRL + P se fuerza la impresión de PDF
+    ventanaTabla.bind("<Control-p>", lambda event: BotonImprimirForzado())
+    ventanaTabla.bind("<Control-P>", lambda event: BotonImprimirForzado())   
+   
+    # Importancia en la raiz
+    raiz.deiconify()
+    ventanaTabla.iconify()
+       
+    # Cramos las labels dentro de la tabla
+    crea_espacios_info(frameTablaVHora,3,11)
+    ajusta_espacios_info(3,11,20,15,15)
+                 
+    # Preparamos la salida
+    menusBotones("Tornar",preMenuTablas,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Visitants per hora")
+
+    # Datos a rellenar
+    LR1.config(text = "desde DIA:")
+    LRR12.grid(row=0, column=1)  
+    LR2.config(text = "MES:")
+    LRR22.grid(row=1, column=1)  
+    LR3.config(text = "ANY:")
+    LRR32.grid(row=2, column=1)  
+    LR4.config(text = "fins DIA:")
+    LRR42.grid(row=3, column=1)  
+    LR5.config(text = "MES:")
+    LRR52.grid(row=4, column=1)  
+    LR6.config(text = "ANY:")
+    LRR62.grid(row=5, column=1)  
+
+    # Si aquí se pulsan las teclas CTRL + D se pone la fecha actual
+    raiz.bind("<Control-d>", lambda event: FechaActualIncrustadaGru())
+    raiz.bind("<Control-D>", lambda event: FechaActualIncrustadaGru())
+    
+    # Foco en el año
+    LRR12.focus()
+
+    # Activa la tabla
+    Boton4activado(menuTablasVHorasMuestra)
+def menuTablasVDia                                  ():
+    def menuTablasVDiasMuestra ():
+        
+        # Rescata valores
+        v1 = LRR12.get()
+        v2 = LRR22.get()
+        v3 = LRR32.get()
+        v4 = LRR42.get()
+        v5 = LRR52.get()
+        v6 = LRR62.get()
+
+        # Coteja fallos
+        if v1 == "" or v2 == "" or v3 == "" or v4 == "" or v5 == "" or v6 == "":
+            
+            LR23.config(text = "Registre incomplert")
+            LRR12.focus()
+
+            return
+                
+        if len(v3) != 4 or len(v6) != 4:
+            
+            LR23.config(text = "Estructura d'any no vàlida")
+            LRR32.focus()
+
+            return
+
+                # Si v2 tiene len 1, le añadimos un 0 delante
+        if len(v2) == 1:
+            v2 = "0" + v2
+            LRR22.delete(0,END)
+            LRR22.insert(0,v2)
+
+        # Si v5 tiene len 1, le añadimos un 0 delante
+        if len(v5) == 1:
+            v5 = "0" + v5
+            LRR52.delete(0,END)
+            LRR52.insert(0,v5)
+        
+        # Si v1 tiene len 1, le añadimos un 0 delante
+        if len(v1) == 1:
+            v1 = "0" + v1
+            LRR12.delete(0,END)
+            LRR12.insert(0,v1)
+        
+        # Si v4 tiene len 1, le añadimos un 0 delante
+        if len(v4) == 1:
+            v4 = "0" + v4
+            LRR42.delete(0,END)
+            LRR42.insert(0,v4)
+            
+        if len(v2) != 2 or len(v5) != 2:
+            
+            LR23.config(text = "Estructura de mes no vàlida")
+            LRR22.focus()
+
+            return
+        
+        if len(v1) != 2 or len(v4) != 2:
+            
+            LR23.config(text = "Estructura de dia no vàlida")
+            LRR12.focus()
+
+            return
+                            
+        try:
+            a = int(v1)
+            a = int(v2)
+            a = int(v3)
+            a = int(v4)
+            a = int(v5)
+            a = int(v6)
+        
+        except:
+            
+            LR23.config(text = "Dada no numèrica")
+            LRR12.focus()
+            return    
+
+        if int(v2) < 1 or int(v5) < 1 or int(v2) > 12 or int(v5) > 12:
+            
+            LR23.config(text = "Mes impossible")
+            LRR22.focus()
+
+            return
+
+        if int(v1) < 1 or int(v4) < 1 or int(v1) > 31 or int(v4) > 31:
+            
+            LR23.config(text = "Dia impossible")
+            LRR12.focus()
+
+            return
+         
+        # Limpia posibles mensajes anteriores innecesarios
+        LR23.config(text = "")
+        
+        # Importancia en la tabla
+        ventanaTabla.deiconify()
+        ventanaTabla.title('Taula per dies: desde ' +v1 + '/'+v2+'/'+v3+' fins '+v4+'/'+v5+'/'+v6+'.')
+
+        # Terminamos de dibujar las necesidades de la tabla
+        columna = 1   
+        for data in range (1,12,2):
+            
+            fila = 0
+            for dato in range (3):
+                
+                num = "0" + str(fila) + "0" + str(columna)
+                            
+                globals()['VIEW%s' % num].config(bg = "#9A7048")
+                fila += 1   
+            
+            columna += 2        
+        columna = 0
+        for dato in range (12):
+            
+            num = "000" + str(columna)
+            
+            if num == "0000":
+                
+                columna += 1
+                
+            else:
+                
+                globals()['VIEW%s' % num].config(bg = "grey",fg = "#FFFFFF")
+                columna += 1
+        columna = 0
+        globals()['VIEW%s' % "0106"].config(bg = "grey",fg = "#FFFFFF")
+        globals()['VIEW%s' % "0206"].config(bg = "grey",fg = "#FFFFFF")
+
+        # Pinta Casillas fijas
+        globals()['VIEW%s' % "0000"].config(text="DIES MILLORS")
+        globals()['VIEW%s' % "0006"].config(text="DIES PITJORS")
+        globals()['VIEW%s' % "0100"].config(text="PAX")
+        globals()['VIEW%s' % "0200"].config(text="TANT PER CENT")
+        globals()['VIEW%s' % "0106"].config(text="PAX")
+        globals()['VIEW%s' % "0206"].config(text="TANT PER CENT")                                  
+        # Abre archivo con los datos en el mes y año necesarios
+        # Crea una base de datos o se conecta a una
+        base_datos = sqlite3.connect('databases/basesDeDatosRegistros.db')
+        # Crea cursor
+        c = base_datos.cursor()
+        # Query the database
+        c.execute("SELECT * FROM bd_registros WHERE FECHA >= '"+v3+"/"+v2+"/"+v1+"' and FECHA <= '"+v6+"/"+v5+"/"+v4+"'")
+        records = c.fetchall()
+        
+        # Crea una lista de listas de nombre 'lista' con 2 elementos cada una
+        # El primer elemento es cada una de las fechas de "c" y el segundo elemento es un 0
+        lista = []
+        for record in records:
+            lista.append([record[1],0])
+        # Elimina las listas repetidas de la lista
+        lista = list(set(tuple(i) for i in lista))
+        # Convierte la tupla en una lista de listas
+        lista = [list(elem) for elem in lista]
+                
+        # Guardamos el total de los registros de records
+        CantidadRegistros = len(records)
+
+        # Revisamos record 
+        for record in records:
+                
+                # Revisamos la lista
+                for linea in lista:
+                    # Si coincide el campo 2 de record con el campo 1 de linea
+                    if record[1] == linea[0]:
+                        # +1 al campo 1 de linea
+                        try:
+                            valor = linea[1]
+                            valor = int(valor)
+                            valor += 1
+                            linea[1] = str(valor)
+                        except:
+                            linea[1] = 1
+
+                        # Salimos del bucle
+                        break
+        
+        try:
+            # Organizamos lista de mayor a menor por el SEGUNDO elemento de sus listas  
+            lista = sorted(lista, key=lambda valor: int(valor[1]),reverse = True)
+            # Pintamos datos      
+            for linea in range(5):
+                circun = lista[linea]
+                globals()['VIEW%s' % "000" + str(linea+1)].config(text=str(circun[0]),foreground = "yellow")
+                globals()['VIEW%s' % "010" + str(linea+1)].config(text=str(circun[1]))
+                try:
+                    circun1 = int(circun[1])
+                    circun1 = (circun1*100)/CantidadRegistros
+                    circun1 = round(circun1,2)
+                except:
+                    circun1 = 0
+
+                globals()['VIEW%s' % "020" + str(linea+1)].config(text=str(circun1)+" %")
+        except:
+            pass
+        
+        try:
+            # Organizamos lista de menor a mayor por el SEGUNDO elemento de sus listas  
+            lista = sorted(lista, key=lambda valor: int(valor[1]),reverse = False)
+            # Pintamos datos      
+            for linea in range(5):
+                circun = lista[linea]
+                globals()['VIEW%s' % "000" + str(linea+7)].config(text=str(circun[0]),foreground = "yellow")
+                globals()['VIEW%s' % "010" + str(linea+7)].config(text=str(circun[1]))
+                try:
+                    circun1 = int(circun[1])
+                    circun1 = (circun1*100)/CantidadRegistros
+                    circun1 = round(circun1,2)
+                except:
+                    circun1 = 0
+
+                globals()['VIEW%s' % "020" + str(linea+7)].config(text=str(circun1)+" %")
+        except:
+            pass
+
+        # Activa boton pdf
+        Boton7activado(PDFTablasVDias)
+                          
+    # Destruimos las labels de informacion para no sobrecargar el sistema
+    destruye_espacios_info(10,22)
+    
+    # Creamos ventana extra para esta tabla
+    global ventanaTabla
+    ventanaTabla = Tk()
+    ventanaTabla.title('Taula dies')
+    #ventanaTabla.geometry("1500x700")
+    ventanaTabla.configure(bg='green')
+    ventanaTabla.iconbitmap("image/icono.ico")
+    frameTablaVDia = Frame(ventanaTabla)
+    frames(frameTablaVDia,0,0,1,300,50,"green")
+    # Si en cualquier momento se pulsan las teclas CTRL + CURSOR IZQUIERDA se fuerza el pulsado del botón REGRESAR
+    ventanaTabla.bind("<Control-Left>", lambda event: BotonRegresarForzado())
+    # Si en cualquier momento se pulsan las teclas CTRL + P se fuerza la impresión de PDF
+    ventanaTabla.bind("<Control-p>", lambda event: BotonImprimirForzado())
+    ventanaTabla.bind("<Control-P>", lambda event: BotonImprimirForzado())   
+   
+    # Importancia en la raiz
+    raiz.deiconify()
+    ventanaTabla.iconify()
+       
+    # Cramos las labels dentro de la tabla
+    crea_espacios_info(frameTablaVDia,3,12)
+    ajusta_espacios_info(3,12,20,15,15)
+                 
+    # Preparamos la salida
+    menusBotones("Tornar",preMenuTablas,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Visitants per dia")
+
+    # Datos a rellenar
+    LR1.config(text = "desde DIA:")
+    LRR12.grid(row=0, column=1)  
+    LR2.config(text = "MES:")
+    LRR22.grid(row=1, column=1)  
+    LR3.config(text = "ANY:")
+    LRR32.grid(row=2, column=1)  
+    LR4.config(text = "fins DIA:")
+    LRR42.grid(row=3, column=1)  
+    LR5.config(text = "MES:")
+    LRR52.grid(row=4, column=1)  
+    LR6.config(text = "ANY:")
+    LRR62.grid(row=5, column=1)  
+
+    # Si aquí se pulsan las teclas CTRL + D se pone la fecha actual
+    raiz.bind("<Control-d>", lambda event: FechaActualIncrustadaGru())
+    raiz.bind("<Control-D>", lambda event: FechaActualIncrustadaGru())
+    
+    # Foco en el año
+    LRR12.focus()
+
+    # Activa la tabla
+    Boton4activado(menuTablasVDiasMuestra)
+def menuTablasVOrigen                               ():
+    def menuTablasVOrigenesMuestra ():
+        
+        # Rescata valores
+        v1 = LRR12.get()
+        v2 = LRR22.get()
+        v3 = LRR32.get()
+        v4 = LRR42.get()
+        v5 = LRR52.get()
+        v6 = LRR62.get()
+
+        # Coteja fallos
+        if v1 == "" or v2 == "" or v3 == "" or v4 == "" or v5 == "" or v6 == "":
+            
+            LR23.config(text = "Registre incomplert")
+            LRR12.focus()
+
+            return
+                
+        if len(v3) != 4 or len(v6) != 4:
+            
+            LR23.config(text = "Estructura d'any no vàlida")
+            LRR32.focus()
+
+            return
+
+                # Si v2 tiene len 1, le añadimos un 0 delante
+        if len(v2) == 1:
+            v2 = "0" + v2
+            LRR22.delete(0,END)
+            LRR22.insert(0,v2)
+
+        # Si v5 tiene len 1, le añadimos un 0 delante
+        if len(v5) == 1:
+            v5 = "0" + v5
+            LRR52.delete(0,END)
+            LRR52.insert(0,v5)
+        
+        # Si v1 tiene len 1, le añadimos un 0 delante
+        if len(v1) == 1:
+            v1 = "0" + v1
+            LRR12.delete(0,END)
+            LRR12.insert(0,v1)
+        
+        # Si v4 tiene len 1, le añadimos un 0 delante
+        if len(v4) == 1:
+            v4 = "0" + v4
+            LRR42.delete(0,END)
+            LRR42.insert(0,v4)
+            
+        if len(v2) != 2 or len(v5) != 2:
+            
+            LR23.config(text = "Estructura de mes no vàlida")
+            LRR22.focus()
+
+            return
+        
+        if len(v1) != 2 or len(v4) != 2:
+            
+            LR23.config(text = "Estructura de dia no vàlida")
+            LRR12.focus()
+
+            return
+                            
+        try:
+            a = int(v1)
+            a = int(v2)
+            a = int(v3)
+            a = int(v4)
+            a = int(v5)
+            a = int(v6)
+        
+        except:
+            
+            LR23.config(text = "Dada no numèrica")
+            LRR12.focus()
+            return    
+
+        if int(v2) < 1 or int(v5) < 1 or int(v2) > 12 or int(v5) > 12:
+            
+            LR23.config(text = "Mes impossible")
+            LRR22.focus()
+
+            return
+
+        if int(v1) < 1 or int(v4) < 1 or int(v1) > 31 or int(v4) > 31:
+            
+            LR23.config(text = "Dia impossible")
+            LRR12.focus()
+
+            return
+         
+        # Limpia posibles mensajes anteriores innecesarios
+        LR23.config(text = "")
+        
+        # Importancia en la tabla
+        ventanaTabla.deiconify()
+        ventanaTabla.title('Taula per Origens: desde ' +v1 + '/'+v2+'/'+v3+' fins '+v4+'/'+v5+'/'+v6+'.')
+
+        # Terminamos de dibujar las necesidades de la tabla
+        columna = 1   
+        for data in range (1,11,2):
+            
+            fila = 0
+            for dato in range (3):
+                
+                num = "0" + str(fila) + "0" + str(columna)
+                            
+                globals()['VIEW%s' % num].config(bg = "#9A7048")
+                fila += 1   
+            
+            columna += 2        
+        columna = 0
+        for dato in range (11):
+            
+            num = "000" + str(columna)
+            
+            if num == "0000":
+                
+                columna += 1
+                
+            else:
+                
+                globals()['VIEW%s' % num].config(bg = "grey",fg = "#FFFFFF")
+                columna += 1
+        columna = 0
+
+        # Pinta Casillas fijas
+        globals()['VIEW%s' % "0000"].config(text="ORIGENS")
+        globals()['VIEW%s' % "0100"].config(text="PAX")
+        globals()['VIEW%s' % "0200"].config(text="TANT PER CENT")
+        
+        # Abrimos el archivo de las descripciones
+        archivo = open("files/ORIGENS.DAT","r")
+        # Convertimos en lista de listas
+        lista = []
+        # itera sobre cada línea del archivo
+        for datos in archivo:
+        # divide cada línea en una lista utilizando la función split() y almacena
+        # el resultado en la lista de datos
+            lista.append(datos.split('\n'))
+        
+        # De todas las listas de lista borra todo lo que hay en la posición 1 a partir de la prmera ","
+        for i in lista:
+            i[0] = i[0].split(",")[0]
+            
+        # Revisa que todas las listas de lista tengan "0" en la posición 1
+        # Si no es así, le pone "0" en la posición 1
+        for i in lista:
+            if (i[1]) != "0":
+                    i[1] = "0" 
+    
+      
+        # Cerramos el archivo
+        archivo.close()
+                    
+        # Abre archivo con los datos en el mes y año necesarios
+        # Crea una base de datos o se conecta a una
+        base_datos = sqlite3.connect('databases/basesDeDatosRegistros.db')
+        # Crea cursor
+        c = base_datos.cursor()
+        # Query the database
+        c.execute("SELECT * FROM bd_registros WHERE FECHA >= '"+v3+"/"+v2+"/"+v1+"' and FECHA <= '"+v6+"/"+v5+"/"+v4+"'")
+        records = c.fetchall()
+        # Guardamos el total de los registros de records
+        CantidadRegistros = len(records)
+        
+        # Revisamos record 
+        for record in records:
+                
+                # Revisamos la lista
+                for linea in lista:
+                    # Si coincide el campo 2 de record con el campo 1 de linea
+                    if record[3] == linea[0]:
+                        # +1 al campo 1 de linea
+                        try:
+                            valor = linea[1]
+                            valor = int(valor)
+                            valor += 1
+                            linea[1] = str(valor)
+                        except:
+                            linea[1] = 1
+
+                        # Salimos del bucle
+                        break
+                                           
+        # Organizamos lista de mayor a menor por el SEGUNDO elemento de sus listas  
+        lista = sorted(lista, key=lambda valor: int(valor[1]),reverse = True)
+     
+        # Pintamos datos      
+        for linea in range(10):
+            circun = lista[linea]
+            globals()['VIEW%s' % "000" + str(linea+1)].config(text=str(circun[0]),foreground = "yellow")
+            globals()['VIEW%s' % "010" + str(linea+1)].config(text=str(circun[1]))
+            try:
+                circun1 = int(circun[1])
+                circun1 = (circun1*100)/CantidadRegistros
+                circun1 = round(circun1,2)
+            except:
+                circun1 = 0
+
+            globals()['VIEW%s' % "020" + str(linea+1)].config(text=str(circun1)+" %")
+       
+        # Activa boton pdf
+        Boton7activado(PDFTablasVOrigen)
+                          
+    # Destruimos las labels de informacion para no sobrecargar el sistema
+    destruye_espacios_info(10,22)
+    
+    # Creamos ventana extra para esta tabla
+    global ventanaTabla
+    ventanaTabla = Tk()
+    ventanaTabla.title('Taula origens')
+    #ventanaTabla.geometry("1500x700")
+    ventanaTabla.configure(bg='green')
+    ventanaTabla.iconbitmap("image/icono.ico")
+    frameTablaVOrigen = Frame(ventanaTabla)
+    frames(frameTablaVOrigen,0,0,1,300,50,"green")
+    # Si en cualquier momento se pulsan las teclas CTRL + CURSOR IZQUIERDA se fuerza el pulsado del botón REGRESAR
+    ventanaTabla.bind("<Control-Left>", lambda event: BotonRegresarForzado())
+    # Si en cualquier momento se pulsan las teclas CTRL + P se fuerza la impresión de PDF
+    ventanaTabla.bind("<Control-p>", lambda event: BotonImprimirForzado())
+    ventanaTabla.bind("<Control-P>", lambda event: BotonImprimirForzado())   
+   
+    # Importancia en la raiz
+    raiz.deiconify()
+    ventanaTabla.iconify()
+       
+    # Cramos las labels dentro de la tabla
+    crea_espacios_info(frameTablaVOrigen,3,11)
+    ajusta_espacios_info(3,11,20,15,15)
+                 
+    # Preparamos la salida
+    menusBotones("Tornar",preMenuTablas,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Visitants per origen")
+
+    # Datos a rellenar
+    LR1.config(text = "desde DIA:")
+    LRR12.grid(row=0, column=1)  
+    LR2.config(text = "MES:")
+    LRR22.grid(row=1, column=1)  
+    LR3.config(text = "ANY:")
+    LRR32.grid(row=2, column=1)  
+    LR4.config(text = "fins DIA:")
+    LRR42.grid(row=3, column=1)  
+    LR5.config(text = "MES:")
+    LRR52.grid(row=4, column=1)  
+    LR6.config(text = "ANY:")
+    LRR62.grid(row=5, column=1)  
+
+    # Si aquí se pulsan las teclas CTRL + D se pone la fecha actual
+    raiz.bind("<Control-d>", lambda event: FechaActualIncrustadaGru())
+    raiz.bind("<Control-D>", lambda event: FechaActualIncrustadaGru())
+    
+    # Foco en el año
+    LRR12.focus()
+
+    # Activa la tabla
+    Boton4activado(menuTablasVOrigenesMuestra)
+
+def menuArqueos                                 ():
+    
+    return # Mientras no se haga el arqueo no se puede acceder a este menú
+
+    if  nomUsuario.cget("text") == "":
+
+        return
+    global usuarioNivel
+    if int(usuarioNivel) >= 4:
+        return
+    LimpiaLabelsRellena()
+    textMenu.config(text = "MENU ARQUEIJOS")   
+    menusBotones("Tornar",MenuInicial,"Arqueig diari",menuArqueoDiario,"Arqueig global",regresaSinNada,"Resum econòmic parcial")         
+    BM1.focus()
+def menuArqueoDiario                                ():
+
+    LimpiaLabelsRellena()   
+    textMenu.config(text = "ARQUEIG DIARI")   
+    menusBotones("Tornar",menuArqueos,"Matí",menuArqueoDiarioMatí,"Tarda",menuArqueoDiarioTarde)         
+def menuArqueoDiarioMatí                                ():
+
+    # Carga los datos en zona 3 del arqueo de mañana de ese día
+    return
+def menuArqueoDiarioTarde                               ():
+    
+    # Carga los datos en zona 3 del arqueo de tarde de ese día
+    return                            
+
+def menuStocks                                  ():
+    
+    return # Mientras no se haga el arqueo no se puede acceder a este menú
+    
+    if  nomUsuario.cget("text") == "":
+
+        return
+    global usuarioNivel
+    if int(usuarioNivel) >= 3:
+        return
+      
+    LimpiaLabelsRellena()
+    textMenu.config(text = "MENU STOCKS")   
+    menusBotones("Tornar",MenuInicial,"Introduir",menuStockIntroducir,"Consultar",menustockConsultar)         
+    BM1.focus()
+def menuStockIntroducir                             ():
+    
+    LimpiaLabelsRellena()
+    menusBotones("Tornar",menuStocks,"Introduir",regresaSinNada) 
+
+    LR1.config(text = "PRODUCTE:")  
+    LRR11.grid(row=0, column=1)  
+    LRR11['values'] = (["Guiada","Vermut","Fotogràfica","Teatralitzada"])  
+    LR2.config(text = "QUANTITAT:")  
+    LRR22.grid(row=1, column=1)  
+        
+    BB4.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 5)
+    cambiaPasaEncima(BB4,"green","#27779d")    
+    LRR11.focus()           
+def menustockConsultar                              ():
+    
+    LimpiaLabelsRellena()
+    textMenu.config(text = "CONSULTA STOCKS")   
+    menusBotones("Tornar",menuStocks,"Total",menustockConsultarTotal,"Específica",menustockConsultarEspecifica)         
+def menustockConsultarTotal                             ():
+    
+    # Salta a un resumen total de productos en la zona 3
+    return
+def menustockConsultarEspecifica                        ():
+    
+    LimpiaLabelsRellena()
+    textMenu.config(text = "CONSULTA STOCKS")   
+    menusBotones("Tornar",menustockConsultar,"",regresaSinNada,"Específica",regresaSinNada)       
+
+    LR1.config(text = "PRODUCTE:")  
+    LRR11.grid(row=0, column=1)  
+    LRR11['values'] = (["Guiada","Vermut","Fotogràfica","Teatralitzada"])  
+    
+    BB4.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 5)
+    cambiaPasaEncima(BB4,"green","#27779d")    
+    LRR11.focus()  
+
+def menuIncidencias                             ():
+
+    # Si aquí se pulsan las teclas CTRL + D no pasa nada
+    raiz.bind("<Control-d>", lambda event: regresaSinNada())
+    raiz.bind("<Control-D>", lambda event: regresaSinNada())
+    
+    if  nomUsuario.cget("text") == "":
+
+        return
+    
+    nomUsuario.config(text = usuarioReal)
+    diaGlobaltk.set(diaGlobal)
+    mesGlobaltk.set(mesGlobal)
+    anyoGlobaltk.set(anyoGlobal)
+    MiraFecha(anyoFecha)
+    
+    global usuarioNivel
+    LimpiaLabelsRellena()
+       
+    textMenu.config(text = "MENU INCIDÈNC./GRUPS")   
+    menusBotones("Tornar",MenuInicial,"Introduir",menuIncidenciasIntroducir,"Consultar",menuIncidenciasConsultar,"Mirar/Corregir",menuIncidenciasCorregir,"Eliminar",menuIncidenciasEliminar,"",regresaSinNada,"Factures proforma",menuIncidenciasFacturaProforma)         
+    BM1.focus()
+    
+    if int(usuarioNivel) >= 3:
+            menusBotones("Tornar",MenuInicial,"",regresaSinNada,"Consultar",menuIncidenciasConsultar,"Mirar/Corregir",menuIncidenciasCorregir)        
+            # Pon el foco en el botón de consultar
+            BM2.focus()
+    if int(usuarioNivel) >= 3:
+        BM6.config(text="")
+    ajusta_espacios_info(10,22,8,11,8,5,5,20,11,11,20,1)
+def menuIncidenciasIntroducir                       ():
+    
+    global usuarioNivel
+    if int(usuarioNivel) >= 3:
+        return
+    ajusta_espacios_info(10,22,8,11,8,5,5,20,11,11,20,1)
+    textMenu.config(text = "MENU INCIDÈNC./GRUPS")   
+    
+    def menuIncidenciasIntroducirIntroduce ():
+        # Rescata los valores de los campos
+        v1 = LR1.cget("text")
+        v2 = LRR22.get()
+        v3 = LRR31.get()
+        v4 = LRR42.get()
+        v5 = LRR52.get()
+        v6 = LRR61.get()
+        v7 = LRR72.get()
+        v8 = LRR82.get()
+        v9 = LRR92.get()
+        v10 = LRR102.get()
+        v11 = LRR112.get()
+        v12 = LRR122.get()
+        v13 = LRR131.get()
+        v14 = LRR141.get()
+        v16 = LRR161.get()
+        v17 = LRR172.get()
+        v18 = LRR181.get()
+        v19 = LRR213.get(1.0,END)
+        v20 = LRR201.get()
+        v21 = LRR192.get()    
+            
+        # Coteja errores
+        try:
+            # Si el principio de v2 es 1 dígito y "/"
+            if v2[1] == "/":
+                #Añadimos un 0 delante
+                v2 = "0" + v2
+            # Si el principio de v2 no es 2 dígitos y "/"
+            if v2[0:2].isdigit() == False:
+                LR23.config(text = "Dia incorrecte")
+                LRR22.focus()
+                return
+
+            # Si la posición 4 es "/"
+            if v2[4] == "/":
+                # Añadimos un 0 entre la posición 2 y 3
+                v2 = v2[0:3] + "0" + v2[3:]
+            # Si v2 no contiene "/" dos digitos y "/"
+            if v2[3:5].isdigit() == False:
+                LR23.config(text = "Mes incorrecte")
+                LRR22.focus()
+                return
+
+            # Si el largo de la cadena v2 es inferior a 10 caracteres
+            if len(v2) <= 9:
+                # Añadimos 20 entre las posiciones 5 y 6
+                v2 = v2[0:6] + "20" + v2[6:] 
+            # Si v2 no acaba en 4 dígitos
+            if v2[6:10].isdigit() == False:
+                LR23.config(text = "Any incorrecte")
+                LRR22.focus()
+                return
+            # Si el largo es superior a 10 caracteres
+            if len(v2) > 10:
+                LR23.config(text = "Data incorrecte")
+                LRR22.focus()
+                return
+        except:
+                LR23.config(text = "Data incorrecte")
+                LRR22.focus() 
+                return 
+        try:
+            # Si el principio de v17 es 1 dígito y "/"
+            if v17[1] == "/":
+                #Añadimos un 0 delante
+                v17 = "0" + v17
+            # Si el principio de v17 no es 2 dígitos y "/"
+            if v17[0:2].isdigit() == False:
+                LR23.config(text = "Dia incorrecte")
+                LRR172.focus()
+                return
+
+            # Si la posición 4 es "/"
+            if v17[4] == "/":
+                # Añadimos un 0 entre la posición 2 y 3
+                v17 = v17[0:3] + "0" + v17[3:]
+            # Si v17 no contiene "/" dos digitos y "/"
+            if v17[3:5].isdigit() == False:
+                LR23.config(text = "Mes incorrecte")
+                LRR172.focus()
+                return
+
+            # Si el largo de la cadena v17 es inferior a 10 caracteres
+            if len(v17) <= 9:
+                # Añadimos 20 entre las posiciones 5 y 6
+                v17 = v17[0:6] + "20" + v17[6:] 
+            # Si v17 no acaba en 4 dígitos
+            if v17[6:10].isdigit() == False:
+                LR23.config(text = "Any incorrecte")
+                LRR172.focus()
+                return
+            # Si el largo es superior a 10 caracteres
+            if len(v17) > 10:
+                LR23.config(text = "Data incorrecte")
+                LRR172.focus()
+                return
+        except:
+                LR23.config(text = "Data incorrecte")
+                LRR172.focus() 
+                return
+        # Si ESTADO está vacío
+        if v19 == "":
+            LR20.config(text = "Estat incorrecte")
+            LRR213.focus()
+            return                   
+        # Si TELF_EXTRA es ""
+        if v4 == "":
+            # Abre la base de datos de clientes
+            base_datos_clientes = sqlite3.connect('databases/basesDeDatosClientes.db')
+            # Crea el cursor
+            cursor1 = base_datos_clientes.cursor()
+            # Busca el cliente 
+            cursor1.execute("SELECT * FROM bd_Clientes WHERE NOM ='"+v3+"'")
+            clientes = cursor1.fetchall()
+            # Si cursor1 tiene una sóla linea
+            largo = len(clientes)
+            if largo == 1:
+                # Buscamos el valor TELEFONO DE la linea CLIENTE
+                v4 = clientes[0][4]
+            # Cierra la base de datos
+            base_datos_clientes.close() 
+
+        # Si MAIL_EXTRA es ""
+        if v5 == "":
+            # Abre la base de datos de clientes
+            base_datos_clientes = sqlite3.connect('databases/basesDeDatosClientes.db')
+            # Crea el cursor
+            cursor1 = base_datos_clientes.cursor()
+            # Busca el cliente 
+            cursor1.execute("SELECT * FROM bd_Clientes WHERE NOM ='"+v3+"'")
+            clientes = cursor1.fetchall()
+            # Si cursor1 tiene una sóla linea
+            largo = len(clientes)
+            if largo == 1:
+                # Buscamos el valor MAIL de la linea CLIENTE
+                v5 = clientes[0][5]
+            # Cierra la base de datos
+            base_datos_clientes.close() 
+                        
+        # Salva datos
+        # Crea la base de datos o conecta con ella
+        base_datos_datos = sqlite3.connect('databases/basesDeDatosIncidencias.db')
+        
+        
+        # Crea el cursor
+        cursor = base_datos_datos.cursor()   
+    
+        # Inserta en la base de tados
+        cursor.execute("""INSERT INTO bd_Incidencias VALUES (:fecha,:hora,:pax1,:pax2,:producto,
+                       :idioma,:tel_extra,:estado,:usuario,:fecha_cre,:cliente,:mail_extra,:precio1,
+                       :tipo1,:precio2,:tipo2,:agendado,:fecha_rev,:pagat,:notas,:factura)""",
+                {
+                    'fecha':        v2,
+                    'hora':         v6,
+                    'pax1':         v7,
+                    'pax2':         v10,
+                    'producto':     v13,
+                    'idioma':       v14,
+                    'tel_extra':    v4,
+                    'estado':       v20,
+                    'usuario':      usuarioReal,
+                    'fecha_cre':    anyoGlobaltk.get() + "/" + mesGlobaltk.get() + "/" + diaGlobaltk.get(),
+                    'cliente':      v3,
+                    'mail_extra':   v5,
+                    'precio1':      v8,
+                    'tipo1':        v9,
+                    'precio2':      v11,
+                    'tipo2':        v12,
+                    'agendado':     v16,
+                    'fecha_rev':    v17,
+                    'pagat' :       v18,
+                    'notas':        v21,
+                    'factura':      v19
+                    })
+
+
+        # Asegura los cambios
+        base_datos_datos.commit()
+
+        # Cerrar conexion 
+        base_datos_datos.close() 
+                            
+        # Pinta datos en zona 3
+        query_incidencias_Inv()
+
+        # Limpia posibles mensajes anteriores innecesarios
+        LR23.config(text = "")
+
+        # Pinta la lista actualizada
+        # Crea la base de datos o conecta con ella
+        base_datos_datos = sqlite3.connect('databases/basesDeDatosIncidencias.db')
+            
+        # Crea el cursor
+        cursor = base_datos_datos.cursor()
+        
+        # Coge el valor del ultimo oid
+        cursor.execute("SELECT *, oid FROM bd_incidencias")
+        
+        try:
+            datos = cursor.fetchall()
+            dato = datos[-1]
+            idAdecuado = dato[21]
+        except:
+            idAdecuado = 0
+            
+        idCorrecto = int(idAdecuado)+1
+        
+        # Cerrar conexion 
+        base_datos_datos.close() 
+        
+        # Prepara el nuevo ID    
+        LRR1.config(text = idCorrecto)
+
+        # Limpia los campos
+        LimpiaElegibles()
+        
+        # Liberamos la escritura de la etiqueta CLIENT
+        LRR31.config(state = "readandwrite")
+        
+        # Coloca foco
+        LRR22.focus()
+           
+    # Crea la base de datos o conecta con ella
+    base_datos_datos = sqlite3.connect('databases/basesDeDatosIncidencias.db')
+        
+    # Crea el cursor
+    cursor = base_datos_datos.cursor()
+    
+    # Coge el valor del ultimo oid
+    cursor.execute("SELECT *, oid FROM bd_Incidencias")
+    
+    try:
+        datos = cursor.fetchall()
+        dato = datos[-1]
+        idAdecuado = dato[21]
+    except:
+        idAdecuado = 0
+        
+    idCorrecto = int(idAdecuado)+1
+    
+    # Cerrar conexion 
+    base_datos_datos.close()
+    LimpiaLabelsRellena()
+    menusBotones("Tornar",menuIncidencias,"Introduir") 
+    
+    LR1.config(text = "ID:")
+    LRR1.grid(row=0, column=1)  
+    LRR1.config(text = idCorrecto)            
+    LR2.config(text = "DIA/MES/ANY:")
+    LRR22.grid(row=1, column=1) 
+    LR3.config(text = "CLIENT:")
+    LRR31.grid(row=2, column=1)
+    LRR31['values'] = (clientes)  
+    LRR31.config(state = "readandwrite")
+    LR4.config(text = "TELF. EXTRA:")
+    LRR42.grid(row=3, column=1)
+    LR5.config(text = "MAIL EXTRA:")
+    LRR52.grid(row=4, column=1)
+    LR6.config(text = "HORA:")
+    LRR61.grid(row=5, column=1)
+    LRR61['values'] = (horas)  
+    LR7.config(text = "PAX:")
+    LRR72.grid(row=6, column=1)
+    LR8.config(text = "PREU:")
+    LRR82.grid(row=7, column=1)
+    LR9.config(text = "TIPUS:")
+    LRR92.grid(row=8, column=1)
+    LR10.config(text = "PAX:")
+    LRR102.grid(row=9, column=1)
+    LR11.config(text = "PREU:")
+    LRR112.grid(row=10, column=1)
+    LR12.config(text = "TIPUS:")
+    LRR122.grid(row=11, column=1)
+    LR13.config(text = "PRODUCTE:")
+    LRR131.grid(row=12, column=1)
+    LRR131['values'] = (productosR)  
+    LR14.config(text = "IDIOMA:")
+    LRR141.grid(row=13, column=1) 
+    LRR141['values'] = (idiomas)  
+
+    LR16.config(text = "AGENDAT:")
+    LRR161.grid(row=15, column=1) 
+    LRR161['values'] = (["Si","No"])
+    LR17.config(text = "revis DIA/MES/ANY:")
+    LRR172.grid(row=16, column=1)
+    LR18.config(text = "PAGAT:")
+    LRR181.grid(row=17, column=1) 
+    LRR181['values'] = (["Si","No"])
+    LR19.config(text = "FACTURA:")
+    LRR192.grid(row=18, column=1)
+    LR20.config(text = "ESTAT:")
+    LRR201.grid(row=19, column=1)
+    LRR201['values'] = (estados)
+    LR21.config(text = "NOTES:")
+    LRR213.grid(row=20, column=1)
+         
+    Boton4activado(menuIncidenciasIntroducirIntroduce)
+    query_incidencias_Inv()
+    
+    # Si el usuario tiene un nivel de 3 o más...
+    if int(usuarioNivel) >= 3:
+        # Ponemos el foco en el botón de estado
+        LRR213.focus()
+        return   
+    LRR22.focus()
+def menuIncidenciasConsultar                        ():
+
+    textMenu.config(text = "MENU INCIDÈNC./GRUPS")   
+    ajusta_espacios_info(10,22,8,11,8,5,5,20,11,11,20,1)
+    LimpiaLabelsRellena()
+    menusBotones("Tornar",menuIncidencias,"",regresaSinNada,"Consultar")    
+
+    LR1.config(text = "CLIENT:")
+    LRR11.grid(row=0, column=1)  
+    LRR11['values'] = (clientes)  
+    LR2.config(text = "esdeveniment DIA:")
+    LRR22.grid(row=1, column=1)
+    LR3.config(text = "MES:")
+    LRR32.grid(row=2, column=1)
+    LR4.config(text = "ANY:")
+    LRR42.grid(row=3, column=1)
+    LR5.config(text = "PRODUCTE:")
+    LRR51.grid(row=4, column=1) 
+    LRR51['values'] = (productosR)  
+    LR6.config(text = "IDIOMA:")
+    LRR61.grid(row=5, column=1) 
+    LRR61['values'] = (idiomas)
+    LR7.config(text = "AGENDAT:")
+    LRR71.grid(row=6, column=1) 
+    LRR71['values'] = (["Si","No"])
+    LR8.config(text = "revisió DIA:")
+    LRR82.grid(row=7, column=1)
+    LR9.config(text = "MES:")
+    LRR92.grid(row=8, column=1)
+    LR10.config(text = "ANY:")
+    LRR102.grid(row=9, column=1)
+    LR11.config(text = "FACTURA:")
+    LRR112.grid(row=10, column=1)
+    LR12.config(text = "ESTAT:")
+    LRR121.grid(row=11, column=1) 
+    LRR121['values'] = (estados)
+
+    # Si aquí se pulsan las teclas CTRL + D se pone la fecha actual
+    raiz.bind("<Control-d>", lambda event: FechaActualIncrustadaInc())
+    raiz.bind("<Control-D>", lambda event: FechaActualIncrustadaInc())
+            
+    Boton4activado(query_incidencias_busca0)
+    Boton5activado(prequery_incidencias)
+    Boton6activado(query_incidencias_busca)
+    LRR11.focus()     
+def menuIncidenciasCorregir                         ():
+
+    MiraFecha(anyoFecha)
+
+    diaGlobaltk.set(diaGlobal)
+    mesGlobaltk.set(mesGlobal)
+    anyoGlobaltk.set(anyoGlobal) 
+     
+    LimpiaLabelsRellena()
+    menusBotones("Tornar",menuIncidencias,"",regresaSinNada,"",regresaSinNada,"Mirar/Corregir")
+
+    LR1.config(text = "ID:")
+    LRR12.grid(row=0, column=1)
+        
+    Boton4activado(incidenciasCorrigeUno)
+    LRR12.focus()     
+def menuIncidenciasEliminar                         ():
+
+    LimpiaLabelsRellena()
+    menusBotones("Tornar",menuIncidencias,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Eliminar")
+
+    LR1.config(text = "ID:")
+    LRR12.grid(row=0, column=1)
+        
+    Boton4activado(incidenciasBorraUno)
+    LRR12.focus()
+     
+def menuIncidenciasFacturaProforma               ():
+ 
+    global usuarioNivel
+    if int(usuarioNivel) >= 3:
+        return
+    
+    global VieneDeIncGrups
+    VieneDeIncGrups = "None"
+    
+    nomUsuario.config(text = usuarioReal)
+    diaGlobaltk.set(diaGlobal)
+    mesGlobaltk.set(mesGlobal)
+    anyoGlobaltk.set(anyoGlobal)
+    MiraFecha(anyoFecha)
+    
+    ajusta_espacios_info(10,22,8,11,1,12,25,9,25,7,1,1)
+    textMenu.config(text = "PROFORMA")   
+    LimpiaLabelsRellena() 
+    menusBotones("Tornar",menuIncidencias,"Introduir",menuIncidenciasFacturaProformaIntroducir,"Consultar",menuIncidenciasFacturaProformaConsultar,"Mirar/Corregir",menuIncidenciasFacturaProformaCorregir,"Eliminar",menuIncidenciasFacturaProformaEliminar)
+    BM1.focus()
+def menuIncidenciasFacturaProformaIntroducir        ():
+    
+    if nomUsuario.cget("text") == "":
+        return
+    textMenu.config(text = "PROFORMA INTRODUIR")   
+    LimpiaLabelsRellena() 
+    menusBotones("Tornar",menuIncidenciasFacturaProforma,"Produir",menuIncidenciasFacturaProformaIntroducirProducir,"Clonar",menuIncidenciasFacturaProformaIntroducirClonar,"Crear",menuIncidenciasFacturaProformaIntroducirCrear)
+    BM1.focus()
+def menuIncidenciasFacturaProformaIntroducirProducir    ():
+    
+    LimpiaLabelsRellena()
+    menusBotones("Tornar",menuIncidenciasFacturaProformaIntroducir,"Produir")
+
+    LR1.config(text = "ID Incidència/grup:")
+    LRR12.grid(row=0, column=1)
+        
+    Boton4activado(ProformaProduceUno)
+    LRR12.focus()
+def menuIncidenciasFacturaProformaIntroducirClonar      ():
+
+    LimpiaLabelsRellena()
+    menusBotones("Tornar",menuIncidenciasFacturaProformaIntroducir,"Produir",regresaSinNada,"Clonar")
+
+    LR1.config(text = "ID Proforma:")
+    LRR12.grid(row=0, column=1)
+        
+    Boton4activado(ProformaClonaUno)
+    LRR12.focus()
+def menuIncidenciasFacturaProformaIntroducirCrear       ():
+    
+    global VieneDeIncGrups
+    ajusta_espacios_info(10,22,8,11,1,12,25,9,25,7,1,1)
+    
+    def menuProformaIntroducirIntroduce ():
+        # Rescata los valores de los campos
+        v1 = LRR1.cget("text")
+        v2 = LRR22.get()
+        v3 = LRR31.get()
+        v4 = LRR42.get()
+        v5 = LRR52.get()
+        v6 = LRR62.get()
+        v7 = LRR72.get()
+        v8 = LRR82.get()
+        v9 = LRR92.get()
+        v10 = LRR102.get()
+        v11 = LRR111.get()
+        v12 = LRR122.get()
+        v13 = LRR131.get()
+        # Guardamos en v14 el valor de ID de incedències/grups si existe
+        global v14
+        v14 = VieneDeIncGrups
+            
+        # Coteja errores
+        # Miramos si v2 está vacío
+        if v2 == "":
+            LR23.config(text = "Falta proforma")
+            LRR22.focus()
+            return
+        
+        # Miramos si v2 existe como NUM_PRO
+        # Abrimos la tabla de proformas
+        conn = sqlite3.connect('databases/basesDeDatosProforma.db')
+        c = conn.cursor()
+        # Bucle revisando todas las proformas
+        for row in c.execute('SELECT * FROM bd_Proforma'):
+            # Si el NUM_PRO coincide con v2
+            if row[2] == v2:
+                # Cerramos la tabla
+                conn.close()
+                # Mostramos el error
+                LR23.config(text = "Proforma duplicat")
+                # Ponemos el foco en NUM_PRO
+                LRR22.focus()
+                return
+        
+        # Si en v2 hay el símbolo "/" avisamos que no es válido
+        if "/" in v2:
+            LRR23.config(text = "No es pot posar '/' al nom de proforma")
+            LRR22.focus()
+            return
+        # Miramos si ha puesto un cliente
+        if v3 == "":
+            LR23.config(text = "Falta Client")
+            LRR31.focus()
+            return
+        
+        # Miramos si el cliente existe
+        # Abrimos la tabla de clientes
+        conn = sqlite3.connect('databases/basesDeDatosProforma.db')
+        c = conn.cursor()
+        # Bucle revisando todos los clientes
+        exist = False
+        for row in c.execute('SELECT * FROM bd_Proforma'):
+            # Si el ID coincide con v3
+            if row[3] == v3:
+                # Cerramos la tabla
+                conn.close()
+                # Ponemos la variable exist en True
+                exist = True
+                # Salimos del bucle
+                break
+        if exist == False:
+            LR23.config(text = "Client inexistent")
+            LRR31.focus()
+            return  
+          
+        # Miramos que la fecha esté bien escrita
+        try:
+            # Si el principio de v4 es 1 dígito y "/"
+            if v4[1] == "/":
+                #Añadimos un 0 delante
+                v4 = "0" + v4
+            # Si el principio de v4 no es 2 dígitos y "/"
+            if v4[0:2].isdigit() == False:
+                LR23.config(text = "Dia incorrecte")
+                LRR42.focus()
+                return
+
+            # Si la posición 4 es "/"
+            if v4[4] == "/":
+                # Añadimos un 0 entre la posición 2 y 3
+                v4 = v4[0:3] + "0" + v4[3:]
+            # Si v4 no contiene "/" dos digitos y "/"
+            if v4[3:5].isdigit() == False:
+                LR23.config(text = "Mes incorrecte")
+                LRR42.focus()
+                return
+
+            # Si el largo de la cadena v4 es inferior a 10 caracteres
+            if len(v4) <= 9:
+                # Añadimos 20 entre las posiciones 5 y 6
+                v4 = v4[0:6] + "20" + v4[6:] 
+            # Si v4 no acaba en 4 dígitos
+            if v4[6:10].isdigit() == False:
+                LR23.config(text = "Any incorrecte")
+                LRR42.focus()
+                return
+            # Si el largo es superior a 10 caracteres
+            if len(v4) > 10:
+                LR23.config(text = "DOta incorrecte")
+                LRR42.focus()
+                return
+        except:
+                LR23.config(text = "Data incorrecte")
+                LRR42.focus() 
+                return 
+
+        # Si v5 no es un número y no está en blanco
+        if v5 != "" and v5.isdigit() == False:
+            LR23.config(text = "Quantitat incorrecte")
+            LRR52.focus()
+            return
+        
+        # Si v7 no es un número y no está en blanco
+        if v7 != "" and v7.isdigit() == False:
+            LR23.config(text = "Preu incorrecte")
+            LRR72.focus()
+            return
+        
+        # Si v8 no es un número y no está en blanco
+        if v8 != "" and v8.isdigit() == False:
+            LR23.config(text = "Quantitat incorrecte")
+            LRR82.focus()
+            return
+        
+        # Si v10 no es un número y no está en blanco
+        if v10 != "" and v10.isdigit() == False:
+            LR23.config(text = "Preu incorrecte")
+            LRR102.focus()
+            return
+        
+        # Si v11 está vacío
+        if v11 == "":
+            LR23.config(text = "No sabem si hi ha IVA")
+            LRR111.focus()
+            return
+        
+        # Si v11 es sí y v12 está vacío
+        if  v11 == "Si" and v12 == "":
+            LR23.config(text = "No sabem el tan % d'IVA?")
+            LRR122.focus()
+            return
+        
+        # Si v11 es sí y v12 no es un número
+        if  v11 == "Si" and v12.isdigit() == False:
+            LR23.config(text = "L'IVA ha de ser un número")
+            LRR122.focus()
+            return
+        
+        # Si v11 es sí y v13 está vacío
+        if  v11 == "Si" and v13 == "":
+            LR23.config(text = "No sabem si l'IVA està inclòs")
+            LRR131.focus()
+            return
+                        
+        # Salva datos
+        # Crea la base de datos o conecta con ella
+        base_datos_datos = sqlite3.connect('databases/basesDeDatosProforma.db')
+          
+        # Crea el cursor
+        cursor = base_datos_datos.cursor()   
+    
+        # Inserta en la base de tados
+        cursor.execute("""INSERT INTO bd_Proforma VALUES (:fecha,:fechaPro,:numPro,:cliente,:cant1,
+                       :concept1,:precio1,:cant2,:concept2,:precio2,:iva,:tipoIva,:incluidoIva,
+                       :idIncidencias)""",
+                {
+                    'fecha':           v4,
+                    'fechaPro':        anyoGlobaltk.get() + "/" + mesGlobaltk.get() + "/" + diaGlobaltk.get(),
+                    'numPro':          v2,
+                    'cliente':         v3,
+                    'cant1':           v5,
+                    'concept1':        v6,
+                    'precio1':         v7,
+                    'cant2':           v8,
+                    'concept2':        v9,
+                    'precio2':         v10,
+                    'iva':             v11,
+                    'tipoIva':         v12,
+                    'incluidoIva':     v13,
+                    'idIncidencias':   v14
+                    })
+
+
+        # Asegura los cambios
+        base_datos_datos.commit()
+
+        # Cerrar conexion 
+        base_datos_datos.close() 
+                            
+        # Pinta datos en zona 3
+        query_proforma_Inv()
+
+        # Limpia posibles mensajes anteriores innecesarios
+        LR23.config(text = "")
+
+        # Pinta la lista actualizada
+        # Crea la base de datos o conecta con ella
+        base_datos_datos = sqlite3.connect('databases/basesDeDatosProforma.db')
+            
+        # Crea el cursor
+        cursor = base_datos_datos.cursor()
+        
+        # Coge el valor del ultimo oid
+        cursor.execute("SELECT *, oid FROM bd_proforma")
+        
+        try:
+            datos = cursor.fetchall()
+            dato = datos[-1]
+            idAdecuado = dato[21]
+        except:
+            idAdecuado = 0
+            
+        idCorrecto = int(idAdecuado)+1
+        
+        # Cerrar conexion 
+        base_datos_datos.close() 
+        
+        # Prepara el nuevo ID    
+        LRR1.config(text = idCorrecto)
+
+        # Limpia los campos
+        LimpiaElegibles()
+        
+        # Liberamos la escritura de la etiqueta CLIENT
+        LRR31.config(state = "readandwrite")
+        
+        # Abrimos db_incidencias
+        db_incidencias = sqlite3.connect('databases/basesDeDatosIncidencias.db')
+
+        # Creamos el cursor
+        c = db_incidencias.cursor()
+        
+        c.execute("""UPDATE bd_incidencias SET
+                                NOTAS           = :notas                
+                                WHERE oid = :v14""",
+                                {
+                                    'notas' : v2,
+                                    'v14': v14
+                                    })
+
+        #Asegura los cambios
+        db_incidencias.commit()
+
+        # Cierra la conexión 
+        db_incidencias.close()  
+            
+        # Coloca foco
+        LRR22.focus()
+           
+    # Crea la base de datos o conecta con ella
+    base_datos_datos = sqlite3.connect('databases/basesDeDatosProforma.db')
+        
+    # Crea el cursor
+    cursor = base_datos_datos.cursor()
+    
+    # Coge el valor del ultimo oid
+    cursor.execute("SELECT *, oid FROM bd_Proforma ORDER BY NUM_PRO DESC")
+    
+    try:
+        datos = cursor.fetchall()
+        dato = datos[-1]
+        idAdecuado = dato[21]
+    except:
+        idAdecuado = 0
+        
+    idCorrecto = int(idAdecuado)+1
+    
+    # Cerrar conexion 
+    base_datos_datos.close()
+    LimpiaLabelsRellena()
+    menusBotones("Tornar",menuIncidenciasFacturaProforma,"",regresaSinNada,"",regresaSinNada,"Crear") 
+    
+    LR1.config(text = "ID:")
+    LRR1.grid(row=0, column=1)  
+    LRR1.config(text = idCorrecto)            
+    LR2.config(text = "PROFORMA:")
+    LRR22.grid(row=1, column=1) 
+    LR3.config(text = "CLIENT:")
+    LRR31.grid(row=2, column=1)
+    LRR31['values'] = (clientes)  
+    LRR31.config(state = "readandwrite")
+    LR4.config(text = "DATA ACTE D/M/A:")
+    LRR42.grid(row=3, column=1)
+    LR5.config(text = "QUANTITAT 1:")
+    LRR52.grid(row=4, column=1)
+    LR6.config(text = "CONCEPTE 1:")
+    LRR62.grid(row=5, column=1)
+    LR7.config(text = "PREU 1:")
+    LRR72.grid(row=6, column=1)
+    LR8.config(text = "QUATITAT 2:")
+    LRR82.grid(row=7, column=1)
+    LR9.config(text = "CONCEPTE 2:")
+    LRR92.grid(row=8, column=1)
+    LR10.config(text = "PREU 2:")
+    LRR102.grid(row=9, column=1)
+    LR11.config(text = "IVA:")
+    LRR111.grid(row=10, column=1)
+    LRR111['values'] = (["Si","No"])
+    LR12.config(text = "TIPUS IVA:")
+    LRR122.grid(row=11, column=1)
+    LR13.config(text = "INCLÒS:")
+    LRR131.grid(row=12, column=1)
+    LRR131['values'] = (["Si","No"])  
+    # Si en cualquier momento se pulsan las teclas CTRL + P se fuerza la impresión de PDF
+    raiz.bind("<Control-p>", lambda event: BotonImprimirForzado())
+    raiz.bind("<Control-P>", lambda event: BotonImprimirForzado())     
+    Boton7activado(PDFProforma)
+    Boton4activado(menuProformaIntroducirIntroduce)
+    query_proforma_Inv()
+    
+    LRR22.focus()  
+def menuIncidenciasFacturaProformaConsultar         ():
+    
+    LimpiaLabelsRellena()    
+    menusBotones("Tornar",menuIncidenciasFacturaProforma,"",regresaSinNada,"Consultar")
+
+    LR1.config(text = "PROFORMA:")
+    LRR12.grid(row=0, column=1)
+    LR2.config(text = "CLIENT:")
+    LRR21.grid(row=1, column=1)
+    LRR21['values'] = (clientes)     
+    LR3.config(text = "Acte: DIA:")  
+    LRR32.grid(row=2, column=1)
+    LR4.config(text = "MES:")  
+    LRR42.grid(row=3, column=1)
+    LR5.config(text = "ANY:")  
+    LRR52.grid(row=4, column=1)
+    LR6.config(text = "QUANTITAT PAX:")  
+    LRR62.grid(row=5, column=1)
+    LR7.config(text = "PREU PAX:")
+    LRR72.grid(row=6, column=1)
+
+    # Si aquí se pulsan las teclas CTRL + D se pone la fecha actual
+    raiz.bind("<Control-d>", lambda event: FechaActualIncrustada())
+    raiz.bind("<Control-D>", lambda event: FechaActualIncrustada())
+        
+    Boton4activado(query_proforma_busca0)
+    Boton5activado(prequery_proforma)
+    Boton6activado(query_proforma_busca)
+    LRR12.focus()   
+def menuIncidenciasFacturaProformaCorregir          ():
+
+    diaGlobaltk.set(diaGlobal)
+    mesGlobaltk.set(mesGlobal)
+    anyoGlobaltk.set(anyoGlobal) 
+     
+    LimpiaLabelsRellena()
+    menusBotones("Tornar",menuIncidenciasFacturaProforma,"",regresaSinNada,"",regresaSinNada,"Mirar/Corregir")
+
+    LR1.config(text = "ID:")
+    LRR12.grid(row=0, column=1)
+        
+    Boton4activado(ProformaCorrigeUno)
+    LRR12.focus()   
+def menuIncidenciasFacturaProformaEliminar          ():
+
+    LimpiaLabelsRellena()
+    menusBotones("Tornar",menuIncidenciasFacturaProforma,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Eliminar")
+
+    LR1.config(text = "ID:")
+    LRR12.grid(row=0, column=1)
+        
+    Boton4activado(ProformaBorraUno)
+    LRR12.focus() 
+    
+def menuCalendarios                             ():
+    
+    return # Desactivado por el momento
+    
+    if  nomUsuario.cget("text") == "":
+
+        return
+    global usuarioNivel
+    LimpiaLabelsRellena()
+    textMenu.config(text = "MENU CALENDARI")   
+    menusBotones("Tornar",MenuInicial,"Crear",menuCalendarioCrear,"Mostrar",menuCalendarioMostrar)
+    
+    if int(usuarioNivel) >= 3:
+        BM1.config(text = "")
+        BM3.config(text = "")               
+    BM1.focus()
+def menuCalendarioCrear                             ():
+
+    global usuarioNivel
+    if int(usuarioNivel) >= 3:
+        return
+    
+    LimpiaLabelsRellena()
+
+    textMenu.config(text = "CREAR CALEND.")   
+    menusBotones("Tornar",menuCalendarios,"Usuaris",MenuCalendarioCrearUsuarios,"Visites",MenuCalendarioCrearVisitas)
+def MenuCalendarioCrearUsuarios                         ():
+    
+    LimpiaLabelsRellena()
+    menusBotones("Tornar",menuCalendarioCrear,"Usuaris")
+    
+    LR1.config(text = "MES:")
+    LRR12.grid(row=0, column=1)
+    LR2.config(text = "ANY:")
+    LRR22.grid(row=1, column=1)
+    
+    BB4.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 5)
+    cambiaPasaEncima(BB4,"green","#27779d")     
+    LRR12.focus()       
+def MenuCalendarioCrearVisitas                          ():
+    
+    LimpiaLabelsRellena()
+    menusBotones("Tornar",menuCalendarioCrear,"",regresaSinNada,"Visites")
+    
+    LR1.config(text = "MES:")
+    LRR12.grid(row=0, column=1)
+    LR2.config(text = "ANY:")
+    LRR22.grid(row=1, column=1)
+    
+    BB4.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 5)
+    cambiaPasaEncima(BB4,"green","#27779d")     
+    LRR12.focus()   
+def menuCalendarioMostrar                           ():
+ 
+    LimpiaLabelsRellena()
+
+    textMenu.config(text = "MOSTRAR CALEND.")        
+    menusBotones("Tornar",menuCalendarios,"Usuaris",menuCalendarioMostrarUsuarios,"Visites",menuCalendarioMostrarVisitas,"Hores",menuCalendarioMostrarHoras)
+
+    global usuarioNivel
+    if int(usuarioNivel) >= 3:
+        BM3.config(text = "")      
+def menuCalendarioMostrarUsuarios                       ():
+    
+    LimpiaLabelsRellena()
+    menusBotones("Tornar",menuCalendarioMostrar,"Usuaris")
+    
+    LR1.config(text = "MES:")
+    LRR12.grid(row=0, column=1)
+    LR2.config(text = "ANY:")
+    LRR22.grid(row=1, column=1)
+    
+    BB4.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 5)
+    cambiaPasaEncima(BB4,"green","#27779d")     
+    LRR12.focus()   
+def menuCalendarioMostrarVisitas                        ():
+    
+    LimpiaLabelsRellena()
+    menusBotones("Tornar",menuCalendarioMostrar,"",regresaSinNada,"Visites")
+    
+    LR1.config(text = "MES:")
+    LRR12.grid(row=0, column=1)
+    LR2.config(text = "ANY:")
+    LRR22.grid(row=1, column=1)
+    
+    BB4.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 5)
+    cambiaPasaEncima(BB4,"green","#27779d")     
+    LRR12.focus()   
+def menuCalendarioMostrarHoras                          ():
+
+    global usuarioNivel
+    if int(usuarioNivel) >= 3:
+        return
+        
+    global usoUsuarios
+    LimpiaLabelsRellena()
+    menusBotones("Tornar",menuCalendarioMostrar,"",regresaSinNada,"",regresaSinNada,"Hores")
+    
+    LR1.config(text = "USUARI:")
+    LRR11.grid(row=0, column=1)
+    LRR11['values'] = (usoUsuarios)  
+    LR2.config(text = "MES:")
+    LRR22.grid(row=1, column=1)
+    LR3.config(text = "ANY:")
+    LRR32.grid(row=2, column=1)
+    
+    BB4.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 5)
+    cambiaPasaEncima(BB4,"green","#27779d")     
+    LRR12.focus()   
+
+def menuDatos                                   ():
+    if  nomUsuario.cget("text") == "":
+
+        return
+    global usuarioNivel
+    if int(usuarioNivel) >= 3:
+        return  
+    LimpiaLabelsRellena()
+    borra_datos()   
+    textMenu.config(text = "MENU DADES")   
+    menusBotones("Tornar",MenuInicial,"Producte",MenuDatosProducto,"Clients",MenuDatosCliente,"Usuaris",menuDatosUsuario,"Empresa",menuDatosEmpresa)             
+    BM1.focus()
+def MenuDatosProducto                               ():
+
+    ajusta_espacios_info(10,22,7,52,13,13,10,1,1,1,1,1)
+    global puntero
+    puntero = 0
+
+    textMenu.config(text = "MENU PRODUCTE")   
+    LimpiaLabelsRellena()
+    menusBotones("Tornar",menuDatos,"Introduir",MenuDatosProductoIntroducir,"Consultar",MenuDatosProductoConsultar,"Mirar/Corregir",MenuDatosProductoCorregir,"Eliminar",menuDatosProductoEliminar)            
+    BM1.focus()
+def MenuDatosProductoIntroducir                         ():
+    
+    def MenuDatosProductoIntroducirIntroduce():
+       
+        # Rescata valores
+        v1 = LRR22.get()
+        v2 = LRR32.get()
+        v3 = LRR42.get()
+        v4 = LRR51.get()
+                
+        # Coteja fallos
+        if v1 == "" or v2 == "" or v3 == "" or v4 == "":
+            
+            LR23.config(text = "Registre incomplert")
+            return
+        
+        try:
+            
+            circunstancial = float(v2)
+            
+        except:
+            
+            LR23.config(text = "Valor no numéric")
+            LRR32.focus()
+            return
+            
+        try:
+            
+            circunstancial = float(v3)
+            
+        except:
+            
+            LR23.config(text = "Valor no numéric")
+            LRR42.focus()
+            return
+                    
+        # Salva datos       
+        # Crea la base de datos o conecta con ella
+        base_datos_datos = sqlite3.connect('databases/basesDeDatosDatos.db')
+        
+        # Crea el cursor
+        cursor = base_datos_datos.cursor()   
+                            
+        # Inserta en la base de tados
+        cursor.execute("""INSERT INTO bd_productos VALUES (:nombre, :precio_habitual, 
+                :precio_actual, :registrable)""",
+                {
+                    'nombre':           LRR22.get(),
+                    'precio_habitual':  LRR32.get(),
+                    'precio_actual':    LRR42.get(),
+                    'registrable':      LRR51.get()
+                    })
+
+
+        # Asegura los cambios
+        base_datos_datos.commit()
+
+        # Cerrar conexion 
+        base_datos_datos.close() 
+        
+        # Pinta datos en zona 3
+        query_productos_Inv()
+
+        # Limpia posibles mensajes anteriores innecesarios
+        LR23.config(text = "")
+        LimpiaElegibles()
+
+        # Pinta la lista actualizada
+        # Crea la base de datos o conecta con ella
+        base_datos_datos = sqlite3.connect('databases/basesDeDatosDatos.db')
+            
+        # Crea el cursor
+        cursor = base_datos_datos.cursor()
+        
+        # Coge el valor del ultimo oid
+        cursor.execute("SELECT *, oid FROM bd_productos")
+        
+        try:
+            datos = cursor.fetchall()
+            dato = datos[-1]
+            idAdecuado = dato[4]
+        except:
+            idAdecuado = 0
+            
+        idCorrecto = int(idAdecuado)+1
+        
+        # Cerrar conexion 
+        base_datos_datos.close() 
+            
+        LRR1.config(text = idCorrecto)
+        
+        # Actualiza las listas
+        abreLasListas()            
+        
+        # Coloca foco
+        LRR22.focus()
+
+    # Crea la base de datos o conecta con ella
+    base_datos_datos = sqlite3.connect('databases/basesDeDatosDatos.db')
+        
+    # Crea el cursor
+    cursor = base_datos_datos.cursor()
+    
+    # Coge el valor del ultimo oid
+    cursor.execute("SELECT *, oid FROM bd_productos")
+    
+    try:
+        datos = cursor.fetchall()
+        dato = datos[-1]
+        idAdecuado = dato[4]
+    except:
+        idAdecuado = 0
+        
+    idCorrecto = int(idAdecuado)+1
+    
+    # Cerrar conexion 
+    base_datos_datos.close() 
+                    
+    LimpiaLabelsRellena()
+    menusBotones("Tornar",MenuDatosProducto,"Introduir")
+
+    LR1.config(text = "ID:")
+    LRR1.grid(row=0, column=1) 
+    LRR1.config(text = idCorrecto)            
+    LR2.config(text = "PRODUCTE:")  
+    LRR22.grid(row=1, column=1)
+    LR3.config(text = "PREU REAL:")  
+    LRR32.grid(row=2, column=1)
+    LR4.config(text = "PREU ACTUAL:")  
+    LRR42.grid(row=3, column=1)
+    LR5.config(text = "REGISTRE/STOCK:")  
+    LRR51.grid(row=4,column=1)
+    LRR51['values'] = (["Registre","Stock"])
+    
+    Boton4activado(MenuDatosProductoIntroducirIntroduce)
+    query_productos_Inv()  
+    LRR22.focus()
+def MenuDatosProductoConsultar                          ():
+ 
+    LimpiaLabelsRellena()
+    menusBotones("Tornar",MenuDatosProducto,"",regresaSinNada,"Consultar")
+
+    LR1.config(text = "PRODUCTE:")
+    LRR11.grid(row=0, column=1)             
+    LRR11['values'] = (productos)
+    LR2.config(text = "PREU REAL:")  
+    LRR22.grid(row=1, column=1)
+    LR3.config(text = "PREU ACTUAL:")  
+    LRR32.grid(row=2, column=1)
+    LR4.config(text = "REGISTRE/STOCK:")  
+    LRR41.grid(row=3, column=1)
+    LRR41['values'] = (["Registre","Stock"])
+    
+    Boton4activado(query_productos_busca0)
+    Boton5activado(prequery_productos)
+    Boton6activado(query_productos_busca)
+ 
+    LRR12.focus() 
+def MenuDatosProductoCorregir                           ():
+    
+    LimpiaLabelsRellena()
+    menusBotones("Tornar",MenuDatosProducto,"",regresaSinNada,"",regresaSinNada,"Mirar/Corregir")
+    
+    LR1.config(text = "ID:")
+    LRR12.grid(row=0, column=1)
+    
+    BB4.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 5,  command = productoCorrigeUno)
+    cambiaPasaEncima(BB4,"green","#27779d")     
+    LRR12.focus()
+def menuDatosProductoEliminar                           ():
+    
+    LimpiaLabelsRellena()
+    menusBotones("Tornar",MenuDatosProducto,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Eliminar")
+    
+    LR1.config(text = "ID:")
+    LRR12.grid(row=0, column=1)
+    
+    Boton4activado(productoBorraUno)
+    LRR12.focus() 
+def MenuDatosCliente                                ():
+    
+    ajusta_espacios_info(10,22,5,30,1,1,17,13,19,12,1,1)
+    global puntero
+    puntero = 0
+    
+    textMenu.config(text = "MENU CLIENT")   
+    LimpiaLabelsRellena()
+    menusBotones("Tornar",menuDatos,"Introduir",MenuDatosClienteIntroducir,"Consultar",MenuDatosClienteConsultar,"Mirar/Corregir",MenuDatosClienteCorregir,"Eliminar",menuDatosClienteEliminar)            
+    BM1.focus()
+def MenuDatosClienteIntroducir                          ():
+
+    def MenuDatosClienteIntroducirIntroduce():
+       
+        # Rescata valores
+        v1 = LRR22.get()
+        v4 = LRR62.get()
+                
+        # Coteja fallos
+        if v1 == "":
+            
+            LR23.config(text = "Nom del client obligatori")
+            LRR22.focus()
+            return
+        
+        if v4 != "":
+            try:
+                
+                circunstancial = int(v4)
+                
+            except:
+                
+                LR23.config(text = "Telèfon erroni")
+                LRR52.focus()
+                return
+                    
+        # Salva datos       
+        # Crea la base de datos o conecta con ella
+        base_datos_datos = sqlite3.connect('databases/basesDeDatosClientes.db')
+        
+        # Crea el cursor
+        cursor = base_datos_datos.cursor()   
+                            
+        # Inserta en la base de tados
+        cursor.execute("""INSERT INTO bd_clientes VALUES (:nombre, :direccion1, 
+                :direccion2, :direccion3, :telefono, :mail, :nifcif, :contacto, :telefonocont)""",
+                {
+                    'nombre':           LRR22.get(),
+                    'direccion1':       LRR32.get(),
+                    'direccion2':       LRR42.get(),
+                    'direccion3':       LRR52.get(),
+                    'telefono':         LRR62.get(),
+                    'mail':             LRR72.get(),
+                    'nifcif':           LRR82.get(),
+                    'contacto':         LRR92.get(),
+                    'telefonocont':     LRR102.get()
+                    })
+
+
+        # Asegura los cambios
+        base_datos_datos.commit()
+
+        # Cerrar conexion 
+        base_datos_datos.close() 
+        
+        # Pinta datos en zona 3
+        query_clientes_Inv()
+
+        # Limpia posibles mensajes anteriores innecesarios
+        LR23.config(text = "")
+        LimpiaElegibles()
+
+        # Pinta el nuevo id
+        # Crea la base de datos o conecta con ella
+        base_datos_datos = sqlite3.connect('databases/basesDeDatosClientes.db')
+            
+        # Crea el cursor
+        cursor = base_datos_datos.cursor()
+        
+        # Coge el valor del ultimo oid
+        cursor.execute("SELECT *, oid FROM bd_clientes")
+        
+        try:
+            datos = cursor.fetchall()
+            dato = datos[-1]
+            idAdecuado = dato[9]
+        except:
+            idAdecuado = 0
+            
+        idCorrecto = int(idAdecuado)+1
+        
+        # Cerrar conexion 
+        base_datos_datos.close() 
+            
+        LRR1.config(text = idCorrecto)            
+        
+        # Actualiza las listas
+        abreLasListas()  
+        
+        # Coloca foco
+        LRR22.focus()
+
+    # Crea la base de datos o conecta con ella
+    base_datos_datos = sqlite3.connect('databases/basesDeDatosClientes.db')
+        
+    # Crea el cursor
+    cursor = base_datos_datos.cursor()
+    
+    # Coge el valor del ultimo oid
+    cursor.execute("SELECT *, oid FROM bd_clientes")
+    
+    try:
+        datos = cursor.fetchall()
+        dato = datos[-1]
+        idAdecuado = dato[9]
+    except:
+        idAdecuado = 0
+        
+    idCorrecto = int(idAdecuado)+1
+    
+    # Cerrar conexion 
+    base_datos_datos.close() 
+             
+    LimpiaLabelsRellena()
+    menusBotones("Tornar",MenuDatosCliente,"Introduir")
+
+    LR1.config(text = "ID:")
+    LRR1.grid(row=0, column=1)             
+    LRR1.config(text = idCorrecto)            
+    LR2.config(text = "NOM:")  
+    LRR22.grid(row=1, column=1)
+    LR3.config(text = "ADREÇA:")  
+    LRR32.grid(row=2, column=1)
+    LR4.config(text = "C.P.:")  
+    LRR42.grid(row=3, column=1)
+    LR5.config(text = "CIUTAT/PAIS:")  
+    LRR52.grid(row=4, column=1)
+    LR6.config(text = "TELÈFON:")  
+    LRR62.grid(row=5,column=1)
+    LR7.config(text = "E-MAIL:")  
+    LRR72.grid(row=6,column=1)
+    LR8.config(text = "NIF/CIF:")  
+    LRR82.grid(row=7,column=1)
+    LR9.config(text = "CONTACTE:")
+    LRR92.grid(row=8,column=1)
+    LR10.config(text = "TELÈFON CONTACTE:")
+    LRR102.grid(row=9,column=1)
+    
+    BB4.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 5, command =MenuDatosClienteIntroducirIntroduce)
+    cambiaPasaEncima(BB4,"green","#27779d") 
+    
+    query_clientes_Inv()
+       
+    LRR22.focus()    
+def MenuDatosClienteConsultar                           ():
+ 
+    LimpiaLabelsRellena()
+    menusBotones("Tornar",MenuDatosCliente,"",regresaSinNada,"Consultar")
+    
+    LR1.config(text = "NOM:")  
+    LRR11.grid(row=0, column=1)
+    LRR11['values'] = (clientes)
+    LR2.config(text = "TELÈFON:")  
+    LRR22.grid(row=1,column=1)
+    LR3.config(text = "E-MAIL:")  
+    LRR32.grid(row=2,column=1)
+    LR4.config(text = "NIF/CIF:")  
+    LRR42.grid(row=3,column=1)
+
+    Boton4activado(query_clientes_busca0)
+    Boton5activado(prequery_clientes)
+    Boton6activado(query_clientes_busca)
+    LRR11.focus()
+def MenuDatosClienteCorregir                            ():
+    
+    LimpiaLabelsRellena()
+    menusBotones("Tornar",MenuDatosCliente,"",regresaSinNada,"",regresaSinNada,"Mirar/Corregir")
+    
+    LR1.config(text = "ID:")
+    LRR12.grid(row=0, column=1)
+    
+    Boton4activado(clienteCorrigeUno)
+    LRR12.focus()
+def menuDatosClienteEliminar                            ():
+    
+    LimpiaLabelsRellena()
+    menusBotones("Tornar",MenuDatosCliente,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Eliminar")
+    
+    LR1.config(text = "ID:")
+    LRR12.grid(row=0, column=1)
+    
+    Boton4activado(clienteBorraUno)
+    LRR12.focus() 
+def menuDatosUsuario                                ():
+    
+    ajusta_espacios_info(10,22,7,41,6,8,9,9,9,9,1,1)
+    global puntero
+    puntero = 0
+    global usuarioNivel
+    if int(usuarioNivel) >= 3:
+        return
+    
+    textMenu.config(text = "MENU USUARIS") 
+    LimpiaLabelsRellena()
+    LRR22.config(show="")
+    LRR32.config(show="")
+    menusBotones("Tornar",menuDatos,"Introduir",menuDatosUsuarioIntroducir,"Consultar",menuDatosUsuarioConsultar,"Mirar/Corregir",menuDatosUsuarioCorregir,"Eliminar",menuDatosUsuarioEliminar)            
+    BM1.focus()
+def menuDatosUsuarioIntroducir                          ():
+    
+    def MenuDatosUsuarioIntroducirIntroduce():
+        
+        # Rescata valores
+        v1 = LRR12.get()
+        v2 = LRR22.get()
+        v3 = LRR32.get()
+        v4 = LRR41.get()
+        v5 = LRR51.get()
+        v6 = LRR61.get()
+        v7 = LRR71.get()
+        v8 = LRR81.get()
+
+        # Coteja fallos
+        if v1 == "" or v2 == "" or v3 == "" or v4 == "" or v5 == "" or v6 == "" or v7 == "" or v8 == "":
+            
+            LR23.config(text = "S'han d'omplir tots els espais")
+            return
+        
+        if v2 != v3:
+            
+            LR23.config(text = "Clau incorrecte")
+            LRR22.focus()       
+            return    
+
+        # Salva datos       
+        # Crea la base de datos o conecta con ella
+        base_datos_datos = sqlite3.connect('databases/basesDeDatosDatos.db')
+        
+        # Crea el cursor
+        cursor = base_datos_datos.cursor()   
+                            
+        # Inserta en la base de tados
+        cursor.execute("""INSERT INTO bd_usuarios VALUES (:nombre, :clave, :nivel, 
+                :ingles, :castellano, :catalan, :frances)""",
+                {
+                    'nombre':           LRR12.get(),
+                    'clave':            LRR22.get(),
+                    'nivel':            LRR41.get(),
+                    'ingles':           LRR51.get(),
+                    'castellano':       LRR61.get(),
+                    'catalan':          LRR71.get(),
+                    'frances':          LRR81.get()
+                    })
+
+
+        # Asegura los cambios
+        base_datos_datos.commit()
+
+        # Cerrar conexion 
+        base_datos_datos.close() 
+        
+        # Pinta datos en zona 3
+        query_usuarios_Inv()       
+
+        # Limpia posibles mensajes anteriores innecesarios
+        LR23.config(text = "")
+        LimpiaElegibles()
+
+        # Coloca foco
+        LRR12.focus()
+        
+    LimpiaLabelsRellena()
+    menusBotones("Tornar",menuDatosUsuario,"Introduir")
+    
+    LR1.config(text = "NOM:")
+    LRR12.grid(row=0, column=1)             
+    LR2.config(text = "CLAU:")  
+    LRR22.grid(row=1, column=1)
+    LRR22.config(show="*")
+    LR3.config(text = "REPETEIX CLAU:")  
+    LRR32.grid(row=2, column=1)
+    LRR32.config(show="*")
+    """
+    Nivel de acceso:    1 - todo
+	    				2 - resta 	seguridad
+						3 - resta 	datos 
+						    		calendario/crear
+									calendario/mostrar/horas
+									incidencias/introducir menos estado y notas
+                                    incidencias/eliminar
+									incidencias/factura proforma
+                                    stock
+						4 - resta	arqueo
+						5 - resta 	ventas
+    """
+    LR4.config(text = "NIVELL D'ACCÉS:")  
+    LRR41.grid(row=3,column=1)
+    LRR41['values'] = (["1","2","3","4","5"])
+    LR5.config(text = "ANGLÈS:")  
+    LRR51.grid(row=4,column=1)
+    LRR51['values'] = (["Sí","No"])
+    LR6.config(text = "CASTELLÀ:")  
+    LRR61.grid(row=5,column=1)
+    LRR61['values'] = (["Sí","No"])
+    LR7.config(text = "CATALÀ:")  
+    LRR71.grid(row=6,column=1)
+    LRR71['values'] = (["Sí","No"])
+    LR8.config(text = "FRANCÈS:")  
+    LRR81.grid(row=7,column=1)
+    LRR81['values'] = (["Sí","No"])
+    
+    Boton4activado(MenuDatosUsuarioIntroducirIntroduce)
+    query_usuarios_Inv()
+    LRR12.focus()       
+def menuDatosUsuarioConsultar                           ():
+      
+    global usuariosO
+    LimpiaLabelsRellena()
+    menusBotones("Tornar",menuDatosUsuario,"",regresaSinNada,"Consultar")
+    
+    LR1.config(text = "NOM:")
+    LRR11.grid(row=0, column=1)
+    LRR11['values'] = (usuariosO)
+    LR2.config(text = "NIVELL D'ACCÉS:")  
+    LRR21.grid(row=1,column=1)
+    LRR21['values'] = (["1","2","3","4","5"])
+    LR3.config(text = "ANGLÈS:")  
+    LRR31.grid(row=2,column=1)
+    LRR31['values'] = (["Sí","No"])
+    LR4.config(text = "CASTELLÀ:")  
+    LRR41.grid(row=3,column=1)
+    LRR41['values'] = (["Sí","No"])
+    LR5.config(text = "CATALÀ:")  
+    LRR51.grid(row=4,column=1)
+    LRR51['values'] = (["Sí","No"])
+    LR6.config(text = "FRANCÈS:")  
+    LRR61.grid(row=5,column=1)
+    LRR61['values'] = (["Sí","No"])
+        
+    Boton4activado(query_usuarios_busca0)
+    Boton5activado(prequery_usuarios)
+    Boton6activado(query_usuarios_busca)
+    LRR12.focus() 
+def menuDatosUsuarioCorregir                            ():
+    
+    LimpiaLabelsRellena()
+    menusBotones("Tornar",menuDatosUsuario,"",regresaSinNada,"",regresaSinNada,"Mirar/Corregir")
+    
+    LR1.config(text = "ID:")
+    LRR12.grid(row=0, column=1)
+    
+    Boton4activado(usuariosCorrigeUno)
+    LRR12.focus()   
+def menuDatosUsuarioEliminar                            ():
+    
+    LimpiaLabelsRellena()
+    menusBotones("Tornar",menuDatosUsuario,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Eliminar")
+
+    LR1.config(text = "ID:")
+    LRR12.grid(row=0, column=1)
+        
+    Boton4activado(usuariosBorraUno)
+    LRR12.focus()   
+def menuDatosEmpresa                                ():
+
+    def MenuDatosEmpresaSalva():
+        # Guarda los datos de la empresa en el archivo "files/empresa.DAT"
+        # Un campo por cada línea
+        empresa = [LRR12.get(),LRR22.get(),LRR32.get(),LRR42.get()]         
+
+
+        with open("files/EMPRESA.DAT", "w") as f:
+            for i in empresa:
+                f.write(i + "\n")
+        # Vuelve al menú de datos
+        menuDatos()
+            
+    LimpiaLabelsRellena()
+    menusBotones("Tornar",menuDatos,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Empresa")
+
+    LR1.config(text = "NOM:")
+    LRR12.grid(row=0, column=1) 
+    LR2.config(text = "ADREÇA 1:")  
+    LRR22.grid(row=1, column=1)
+    LR3.config(text = "ADREÇA 2:")  
+    LRR32.grid(row=2, column=1)
+    LR4.config(text = "NIF:")  
+    LRR42.grid(row=3, column=1)
+
+    # Abre el archivo "files/empresa.DAT" o lo crea si no existe
+    # y lo lee para rellenar los campos
+    try:
+        with open("files/EMPRESA.DAT", "r") as f:
+            
+            # Creamos la lista empresa con los datos del archivo EMPRESA.DAT cada "\n" separa los diferentes campos
+            empresa = f.read().split("\n")
+            
+            LRR12.insert(0,empresa[0])
+            LRR22.insert(0,empresa[1])
+            LRR32.insert(0,empresa[2])
+            LRR42.insert(0,empresa[3])
+    except:
+        pass        
+    Boton4activado(MenuDatosEmpresaSalva)
+    LRR12.focus()
+    
+def menuSeguridad                               ():
+    if  nomUsuario.cget("text") == "":
+
+        return 
+    global usuarioNivel
+    if int(usuarioNivel) >= 2:
+        return
+    LimpiaLabelsRellena()
+    textMenu.config(text = "MENU SEGURETAT")   
+    menusBotones("Tornar",MenuInicial,"Còpia de seguretat",menuSeguridadCopiaDeSeguridad,"Carregar",menuSeguridadCargar,"Fussionar",menuSeguridadFusionar,"Esborrar",menuSeguridadBorrar,"Netejar I/G",menuSeguridadLimpiarIncidenciasGrupos)
+    BM1.focus()
+def menuSeguridadCopiaDeSeguridad                   ():
+        CopiaSeguridadGlobal()
+        MenuInicial()
+def menuSeguridadCargar                             ():
+        pass
+def menuSeguridadFusionar                           ():
+        pass
+def menuSeguridadFusionarTodos                          ():
+        pass
+def menuSeguridadFusionarRegistro                       ():
+        pass
+def menuSeguridadFusionarVentas                         ():
+    pass                  
+def menuSeguridadBorrar                             ():
+    pass
+def menuSeguridadBorrarTodos                            ():
+    pass
+def menuSeguridadBorrarRegistro                         ():
+    pass
+def menuSeguridadBorrarVentas                           ():
+    pass                  
+def menuSeguridadLimpiarIncidenciasGrupos           ():
+        pass
+
+def cambioUsuario1          ():
+    
+    MenuInicial()
+    cambioUsuario()
+     
+#  ------------------------------- Frames ----------------------------------
+
+def frames(nombreFrame,fila,columna,expansioncolumnas,largo,alto,color):
+    
+    nombreFrame.grid(row=fila, column=columna, columnspan=expansioncolumnas)
+    nombreFrame.config(width=largo, height=alto)
+    nombreFrame.config(bg=color)
+    nombreFrame.config(bd=5)
+    nombreFrame.config(relief="groove")
+
+frameUsuario = Frame(raiz)
+frames(frameUsuario,0,0,3,300,50,"#b7b493")
+frameUsuario.grid(padx=10, pady=10)
+
+frameFecha = Frame(raiz)
+frames(frameFecha,0,3,4,400,50,"#b7b493")
+frameFecha.grid(padx=10, pady=10)
+
+frameBotones = Frame(raiz)
+frames(frameBotones,0,7,4,400,50,"#b7b493")
+frameBotones.grid(padx=10, pady=10)
+
+frameMenu = Frame(raiz)
+frames(frameMenu,1,0,2,200,500,"#b7b493")
+frameMenu.grid(padx=10, pady=10)
+
+frameRellena = Frame(raiz)
+frames(frameRellena,1,2,3,300,500,"#b7b493")
+frameRellena.grid(padx=10, pady=10)
+
+frameLista = Frame(raiz)
+frames(frameLista,1,5,6,600,500,"#b7b493")
+frameLista.grid(padx=10, pady=10)
+
+# ------------------------------- Crea Listas -----------------------------------
+
+abreLasListas()
+
+# ------------------------------- Crea Usuario ----------------------------------
+
+ConfiguraColumnas(frameUsuario,2,1,1,1)
+frameUsuario.rowconfigure(0,weight = 1)
+textUsuario = creaLabel("textUsuario",frameUsuario,"Usuari:",0,0,1,1,5,"#b7b493","#FFFFFF",E,12,"bold")
+
+nomUsuario = Label(frameUsuario,text=usuarioReal)
+nomUsuario.grid(row=0, column=1,rowspan=2,columnspan=1)
+nomUsuario.config(padx = 5,bg= "#b7b493",fg="#FFFFFF", anchor=W, font=("Helvetica", 12))
+
+# ------------------------------- Crea Fecha -----------------------------------
+
+def recuperaFechaActual():
+           
+    fecha = datetime.now()
+    diaGlobal = str(fecha.day)
+    if int(diaGlobal) < 10: diaGlobal = "0" + diaGlobal
+    diaGlobaltk = StringVar()
+    diaGlobaltk.set(diaGlobal)
+    mesGlobal = str(fecha.month)
+    if int(mesGlobal) < 10: mesGlobal = "0" + mesGlobal
+    mesGlobaltk = StringVar()
+    mesGlobaltk.set(mesGlobal)
+    anyoGlobal = str(fecha.year)
+    anyoGlobaltk = StringVar()
+    anyoGlobaltk.set(anyoGlobal)
+
+    diaFecha.config(text=diaGlobaltk)
+    mesFecha.config(text=mesGlobaltk)
+    anyoFecha.config(text=anyoGlobaltk)
+    frameFecha.config(bg = "#b7b493")
+    textFecha.config(bg = "#b7b493")
+    textBarra1.config(bg = "#b7b493")
+    textBarra2.config(bg = "#b7b493")
+    textSpace.config(bg = "#b7b493") 
+     
+ConfiguraColumnas(frameFecha,7,5,2,1,2,1,4,1,12)
+
+textFecha = Label(frameFecha,text="Data:",textvariable="Data:")
+textFecha.grid(row=0, column=0,rowspan=1,columnspan=1)
+textFecha.config(padx = 5,bg="#b7b493",fg="#FFFFFF", anchor=E, font=("Helvetica", 12, "bold"))
+textFecha.grid(padx=10, pady=10)
+    
+diaFecha = Entry(frameFecha,textvariable=diaGlobaltk,justify = CENTER)
+diaFecha.grid(row=0, column=1)
+diaFecha.config(bg="#5d5b45",fg="#FFFFFF",  width = 2, font=("Helvetica", 12))
+diaFecha.bind("<KeyRelease>",MiraFecha)
+
+textBarra1 = Label(frameFecha,text="/",textvariable="/")
+textBarra1.grid(row=0, column=2,rowspan=1,columnspan=1)
+textBarra1.config(padx = 5,bg="#b7b493",fg="#FFFFFF", anchor=E, font=("Helvetica", 12, "bold"))
+textBarra1.grid(padx=10, pady=10)
+
+mesFecha = Entry(frameFecha,textvariable=mesGlobaltk,justify = CENTER)
+mesFecha.grid(row=0, column=3)
+mesFecha.config(bg="#5d5b45",fg="#FFFFFF",  width = 2, font=("Helvetica", 12))
+mesFecha.bind("<KeyRelease>",MiraFecha)
+
+textBarra2 = Label(frameFecha,text="/",textvariable="/")
+textBarra2.grid(row=0, column=4,rowspan=1,columnspan=1)
+textBarra2.config(padx = 5,bg="#b7b493",fg="#FFFFFF", anchor=E, font=("Helvetica", 12, "bold"))
+textBarra2.grid(padx=10, pady=10)
+
+anyoFecha = Entry(frameFecha,textvariable=anyoGlobaltk,justify = CENTER)
+anyoFecha.grid(row=0, column=5)
+anyoFecha.config(bg="#5d5b45",fg="#FFFFFF",  width = 4, font=("Helvetica", 12))
+anyoFecha.bind("<KeyRelease>",MiraFecha)
+
+textSpace = Label(frameFecha,text=" ",textvariable=" ")
+textSpace.grid(row=0, column=6,rowspan=1,columnspan=1)
+textSpace.config(padx = 5,bg="#b7b493",fg="#FFFFFF", anchor=E, font=("Helvetica", 12, "bold"))
+textSpace.grid(padx=10, pady=10)
+
+botonRegresaFecha = creaBoton("botonRegresaFecha",frameFecha,"Torna a avui",recuperaFechaActual,0,7,"#27779d","#FFFFFF",1,12,"green")
+
+#------------------------------- Crea Botonera -------------------------------------
+
+ConfiguraColumnas(frameBotones,4,1,1,1,1,1,1,1)
+
+Label(frameBotones,text=" ",bg="#b7b493").grid(row=0,column=0)
+
+BB1 = Button(frameBotones, text="-", command=TamanyoMenos, font=(10))
+BB1.grid(row=0, column=1)
+BB1.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 5)
+BB1.grid(pady=10)
+cambiaPasaEncima(BB1,"green","#27779d")
+
+
+BB2 = Button(frameBotones, text="+", command=TamanyoMas, font=(10))
+BB2.grid(row=0, column=2)
+BB2.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 5)
+cambiaPasaEncima(BB2,"green","#27779d")
+
+Label(frameBotones,text=" ",bg="#b7b493").grid(row=0,column=3)
+
+BB5 = Button(frameBotones, text="ant.", font=(10))
+BB5.grid(row=0, column=4)
+BB5.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 5)
+cambiaPasaEncima(BB5,"green","#27779d")
+
+BB6 = Button(frameBotones, text="post.", font=(10))
+BB6.grid(row=0, column=5)
+BB6.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 5)
+cambiaPasaEncima(BB6,"green","#27779d")
+
+Label(frameBotones,text=" ",bg="#b7b493").grid(row=0,column=6)
+
+BB7 = Button(frameBotones, text="PDF", font=(10))
+BB7.grid(row=0, column=7)
+BB7.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 5)
+cambiaPasaEncima(BB7,"green","#27779d")
+
+Label(frameBotones,text=" ",bg="#b7b493").grid(row=0,column=8)
+
+# ------------------------------ Crea etiquetas de menú ----------------------
+
+tamanyoFont = TamanyoLetra+15
+textMenu = Label(frameMenu,text="")
+textMenu.grid(row=0, column=0,rowspan=1,columnspan=1)
+textMenu.config(padx = 5,bg="#5d5b45",fg="#FFFFFF", font=("Helvetica", tamanyoFont,"bold"),width = 19)
+
+for i in range(0,13):
+    
+    globals()['BM%s' % (i)] = Button(frameMenu, text="", command=regresaSinNada, font=("Helvetica", tamanyoFont))
+    globals()['BM%s' % (i)].grid(row=i+1, column=0)
+    globals()['BM%s' % (i)].config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 20, relief='groove')
+    cambiaPasaEncima(globals()['BM%s' % (i)],"green","#27779d")
+    globals()['BM%s' % (i)].grid(padx=5, pady=2)
+    # Cambia el color del botón cuando está enfocado
+    globals()['BM%s' % (i)].bind("<FocusIn>", lambda event, i=i: globals()['BM%s' % (i)].config(bg="#87779d"))
+    # Devuelve el color original si el botón no está enfocado
+    globals()['BM%s' % (i)].bind("<FocusOut>", lambda event, i=i: globals()['BM%s' % (i)].config(bg="#27779d"))
+    if i>1: 
+        globals()['BM%s' % (i)].bind("<Up>", lambda event, i=i: globals()['BM%s' % (i-1)].focus_set())
+    if i<11:
+        globals()['BM%s' % (i)].bind("<Down>", lambda event, i=i: globals()['BM%s' % (i+1)].focus_set())
+tamanyoFont = TamanyoLetra+12
+creaLabel("sep1",frameMenu," ",1,0,1,1,5,"#b7b493","#b7b493",E,tamanyoFont,"bold")   
+creaLabel("sep2",frameMenu," ",14,0,1,1,5,"#b7b493","#b7b493",E,tamanyoFont,"bold")  
+
+# ------------------------------ Crea etiquetas de cuestionario ---------------
+
+ConfiguraColumnas(frameRellena,2,1,3)
+tamanyoFont = TamanyoLetra+10
+
+mantieneDistancia = Label(frameRellena,text="")
+mantieneDistancia.grid(row=0, column=1,rowspan=1,columnspan=1)
+mantieneDistancia.config(padx = 5,bg="#b7b493",fg="#FFFFFF", anchor = E, font=("Helvetica", tamanyoFont,"bold"),width = 15)
+
+# LRx = título; LRRx = texto; LRRx1 = Combobox; LRRx2 = Entry; LRRx3 = Text (multilinea)
+
+for i in range (1,24):
+    globals()['LR%s' % (i)] = Label(frameRellena,text="")   
+    globals()['LR%s' % (i)].grid(row=i-1, column=0,rowspan=1,columnspan=1)
+    globals()['LR%s' % (i)].config(padx = 5,bg="#b7b493",fg="#FFFFFF", anchor = E, font=("Helvetica", tamanyoFont,"bold"),width = 15)
+
+    globals()['LRR%s' % (i) + '1'] = Combobox(frameRellena,state="readonly")                                                                                  
+    globals()['LRR%s' % (i) + '1'].grid(rowspan=1,columnspan=1)
+    globals()['LRR%s' % (i) + '1'].config(font=("Helvetica", tamanyoFont),width = 15)
+    globals()['LRR%s' % (i) + '1'].grid(padx=10, pady=10)
+    
+    globals()['LRR%s' % (i) + '2'] = Entry(frameRellena)                                                                                                    
+    globals()['LRR%s' % (i) + '2'].grid(rowspan=1,columnspan=1)
+    globals()['LRR%s' % (i) + '2'].config(font=("Helvetica", tamanyoFont),width = 18)
+    globals()['LRR%s' % (i) + '2'].grid(padx=10, pady=10)
+
+
+LRR1 = Label(frameRellena,text="PENDIENTE")                                                                                      
+LRR1.grid(rowspan=1,columnspan=1)
+LRR1.config(padx = 5,bg="#b7b493",fg="#FFFFFF", anchor = W, font=("Helvetica", tamanyoFont),width = 15)
+
+LRR5 = Label(frameRellena,text="")                                                                                      
+LRR5.grid(rowspan=1,columnspan=1)
+LRR5.config(padx = 5,bg="#b7b493",fg="#FFFFFF", anchor = W, font=("Helvetica", tamanyoFont),width = 15)
+
+LRR6 = Label(frameRellena,text="")                                                                                      
+LRR6.grid(rowspan=1,columnspan=1)
+LRR6.config(padx = 5,bg="#b7b493",fg="#FFFFFF", anchor = W, font=("Helvetica", tamanyoFont),width = 15)
+
+LRR73 = Text(frameRellena)
+LRR73.grid(rowspan=1,columnspan=1)
+LRR73.config(font=("Helvetica", tamanyoFont),width = 17,height = 5,state = NORMAL)
+
+LRR213 = Text(frameRellena)
+LRR213.grid(rowspan=1,columnspan=1)
+LRR213.config(font=("Helvetica", tamanyoFont),width = 17,height = 5,state = NORMAL)
+
+LR22.grid(columnspan=3)
+LR22.config(fg = "blue",width = 30)
+LR23.grid(columnspan=3)
+LR23.config(fg = "red",width = 30)
+
+BB4 = Button(frameRellena, text="valida", font=(10))
+BB4.grid(row=23, column=0,columnspan=1)
+BB4.config(bg="#27779d",fg="#27779d",  height = 1, width = 5)
+BB4.grid(padx=10, pady=10)
+
+cambiaPasaEncima(BB4,"grey","#27779d")
+BB3 = Button(frameRellena, text="neteja", command=LimpiaElegibles, font=(10))
+BB3.grid(row=23, column=1, columnspan=1)
+BB3.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 5)
+BB3.grid(padx=10, pady=10)
+
+cambiaPasaEncima(BB3,"green","#27779d")
+
+# ------------------------------ Bases de datos -------------------------------
+
+# Creamnos la base de datos o conectamos con ella si ya existe
+base_datos_datos = sqlite3.connect('databases/basesDeDatosDatos.db')
+
+# Creamos el cursor
+cursor = base_datos_datos.cursor()   
+
+# Creamos las tablas (en caso de que existan saltarán este paso)
+
+try:
+    cursor.execute("""CREATE TABLE bd_productos (
+        NOM             text,
+        PREU_HABITUAL   text,
+        PREU_ACTUAL     text,
+        REGISTRABLE     text)""")
+    
+    # Ejecutar (commit) instrucción o consulta
+    base_datos_datos.commit()
+
+except:
+    
+    pass
+
+try:
+    cursor.execute("""CREATE TABLE bd_usuarios (
+        NOM             text,
+        CLAVE           text,
+        NIVEL           text,
+        INGLES          text,
+        CASTELLANO      text,
+        CATALAN         text,
+        FRANCES         text)""")
+    
+    # Ejecutar (commit) instrucción o consulta
+    base_datos_datos.commit()
+
+except:
+    
+    pass
+
+
+# Cierra la conexión con la base de datos
+base_datos_datos.close()
+
+# Creamnos la base de datos o conectamos con ella si ya existe
+base_datos_datos = sqlite3.connect('databases/basesDeDatosClientes.db')
+
+# Creamos el cursor
+cursor = base_datos_datos.cursor()   
+
+try:
+    cursor.execute("""CREATE TABLE bd_clientes (
+        NOM             text,
+        DIRECCION1      text,
+        DIRECCION2      text,
+        DIRECCION3      text,
+        TELEFONO        text,
+        MAIL            text,
+        NIFCIF          text,
+        CONTACTO        text,
+        TELCONTACTO     text)""")
+    
+    # Ejecutar (commit) instrucción o consulta
+    base_datos_datos.commit()
+
+except:
+    
+    pass
+
+# Cierra la conexión con la base de datos
+base_datos_datos.close()
+
+# Creamnos la base de datos o conectamos con ella si ya existe
+base_datos_datos = sqlite3.connect('databases/basesDeDatosRegistros.db')
+
+# Creamos el cursor
+cursor = base_datos_datos.cursor()   
+
+# Creamos la tabla (en caso de que exista saltará este paso)
+
+try:
+    cursor.execute("""CREATE TABLE bd_registros (
+        USUARIO         text,
+        FECHA           text,
+        DESCRIPCION     text,
+        ORIGEN          text,
+        HORA            text,
+        PRODUCTO        text,
+        FUENTE          text,
+        NOTAS           text)""")
+    
+    # Ejecutar (commit) instrucción o consulta
+    base_datos_datos.commit()
+
+except:
+    
+    pass
+
+# Cierra la conexión con la base de datos
+base_datos_datos.close()
+
+# Creamnos la base de datos o conectamos con ella si ya existe
+base_datos_datos = sqlite3.connect('databases/basesDeDatosIncidencias.db')
+
+# Creamos el cursor
+cursor = base_datos_datos.cursor()   
+
+# Creamos la tabla (en caso de que exista saltará este paso)
+
+try:
+    cursor.execute("""CREATE TABLE bd_incidencias (
+        FECHA           text,
+        HORA            text,
+        PAX1            text,
+        PAX2            text,
+        PRODUCTO        text,
+        IDIOMA          text,
+        TEL_EXTRA       text,
+        ESTADO          text,
+        USUARIO         text,
+        FECHA_CREA      text,
+        CLIENTE         text,
+        MAIL_EXTRA      text,
+        PRECIO1         text,
+        TIPO1           text,
+        PRECIO2         text,
+        TIPO2           text,
+        AGENDADO        text,
+        FECHA_REV       text,
+        PAGAT           text,
+        NOTAS           text,
+        FACTURA         text)""")
+    
+    # Ejecutar (commit) instrucción o consulta
+    base_datos_datos.commit()
+
+except:
+    
+    pass
+
+# Cierra la conexión con la base de datos
+base_datos_datos.close()
+
+# Creamnos la base de datos o conectamos con ella si ya existe
+base_datos_datos = sqlite3.connect('databases/basesDeDatosProforma.db')
+
+# Creamos el cursor
+cursor = base_datos_datos.cursor()   
+
+# Creamos la tabla (en caso de que exista saltará este paso)
+
+try:
+    cursor.execute("""CREATE TABLE bd_Proforma (
+        FECHA           text,
+        FECHA_PRO       text,
+        NUM_PRO         text,
+        CLIENTE         text,
+        CANT_1          text,
+        CONCEPT_1       text,
+        PRECIO_1        text,
+        CANT_2          text,
+        CONCEPT_2       text,
+        PRECIO_2        text,
+        IVA             text,
+        TIPO_IVA        text,
+        INCLUIDO_IVA    text,
+        ID_INCIDENCIA   text)""")
+    
+    # Ejecutar (commit) instrucción o consulta
+    base_datos_datos.commit()
+
+except:
+    
+    pass
+
+# Cierra la conexión con la base de datos
+base_datos_datos.close()
+
+# ------------------------------ Loop -----------------------------------------
+crea_espacios_info(frameLista,10,22)
+MenuInicial()
+
+if  DatosUsuario == ():       
+    DatosUsuario = cargaUsuario()
+ 
+raiz.mainloop()  
