@@ -570,6 +570,7 @@ def cargaUsuario            ():
     rUsuario.config(relief="groove")
     rUsuario.config(width = 300, heigh = 300)   
     rUsuario.deiconify()
+    rUsuario.overrideredirect(True)
     
     # Si en cualquier momento se pulsan las teclas CTRL + ESC se fuerza el pulsado del botón SALIR 
     rUsuario.bind("<Escape>", lambda event: salir())   
