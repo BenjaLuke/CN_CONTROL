@@ -2,7 +2,7 @@ echo off
 echo CN CONTROL V.3.15.3
 echo by: Benjamin Miguel Miralpeix
 echo 2021/2023
-echo ultima actualizacion: 2023/02/15
+echo ultima actualizacion: 2023/02/19
 echo -
 echo -
 echo ------------------------------------------------------------

@@ -3657,11 +3657,7 @@ def menuRegistrosIntroducir                         ():
         v7 = anyoGlobaltk.get()
         v8 = mesGlobaltk.get()
         v9 = diaGlobaltk.get()
-        
-        # Hacemos que v8 tenga 2 cifras
-        if len(v8) == 1:
-            v8 = "0" + v8
-            
+                        
         global origenes
         
         # Coteja fallos
@@ -3699,7 +3695,7 @@ def menuRegistrosIntroducir                         ():
             LR23.config(text = "Dia inexistent")
             diaFecha.focus()
             return        
-        if v8 == "" or int(v9) > 31 or int(v9) < 1:
+        if v9 == "" or int(v9) > 31 or int(v9) < 1:
             
             LR23.config(text = "Dia no vàlid")
             diaFecha.focus()
@@ -3730,7 +3726,7 @@ def menuRegistrosIntroducir                         ():
                 :descripcion, :origen, :hora, :producto, :fuente, :notas)""",
                 {
                     'usuario':      usuarioReal,
-                    'fecha':        anyoGlobaltk.get() + "/" + mesGlobaltk.get() + "/" + diaGlobaltk.get(),
+                    'fecha':        v7 + "/" + v8 + "/" + v9,
                     'descripcion':  LRR21.get(),
                     'origen':       LRR31.get(),
                     'hora':         LRR41.get(),
@@ -8167,11 +8163,11 @@ def recuperaFechaActual():
            
     fecha = datetime.now()
     diaGlobal = str(fecha.day)
-    if int(diaGlobal) < 10: diaGlobal = "0" + diaGlobal
+    #if int(diaGlobal) < 10: diaGlobal = "0" + diaGlobal
     diaGlobaltk = StringVar()
     diaGlobaltk.set(diaGlobal)
     mesGlobal = str(fecha.month)
-    if int(mesGlobal) < 10: mesGlobal = "0" + mesGlobal
+    #if int(mesGlobal) < 10: mesGlobal = "0" + mesGlobal
     mesGlobaltk = StringVar()
     mesGlobaltk.set(mesGlobal)
     anyoGlobal = str(fecha.year)
