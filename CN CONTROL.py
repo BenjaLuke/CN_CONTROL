@@ -34,9 +34,12 @@ Label(raiz, image=logo, bg="#b7b493").place(x=30, y=20) # Lo colocamos en raiz u
 # Si en cualquier momento se pulsan las teclas CTRL + R se va al menu de registro
 raiz.bind("<Control-r>", lambda event: menuRegistrosIntroducir())
 raiz.bind("<Control-R>", lambda event: menuRegistrosIntroducir())
+# Si en cualquier momento se pulsan las teclas CTRL + V intenta copiar lo del portapapeles
+raiz.bind("<Control-v>", lambda event: paste())
+raiz.bind("<Control-V>", lambda event: paste())
 # Si en cualquier momento se pulsan las teclas CTRL + V se va al menu de ventas
-raiz.bind("<Control-v>", lambda event: menuVentasIntroducir())
-raiz.bind("<Control-V>", lambda event: menuVentasIntroducir())
+raiz.bind("<Control-e>", lambda event: paste())
+raiz.bind("<Control-E>", lambda event: paste())
 # Si en cualquier momento se pulsan las teclas CTRL + I se va al menu de incidencias
 raiz.bind("<Control-i>", lambda event: menuIncidenciasIntroducir())
 raiz.bind("<Control-I>", lambda event: menuIncidenciasIntroducir()) 
@@ -133,6 +136,20 @@ anyoGlobaltk.set(anyoGlobal)
 puntero = 0
            
 # ------------------------------ Funciones globales ----------------------
+def paste                   ():
+    #Comprueba si el foco está en alguna label o entry.
+    if raiz.focus_get() == None:
+        return 
+    else:
+        # Descubre en qué label o entry está el foco
+        foco = raiz.focus_get()
+        try:
+            # Pega el contenido del portapapeles dentro de la label o entry
+            foco.insert(INSERT, clipboard_get())
+        except:
+            
+            pass
+    
 def CopiaSeguridadGlobal    ():
     
     # Ventana de aviso
