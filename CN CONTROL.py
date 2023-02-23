@@ -149,7 +149,6 @@ def paste                   ():
         except:
             
             pass
-    
 def CopiaSeguridadGlobal    ():
     
     # Ventana de aviso
@@ -175,6 +174,7 @@ def CopiaSeguridadGlobal    ():
     shutil.copytree("files", "Security/" + str(anyoGlobal) + "-" + str(mesGlobal) + "-" + str(diaGlobal) + " " + str(fecha.hour) + "-" + str(fecha.minute) + "-" + str(fecha.second) + "/files")
     
     ventana2.destroy()                          # Destruimos la ventana
+
 def Saliendo                ():
     
     CopiaSeguridadGlobal()
@@ -1193,9 +1193,12 @@ def query_incidencias_busca ():
     v10= LRR102.get()
     v11= LRR112.get()
     v12= LRR121.get()
+    v13= LRR131.get()
+    v14= LRR142.get()
+    
     # Creamos la base de datos o conectamos con una
     base_datos = sqlite3.connect('databases/basesDeDatosIncidencias.db')
-    busqueda = "SELECT *, oid FROM bd_incidencias WHERE ((CLIENTE = '" + v1 + "' or '" + v1 + "' = '') AND (FECHA LIKE '" + v2 + "/%' or '" + v2 + "' = '') AND (FECHA LIKE '%/" + v3 + "/%' or '" + v3 + "' = '') AND (FECHA LIKE '%/" + v4 + "' or '" + v4 + "' = '') AND (PRODUCTO = '" + v5 + "' or '" + v5 + "' = '') AND (IDIOMA = '" + v6 + "' or '" + v6 + "' = '') AND (AGENDADO = '" + v7 + "' or '" + v7 + "' = '') AND (FECHA_REV LIKE '" + v8 + "/%' or '" + v8 + "' = '') AND (FECHA_REV LIKE '%/" + v9 + "/%' or '" + v9 + "' = '')  AND (FECHA_REV LIKE '%/" + v10 + "' or '" + v10 + "' = '') AND (FACTURA = '" + v11 + "' or '" + v11 + "' = '')  AND (ESTADO = '" + v12 + "' or '" + v12 + "' = '')) ORDER BY FECHA"
+    busqueda = "SELECT *, oid FROM bd_incidencias WHERE ((CLIENTE = '" + v1 + "' or '" + v1 + "' = '') AND (FECHA LIKE '" + v2 + "/%' or '" + v2 + "' = '') AND (FECHA LIKE '%/" + v3 + "/%' or '" + v3 + "' = '') AND (FECHA LIKE '%/" + v4 + "' or '" + v4 + "' = '') AND (PRODUCTO = '" + v5 + "' or '" + v5 + "' = '') AND (IDIOMA = '" + v6 + "' or '" + v6 + "' = '') AND (AGENDADO = '" + v7 + "' or '" + v7 + "' = '') AND (FECHA_REV LIKE '" + v8 + "/%' or '" + v8 + "' = '') AND (FECHA_REV LIKE '%/" + v9 + "/%' or '" + v9 + "' = '')  AND (FECHA_REV LIKE '%/" + v10 + "' or '" + v10 + "' = '') AND (FACTURA = '" + v11 + "' or '" + v11 + "' = '')  AND (ESTADO = '" + v12 + "' or '" + v12 + "' = '') AND (PAGAT = '" + v13 + "' OR '" + v13 + "' = '') AND (MAIL_EXTRA = '" + v14 + "' OR '" + v14 + "' = '')) ORDER BY FECHA"
     columnas = 8
     global puntero
     query(base_datos,busqueda,columnas,"ID","DATA","HORA","PAX","PAX","PRODUCTE","IDIOMA","TELÈFON","ESTAT")
@@ -1392,7 +1395,41 @@ def IncidenciasSalvaCorrecc ():
         LR23.config(text = "Any incorrecte")
         LRR172.focus()
         return
-        
+    
+    # Si TELEFONO_EXTRA es ""
+    if v4 == "":
+            # Abre la base de datos de clientes
+            base_datos_clientes = sqlite3.connect('databases/basesDeDatosClientes.db')
+            # Crea el cursor
+            cursor1 = base_datos_clientes.cursor()
+            # Busca el cliente 
+            cursor1.execute("SELECT * FROM bd_Clientes WHERE NOM ='"+v3+"'")
+            clientes = cursor1.fetchall()
+            # Si cursor1 tiene una sóla linea
+            largo = len(clientes)
+            if largo == 1:
+                # Buscamos el valor TELEFONO DE la linea CLIENTE
+                v4 = clientes[0][4]
+            # Cierra la base de datos
+            base_datos_clientes.close() 
+
+    # Si MAIL_EXTRA es ""
+    if v5 == "":
+            # Abre la base de datos de clientes
+            base_datos_clientes = sqlite3.connect('databases/basesDeDatosClientes.db')
+            # Crea el cursor
+            cursor1 = base_datos_clientes.cursor()
+            # Busca el cliente 
+            cursor1.execute("SELECT * FROM bd_Clientes WHERE NOM ='"+v3+"'")
+            clientes = cursor1.fetchall()
+            # Si cursor1 tiene una sóla linea
+            largo = len(clientes)
+            if largo == 1:
+                # Buscamos el valor MAIL de la linea CLIENTE
+                v5 = clientes[0][5]
+            # Cierra la base de datos
+            base_datos_clientes.close() 
+                        
     # Crea una base de datos o abre la existente
     base_datos = sqlite3.connect('databases/basesDeDatosIncidencias.db')
     
@@ -2409,6 +2446,7 @@ def clienteCorrigeUno       ():
         LRR82.insert(0,record[6])
         LRR92.insert(0,record[7])
         LRR102.insert(0,record[8])
+        LRR112.insert(0,record[9])
         
     # Centramos el cursor
     LRR22.focus()
@@ -6908,7 +6946,12 @@ def menuIncidenciasConsultar                        ():
     LR12.config(text = "ESTAT:")
     LRR121.grid(row=11, column=1) 
     LRR121['values'] = (estados)
-
+    LR13.config(text = "PAGAT:")
+    LRR131.grid(row=12, column=1) 
+    LRR131['values'] = (["Si","No"])
+    LR14.config(text = "MAIL:")
+    LRR142.grid(row=13, column=1)
+        
     # Si aquí se pulsan las teclas CTRL + D se pone la fecha actual
     raiz.bind("<Control-d>", lambda event: FechaActualIncrustadaInc())
     raiz.bind("<Control-D>", lambda event: FechaActualIncrustadaInc())
@@ -7052,13 +7095,13 @@ def menuIncidenciasFacturaProformaIntroducirCrear       ():
         
         # Miramos si el cliente existe
         # Abrimos la tabla de clientes
-        conn = sqlite3.connect('databases/basesDeDatosProforma.db')
+        conn = sqlite3.connect('databases/basesDeDatosClientes.db')
         c = conn.cursor()
         # Bucle revisando todos los clientes
         exist = False
-        for row in c.execute('SELECT * FROM bd_Proforma'):
+        for row in c.execute('SELECT * FROM bd_Clientes'):
             # Si el ID coincide con v3
-            if row[3] == v3:
+            if row[0] == v3:
                 # Cerramos la tabla
                 conn.close()
                 # Ponemos la variable exist en True
@@ -7726,7 +7769,7 @@ def MenuDatosClienteIntroducir                          ():
                             
         # Inserta en la base de tados
         cursor.execute("""INSERT INTO bd_clientes VALUES (:nombre, :direccion1, 
-                :direccion2, :direccion3, :telefono, :mail, :nifcif, :contacto, :telefonocont)""",
+                :direccion2, :direccion3, :telefono, :mail, :nifcif, :contacto, :telefonocont, :mailcont)""",
                 {
                     'nombre':           LRR22.get(),
                     'direccion1':       LRR32.get(),
@@ -7736,7 +7779,8 @@ def MenuDatosClienteIntroducir                          ():
                     'mail':             LRR72.get(),
                     'nifcif':           LRR82.get(),
                     'contacto':         LRR92.get(),
-                    'telefonocont':     LRR102.get()
+                    'telefonocont':     LRR102.get(),
+                    'mailcont':         LRR112.get()
                     })
 
 
@@ -7766,7 +7810,7 @@ def MenuDatosClienteIntroducir                          ():
         try:
             datos = cursor.fetchall()
             dato = datos[-1]
-            idAdecuado = dato[9]
+            idAdecuado = dato[10]
         except:
             idAdecuado = 0
             
@@ -7795,7 +7839,7 @@ def MenuDatosClienteIntroducir                          ():
     try:
         datos = cursor.fetchall()
         dato = datos[-1]
-        idAdecuado = dato[9]
+        idAdecuado = dato[10]
     except:
         idAdecuado = 0
         
@@ -7826,9 +7870,11 @@ def MenuDatosClienteIntroducir                          ():
     LRR82.grid(row=7,column=1)
     LR9.config(text = "CONTACTE:")
     LRR92.grid(row=8,column=1)
-    LR10.config(text = "TELÈFON CONTACTE:")
+    LR10.config(text = "TELF. CONTACTE:")
     LRR102.grid(row=9,column=1)
-    
+    LR11.config(text = "MAIL CONTACTE:")
+    LRR112.grid(row=10,column=1)
+        
     BB4.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 5, command =MenuDatosClienteIntroducirIntroduce)
     cambiaPasaEncima(BB4,"green","#27779d") 
     
@@ -8431,7 +8477,8 @@ try:
         MAIL            text,
         NIFCIF          text,
         CONTACTO        text,
-        TELCONTACTO     text)""")
+        TELCONTACTO     text,
+        MAILCONTACTO    text)""")
     
     # Ejecutar (commit) instrucción o consulta
     base_datos_datos.commit()
