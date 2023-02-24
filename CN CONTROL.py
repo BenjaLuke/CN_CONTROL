@@ -1196,6 +1196,25 @@ def query_incidencias_busca ():
     v13= LRR131.get()
     v14= LRR142.get()
     
+    # Si el dia es de una cifra, le añadimos un 0 delante
+    if len(v2) == 1:
+        v2 = "0" + v2
+    # Si el mes es de una cifra, le añadimos un 0 delante
+    if len(v3) == 1:
+        v3 = "0" + v3
+    # Si el año es de dos cifras, le añadimos un 20 delante
+    if len(v4) == 2:
+        v4 = "20" + v4
+    # Si el dia de revisión es de una cifra, le añadimos un 0 delante
+    if len(v8) == 1:
+        v8 = "0" + v8
+    # Si el mes de revisión es de una cifra, le añadimos un 0 delante
+    if len(v9) == 1:
+        v9 = "0" + v9
+    # Si el año de revisión es de dos cifras, le añadimos un 20 delante
+    if len(v10) == 2:
+        v10 = "20" + v10
+            
     # Creamos la base de datos o conectamos con una
     base_datos = sqlite3.connect('databases/basesDeDatosIncidencias.db')
     busqueda = "SELECT *, oid FROM bd_incidencias WHERE ((CLIENTE = '" + v1 + "' or '" + v1 + "' = '') AND (FECHA LIKE '" + v2 + "/%' or '" + v2 + "' = '') AND (FECHA LIKE '%/" + v3 + "/%' or '" + v3 + "' = '') AND (FECHA LIKE '%/" + v4 + "' or '" + v4 + "' = '') AND (PRODUCTO = '" + v5 + "' or '" + v5 + "' = '') AND (IDIOMA = '" + v6 + "' or '" + v6 + "' = '') AND (AGENDADO = '" + v7 + "' or '" + v7 + "' = '') AND (FECHA_REV LIKE '" + v8 + "/%' or '" + v8 + "' = '') AND (FECHA_REV LIKE '%/" + v9 + "/%' or '" + v9 + "' = '')  AND (FECHA_REV LIKE '%/" + v10 + "' or '" + v10 + "' = '') AND (FACTURA = '" + v11 + "' or '" + v11 + "' = '')  AND (ESTADO = '" + v12 + "' or '" + v12 + "' = '') AND (PAGAT = '" + v13 + "' OR '" + v13 + "' = '') AND (MAIL_EXTRA = '" + v14 + "' OR '" + v14 + "' = '')) ORDER BY FECHA"
@@ -1285,6 +1304,7 @@ def incidenciasCorrigeUno   ():
         LRR141.config(state = "readandwrite")
         LRR141.insert(0,record[5])
         LRR141.config(state = "readonly")
+        LRR152.insert(0,record[21])
         LRR161.config(state = "readandwrite")
         LRR161.insert(0,record[16])
         LRR161.config(state = "readonly")
@@ -1327,6 +1347,7 @@ def incidenciasCorrigeUno   ():
         LRR122.config(state = "readonly")
         LRR131.config(state = "disabled")
         LRR141.config(state = "disabled")
+        LRR152.config(state = "readonly")
         LRR161.config(state = "disabled")
         LRR172.config(state = "readonly")
         LRR181.config(state = "disabled")
@@ -1357,6 +1378,7 @@ def IncidenciasSalvaCorrecc ():
     v12 = LRR122.get()
     v13 = LRR131.get()
     v14 = LRR141.get()
+    v15 = LRR152.get()
     v16 = LRR161.get()
     v17 = LRR172.get()
     v18 = LRR181.get()
@@ -1429,7 +1451,23 @@ def IncidenciasSalvaCorrecc ():
                 v5 = clientes[0][5]
             # Cierra la base de datos
             base_datos_clientes.close() 
-                        
+    
+    # Si CONTACTE es ""
+    if v15 == "":
+            # Abre la base de datos de clientes
+            base_datos_clientes = sqlite3.connect('databases/basesDeDatosClientes.db')
+            # Crea el cursor
+            cursor1 = base_datos_clientes.cursor()
+            # Busca el cliente
+            cursor1.execute("SELECT * FROM bd_Clientes WHERE NOM ='"+v3+"'")
+            clientes = cursor1.fetchall()
+            # Si cursor1 tiene una sóla linea
+            largo = len(clientes)
+            if largo == 1:
+                # Buscamos el valor CONTACTE de la linea CLIENTE
+                v22 = clientes[0][7]
+            # Cierra la base de datos
+            base_datos_clientes.close()                                     
     # Crea una base de datos o abre la existente
     base_datos = sqlite3.connect('databases/basesDeDatosIncidencias.db')
     
@@ -1453,6 +1491,7 @@ def IncidenciasSalvaCorrecc ():
             TIPO1           = :tipo1,
             PRECIO2         = :precio2,
             TIPO2           = :tipo2,
+            CONTACTO        = :contacto,
             AGENDADO        = :agendado,
             FECHA_REV       = :fecha_rev,
             PAGAT           = :pagat,
@@ -1477,6 +1516,7 @@ def IncidenciasSalvaCorrecc ():
                 'tipo1' : v9,
                 'precio2': v11,
                 'tipo2': v12,
+                'contacto': v15,
                 'agendado': v16,
                 'fecha_rev': v17,
                 'pagat': v18,
@@ -6624,7 +6664,8 @@ def menuIncidenciasIntroducir                       ():
         v18 = LRR181.get()
         v19 = LRR213.get(1.0,END)
         v20 = LRR201.get()
-        v21 = LRR192.get()    
+        v21 = LRR192.get()
+        v22 = LRR152.get()    
             
         # Coteja errores
         try:
@@ -6742,7 +6783,22 @@ def menuIncidenciasIntroducir                       ():
                 # Buscamos el valor MAIL de la linea CLIENTE
                 v5 = clientes[0][5]
             # Cierra la base de datos
-            base_datos_clientes.close() 
+            base_datos_clientes.close()
+            
+        # Si CONTACTE es ""
+        if v22 == "":
+            # Abre la base de datos de clientes
+            base_datos_clientes = sqlite3.connect('databases/basesDeDatosClientes.db')
+            # Crea el cursor
+            cursor1 = base_datos_clientes.cursor()
+            # Busca el cliente
+            cursor1.execute("SELECT * FROM bd_Clientes WHERE NOM ='"+v3+"'")
+            clientes = cursor1.fetchall()
+            # Si cursor1 tiene una sóla linea
+            largo = len(clientes)
+            if largo == 1:
+                # Buscamos el valor CONTACTE de la linea CLIENTE
+                v22 = clientes[0][7]
                         
         # Salva datos
         # Crea la base de datos o conecta con ella
@@ -6755,7 +6811,7 @@ def menuIncidenciasIntroducir                       ():
         # Inserta en la base de tados
         cursor.execute("""INSERT INTO bd_Incidencias VALUES (:fecha,:hora,:pax1,:pax2,:producto,
                        :idioma,:tel_extra,:estado,:usuario,:fecha_cre,:cliente,:mail_extra,:precio1,
-                       :tipo1,:precio2,:tipo2,:agendado,:fecha_rev,:pagat,:notas,:factura)""",
+                       :tipo1,:precio2,:tipo2,:agendado,:fecha_rev,:pagat,:notas,:factura,:contacto)""",
                 {
                     'fecha':        v2,
                     'hora':         v6,
@@ -6777,7 +6833,8 @@ def menuIncidenciasIntroducir                       ():
                     'fecha_rev':    v17,
                     'pagat' :       v18,
                     'notas':        v21,
-                    'factura':      v19
+                    'factura':      v19,
+                    'contacto':     v22
                     })
 
 
@@ -6806,7 +6863,7 @@ def menuIncidenciasIntroducir                       ():
         try:
             datos = cursor.fetchall()
             dato = datos[-1]
-            idAdecuado = dato[21]
+            idAdecuado = dato[22]
         except:
             idAdecuado = 0
             
@@ -6839,7 +6896,7 @@ def menuIncidenciasIntroducir                       ():
     try:
         datos = cursor.fetchall()
         dato = datos[-1]
-        idAdecuado = dato[21]
+        idAdecuado = dato[22]
     except:
         idAdecuado = 0
         
@@ -6884,7 +6941,8 @@ def menuIncidenciasIntroducir                       ():
     LR14.config(text = "IDIOMA:")
     LRR141.grid(row=13, column=1) 
     LRR141['values'] = (idiomas)  
-
+    LR15.config(text = "CONTACTE:")
+    LRR152.grid(row=14, column=1)
     LR16.config(text = "AGENDAT:")
     LRR161.grid(row=15, column=1) 
     LRR161['values'] = (["Si","No"])
@@ -7343,10 +7401,16 @@ def menuIncidenciasFacturaProformaIntroducirCrear       ():
     LRR92.grid(row=8, column=1)
     LR10.config(text = "PREU 2:")
     LRR102.grid(row=9, column=1)
-    LR11.config(text = "IVA:")
+    LR11.config(text = "REPERCUTEIX IVA:")
     LRR111.grid(row=10, column=1)
     LRR111['values'] = (["Si","No"])
-    LR12.config(text = "TIPUS IVA:")
+    
+    # Si la casilla REPERCUTEIX IVA está vacía:
+    if LRR111.get() == "":
+        # Por defecto no se repercutirá IVA
+        LRR111.current(1)
+    
+    LR12.config(text = "% IVA:")
     LRR122.grid(row=11, column=1)
     LR13.config(text = "INCLÒS:")
     LRR131.grid(row=12, column=1)
@@ -8549,7 +8613,8 @@ try:
         FECHA_REV       text,
         PAGAT           text,
         NOTAS           text,
-        FACTURA         text)""")
+        FACTURA         text,
+        CONTACTO        text)""")
     
     # Ejecutar (commit) instrucción o consulta
     base_datos_datos.commit()
