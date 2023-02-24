@@ -899,6 +899,9 @@ def query_registros_busca   ():
     # Lo mismo con LRR22
     if len(LRR22.get()) == 1:
         LRR22.insert(0,"0")
+    # sI LRR32 mide 2, le añadimos 20 delante
+    if len(LRR32.get()) == 2:
+        LRR32.insert(0,"20")
     
     v1 = LRR12.get()
     v2 = LRR22.get()
