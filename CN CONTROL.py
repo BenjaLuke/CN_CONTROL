@@ -6669,7 +6669,7 @@ def menuIncidenciasIntroducir                       ():
         v20 = LRR201.get()
         v21 = LRR192.get()
         v22 = LRR152.get()    
-            
+        
         # Coteja errores
         try:
             # Si el principio de v2 es 1 dígito y "/"
@@ -6710,50 +6710,85 @@ def menuIncidenciasIntroducir                       ():
                 LR23.config(text = "Data incorrecte")
                 LRR22.focus() 
                 return 
-        try:
-            # Si el principio de v17 es 1 dígito y "/"
-            if v17[1] == "/":
-                #Añadimos un 0 delante
-                v17 = "0" + v17
-            # Si el principio de v17 no es 2 dígitos y "/"
-            if v17[0:2].isdigit() == False:
-                LR23.config(text = "Dia incorrecte")
-                LRR172.focus()
-                return
 
-            # Si la posición 4 es "/"
-            if v17[4] == "/":
-                # Añadimos un 0 entre la posición 2 y 3
-                v17 = v17[0:3] + "0" + v17[3:]
-            # Si v17 no contiene "/" dos digitos y "/"
-            if v17[3:5].isdigit() == False:
-                LR23.config(text = "Mes incorrecte")
-                LRR172.focus()
-                return
+        # Si v17 contiene algo
+        if v17 != "":
+            try:
+                # Si el principio de v17 es 1 dígito y "/"
+                if v17[1] == "/":
+                    #Añadimos un 0 delante
+                    v17 = "0" + v17
+                # Si el principio de v17 no es 2 dígitos y "/"
+                if v17[0:2].isdigit() == False:
+                    LR23.config(text = "Dia incorrecte")
+                    LRR172.focus()
+                    return
 
-            # Si el largo de la cadena v17 es inferior a 10 caracteres
-            if len(v17) <= 9:
-                # Añadimos 20 entre las posiciones 5 y 6
-                v17 = v17[0:6] + "20" + v17[6:] 
-            # Si v17 no acaba en 4 dígitos
-            if v17[6:10].isdigit() == False:
-                LR23.config(text = "Any incorrecte")
-                LRR172.focus()
-                return
-            # Si el largo es superior a 10 caracteres
-            if len(v17) > 10:
-                LR23.config(text = "Data incorrecte")
-                LRR172.focus()
-                return
-        except:
-                LR23.config(text = "Data incorrecte")
-                LRR172.focus() 
-                return
+                # Si la posición 4 es "/"
+                if v17[4] == "/":
+                    # Añadimos un 0 entre la posición 2 y 3
+                    v17 = v17[0:3] + "0" + v17[3:]
+                # Si v17 no contiene "/" dos digitos y "/"
+                if v17[3:5].isdigit() == False:
+                    LR23.config(text = "Mes incorrecte")
+                    LRR172.focus()
+                    return
+
+                # Si el largo de la cadena v17 es inferior a 10 caracteres
+                if len(v17) <= 9:
+                    # Añadimos 20 entre las posiciones 5 y 6
+                    v17 = v17[0:6] + "20" + v17[6:] 
+                # Si v17 no acaba en 4 dígitos
+                if v17[6:10].isdigit() == False:
+                    LR23.config(text = "Any incorrecte")
+                    LRR172.focus()
+                    return
+                # Si el largo es superior a 10 caracteres
+                if len(v17) > 10:
+                    LR23.config(text = "Data incorrecte")
+                    LRR172.focus()
+                    return
+            except:
+                    LR23.config(text = "Data incorrecte")
+                    LRR172.focus() 
+                    return
         # Si ESTADO está vacío
-        if v19 == "":
-            LR20.config(text = "Estat incorrecte")
-            LRR213.focus()
-            return                   
+        if v20 == "":
+            LR23.config(text = "Estat incorrecte")
+            LRR201.focus()
+            return    
+        
+        # Miramos si existe una incidencia con la misma fecha y hora
+        # Abrimos la base de datos de incidencias
+        conn = sqlite3.connect('databases/basesDeDatosIncidencias.db')    
+        # Creamos el cursor
+        miCursor = conn.cursor()
+        # Crea una lista con los datos FECHA y HORA
+        miCursor.execute("SELECT *,oid FROM bd_incidencias WHERE ((FECHA = '" + v2 + "') AND (HORA = '" + v6+ "'))")
+        casos = miCursor.fetchall()
+        cant_casos = len(casos)
+        # Busca en casos un caso con el mismo ID que v1
+        for caso in casos:
+            if caso[-1] == v1:
+                cant_casos -= 1
+                print(cant_casos)
+        # Si hay más de un caso con la misma fecha y hora
+        if cant_casos > 0:
+            global ventana2
+            ventana2 = Tk()                         # Creamos la ventana
+            ventana2.title(" ")                     # Damos titulo a la ventana
+            ventana2.geometry("500x250")            # Damos tamaño a la ventana
+            ventana2.configure(bg='red')            # Damos color de fondo a la ventana
+            ventana2.iconbitmap("image/icono.ico")  # Damos icono a la ventana
+            ventana2.deiconify()                    # Mostramos la ventana
+            ventana2label = Label(ventana2, text = "¡¡ATENCIÓ!! Ja existeix una altra incidència amb aquesta data i hora", bg = "red", fg = "white", font = ("Helvetica", 12))   
+            ventana2label.place(relx = 0.5, rely = 200, anchor = CENTER)               
+            ventana2label.pack()                    # Coloca el label en la ventana
+            ventana2.overrideredirect(True)         # Quitamos el marco de la ventana
+            ventana2.update()                       # Actualiza la ventana       
+            time.sleep(3)                           # 2 segundos de pausa
+            ventana2.destroy()                      # Destruye la ventana
+                                   
         # Si TELF_EXTRA es ""
         if v4 == "":
             # Abre la base de datos de clientes
