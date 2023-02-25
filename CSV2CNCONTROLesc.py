@@ -80,6 +80,7 @@ for LINEA in ARCHIVO:
     PAGAT       = LISTA[8]
     NOTAS       = LISTA[11]
     FACTURA     = LISTA[15]
+    PAX2        = LISTA[16]
         
     # Salva datos
     # Crea la base de datos o conecta con ella
@@ -95,7 +96,7 @@ for LINEA in ARCHIVO:
                     'fecha':        FECHA,
                     'hora':         HORA,
                     'pax1':         PAX1,
-                    'pax2':         "",
+                    'pax2':         PAX2,
                     'producto':     "",
                     'idioma':       IDIOMA,
                     'tel_extra':    TEL_EXTRA,
