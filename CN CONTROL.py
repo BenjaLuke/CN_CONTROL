@@ -1171,8 +1171,8 @@ def prequery_incidencias    ():
 def query_incidencias_Inv   ():
     
     # Creamos la base de datos o conectamos con una
-    base_datos = sqlite3.connect('databases/basesDeDatosIncidencias.db')
-    busqueda = "SELECT *, oid FROM bd_incidencias ORDER BY FECHA_CREA DESC, oid DESC"
+    base_datos = sqlite3.connect('databases/basesDeDatosIncidencias.db') 
+    busqueda = "SELECT *, oid FROM bd_incidencias ORDER BY FECHA_CREA DESC, HORA DESC"
     columnas = 8
     global puntero
     puntero = 0
@@ -1220,7 +1220,7 @@ def query_incidencias_busca ():
             
     # Creamos la base de datos o conectamos con una
     base_datos = sqlite3.connect('databases/basesDeDatosIncidencias.db')
-    busqueda = "SELECT *, oid FROM bd_incidencias WHERE ((CLIENTE = '" + v1 + "' or '" + v1 + "' = '') AND (FECHA LIKE '" + v2 + "/%' or '" + v2 + "' = '') AND (FECHA LIKE '%/" + v3 + "/%' or '" + v3 + "' = '') AND (FECHA LIKE '%/" + v4 + "' or '" + v4 + "' = '') AND (PRODUCTO = '" + v5 + "' or '" + v5 + "' = '') AND (IDIOMA = '" + v6 + "' or '" + v6 + "' = '') AND (AGENDADO = '" + v7 + "' or '" + v7 + "' = '') AND (FECHA_REV LIKE '" + v8 + "/%' or '" + v8 + "' = '') AND (FECHA_REV LIKE '%/" + v9 + "/%' or '" + v9 + "' = '')  AND (FECHA_REV LIKE '%/" + v10 + "' or '" + v10 + "' = '') AND (FACTURA = '" + v11 + "' or '" + v11 + "' = '')  AND (ESTADO = '" + v12 + "' or '" + v12 + "' = '') AND (PAGAT = '" + v13 + "' OR '" + v13 + "' = '') AND (MAIL_EXTRA = '" + v14 + "' OR '" + v14 + "' = '')) ORDER BY FECHA"
+    busqueda = "SELECT *, oid FROM bd_incidencias WHERE ((CLIENTE = '" + v1 + "' or '" + v1 + "' = '') AND (FECHA LIKE '" + v2 + "/%' or '" + v2 + "' = '') AND (FECHA LIKE '%/" + v3 + "/%' or '" + v3 + "' = '') AND (FECHA LIKE '%/" + v4 + "' or '" + v4 + "' = '') AND (PRODUCTO = '" + v5 + "' or '" + v5 + "' = '') AND (IDIOMA = '" + v6 + "' or '" + v6 + "' = '') AND (AGENDADO = '" + v7 + "' or '" + v7 + "' = '') AND (FECHA_REV LIKE '" + v8 + "/%' or '" + v8 + "' = '') AND (FECHA_REV LIKE '%/" + v9 + "/%' or '" + v9 + "' = '')  AND (FECHA_REV LIKE '%/" + v10 + "' or '" + v10 + "' = '') AND (FACTURA = '" + v11 + "' or '" + v11 + "' = '')  AND (ESTADO = '" + v12 + "' or '" + v12 + "' = '') AND (PAGAT = '" + v13 + "' OR '" + v13 + "' = '') AND (MAIL_EXTRA = '" + v14 + "' OR '" + v14 + "' = '')) ORDER BY FECHA, HORA"
     columnas = 8
     global puntero
     query(base_datos,busqueda,columnas,"ID","DATA","HORA","PAX","PAX","PRODUCTE","IDIOMA","TELÈFON","ESTAT")
@@ -6637,6 +6637,10 @@ def menuIncidencias                             ():
             BM2.focus()
     if int(usuarioNivel) >= 3:
         BM6.config(text="")
+    
+    # Campor LRR11 sólo permite que se introduzca algo de la lsita de selección
+        LRR11.config(state = "readonly")
+            
     ajusta_espacios_info(10,22,8,11,8,5,5,20,11,11,20,1)
 def menuIncidenciasIntroducir                       ():
     
@@ -6910,12 +6914,13 @@ def menuIncidenciasIntroducir                       ():
         # Cerrar conexion 
         base_datos_datos.close() 
         
-        # Prepara el nuevo ID    
-        LRR1.config(text = idCorrecto)
-
         # Limpia los campos
         LimpiaElegibles()
         
+        # Prepara el nuevo ID    
+        LRR1.config(text = idCorrecto)
+
+
         # Liberamos la escritura de la etiqueta CLIENT
         LRR31.config(state = "readandwrite")
         
@@ -7015,7 +7020,10 @@ def menuIncidenciasConsultar                        ():
 
     LR1.config(text = "CLIENT:")
     LRR11.grid(row=0, column=1)  
-    LRR11['values'] = (clientes)  
+    LRR11['values'] = (clientes)
+    # Permite introducir cualquier dato en el campo
+    LRR11.config(state = "readandwrite")
+     
     LR2.config(text = "esdeveniment DIA:")
     LRR22.grid(row=1, column=1)
     LR3.config(text = "MES:")
