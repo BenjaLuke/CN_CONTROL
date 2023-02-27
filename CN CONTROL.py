@@ -1217,10 +1217,10 @@ def query_incidencias_busca ():
     # Si el año de revisión es de dos cifras, le añadimos un 20 delante
     if len(v10) == 2:
         v10 = "20" + v10
-            
     # Creamos la base de datos o conectamos con una
     base_datos = sqlite3.connect('databases/basesDeDatosIncidencias.db')
-    busqueda = "SELECT *, oid FROM bd_incidencias WHERE ((CLIENTE = '" + v1 + "' or '" + v1 + "' = '') AND (FECHA LIKE '" + v2 + "/%' or '" + v2 + "' = '') AND (FECHA LIKE '%/" + v3 + "/%' or '" + v3 + "' = '') AND (FECHA LIKE '%/" + v4 + "' or '" + v4 + "' = '') AND (PRODUCTO = '" + v5 + "' or '" + v5 + "' = '') AND (IDIOMA = '" + v6 + "' or '" + v6 + "' = '') AND (AGENDADO = '" + v7 + "' or '" + v7 + "' = '') AND (FECHA_REV LIKE '" + v8 + "/%' or '" + v8 + "' = '') AND (FECHA_REV LIKE '%/" + v9 + "/%' or '" + v9 + "' = '')  AND (FECHA_REV LIKE '%/" + v10 + "' or '" + v10 + "' = '') AND (FACTURA = '" + v11 + "' or '" + v11 + "' = '')  AND (ESTADO = '" + v12 + "' or '" + v12 + "' = '') AND (PAGAT = '" + v13 + "' OR '" + v13 + "' = '') AND (MAIL_EXTRA = '" + v14 + "' OR '" + v14 + "' = '')) ORDER BY FECHA, HORA"
+    busqueda = "SELECT *, oid FROM bd_incidencias WHERE ((CLIENTE = '" + v1 + "' or '" + v1 + "' = '') AND (FECHA LIKE '" + v2 + "/%' or '" + v2 + "' = '') AND (FECHA LIKE '%/" + v3 + "/%' or '" + v3 + "' = '') AND (FECHA LIKE '%/" + v4 + "' or '" + v4 + "' = '') AND (PRODUCTO = '" + v5 + "' or '" + v5 + "' = '') AND (IDIOMA = '" + v6 + "' or '" + v6 + "' = '') AND (AGENDADO = '" + v7 + "' or '" + v7 + "' = '') AND (FECHA_REV LIKE '" + v8 + "/%' or '" + v8 + "' = '') AND (FECHA_REV LIKE '%/" + v9 + "/%' or '" + v9 + "' = '')  AND (FECHA_REV LIKE '%/" + v10 + "' or '" + v10 + "' = '') AND (ESTADO = '" + v12 + "' or '" + v12 + "' = '') AND (NOTAS = '" + v11 + "' or '" + v11 + "' = '') AND (PAGAT = '" + v13 + "' OR '" + v13 + "' = '') AND (MAIL_EXTRA = '" + v14 + "' OR '" + v14 + "' = '')) ORDER BY FECHA, HORA"
+    
     columnas = 8
     global puntero
     query(base_datos,busqueda,columnas,"ID","DATA","HORA","PAX","PAX","PRODUCTE","IDIOMA","TELÈFON","ESTAT")
