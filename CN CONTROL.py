@@ -2192,6 +2192,143 @@ def del_proform_yes         ():
     # Foco
     LRR12.focus() 
 
+def query_bloqueos          ():
+    
+        
+    global puntero
+    if puntero <= 0:
+        puntero = 0
+        query_bloqueos_busca()
+        return
+    else:
+        puntero -= 42
+        query_bloqueos_busca()    
+def query_bloqueos_Inv      ():
+
+# Creamos la base de datos o conectamos con una
+    base_datos = sqlite3.connect('databases/basesDeDatosIncidencias.db')
+    busqueda = "SELECT *, oid FROM bd_bloqueos ORDER BY FECHA"
+    columnas = 8
+    global puntero
+    puntero = 0
+    query(base_datos,busqueda,columnas,"ID","DATES","","","","","","","")
+def query_bloqueos_busca    ():
+        
+    v2 = LRR12.get()
+
+    # Creamos la base de datos o conectamos con una
+    base_datos = sqlite3.connect('databases/basesDeDatosIncidencias.db')
+    busqueda = "SELECT *, oid FROM bd_bloqueos WHERE (FECHA = '" + v2 + "')"
+    
+    columnas = 8
+    global puntero
+    query(base_datos,busqueda,columnas,"ID","DATA","","","","","","","")
+def bloqueoBorraUno         ():
+
+    global v2
+    # Rescata los valores de los campos
+    v2 = LRR12.get()
+        
+    # Coteja errores
+    try:
+        # Si el principio de v2 es 1 dígito y "/"
+        if v2[1] == "/":
+            #Añadimos un 0 delante
+            v2 = "0" + v2
+        # Si el principio de v2 no es 2 dígitos y "/"
+        if v2[0:2].isdigit() == False:
+            LR23.config(text = "Dia incorrecte")
+            LRR22.focus()
+            return
+
+        # Si la posición 4 es "/"
+        if v2[4] == "/":
+            # Añadimos un 0 entre la posición 2 y 3
+            v2 = v2[0:3] + "0" + v2[3:]
+        # Si v2 no contiene "/" dos digitos y "/"
+        if v2[3:5].isdigit() == False:
+            LR23.config(text = "Mes incorrecte")
+            LRR22.focus()
+            return
+
+        # Si el largo de la cadena v2 es inferior a 10 caracteres
+        if len(v2) <= 9:
+            # Añadimos 20 entre las posiciones 5 y 6
+            v2 = v2[0:6] + "20" + v2[6:] 
+        # Si v2 no acaba en 4 dígitos
+        if v2[6:10].isdigit() == False:
+            LR23.config(text = "Any incorrecte")
+            LRR22.focus()
+            return
+        # Si el largo es superior a 10 caracteres
+        if len(v2) > 10:
+            LR23.config(text = "Data incorrecte")
+            LRR22.focus()
+            return
+    except:
+            LR23.config(text = "Data incorrecte")
+            LRR22.focus() 
+            return
+
+    # Creamos la base de datos o conectamos con una
+    base_datos = sqlite3.connect('databases/basesDeDatosIncidencias.db')
+    busqueda = "SELECT *, oid FROM bd_bloqueos WHERE (FECHA = '" + LRR12.get() + "')"
+    columnas = 8
+    global puntero
+    query(base_datos,busqueda,columnas,"ID","DATA","","","","","","","")
+    
+    # Ventana de aviso
+    # Preparamos la ventana Tk donde trabajaremos
+    global ventana2
+    ventana2 = Tk()
+    ventana2.title('Atenció!!!')
+    ventana2.geometry("270x60")
+    ventana2.configure(bg='red')
+    ventana2.iconbitmap("image/icono.ico")
+    ventana2.deiconify()
+    aviso = Label(ventana2,text = ("Aixó esborrarà el bloqueig del "+
+                                   v2 +", si existeix."),
+                  anchor = "center",
+                  background = "red")
+    aviso.grid(column=0, row = 0, columnspan = 2, pady=(5, 0))
+    
+    yes_btn = Button(ventana2, text="SI", command=del_block_yes)
+    yes_btn.grid(row=1, column=0,  ipadx=5)      
+    
+    no_btn = Button(ventana2, text="NO", command=del_no)
+    no_btn.grid(row=1, column=1, ipadx=5)
+    
+    no_btn.focus()
+    
+    ventana2.mainloop()      
+def del_block_yes           ():
+    
+    global v2
+    # Creamos base de datos o conectamos a una
+    base_datos = sqlite3.connect('databases/basesDeDatosIncidencias.db')
+    
+	# Creamos el cursor
+    c = base_datos.cursor()
+
+	# Borra el registro
+    c.execute("DELETE from bd_bloqueos WHERE FECHA = '" + v2 + "'")
+
+    LimpiaElegibles()
+    
+	#Asegura los cambios
+    base_datos.commit()
+
+	# Cierra la conexión 
+    base_datos.close()
+    
+    ventana2.destroy()
+
+    # Borramos los datos del listado de registros
+    query_bloqueos()
+    
+    # Foco
+    LRR12.focus() 
+            
 def query_productos         ():
     
     # Creamos la base de datos o conectamos con una
@@ -6639,7 +6776,7 @@ def menuIncidencias                             ():
     LimpiaLabelsRellena()
        
     textMenu.config(text = "MENU INCIDÈNC./GRUPS")   
-    menusBotones("Tornar",MenuInicial,"Introduir",menuIncidenciasIntroducir,"Consultar",menuIncidenciasConsultar,"Mirar/Corregir",menuIncidenciasCorregir,"Eliminar",menuIncidenciasEliminar,"",regresaSinNada,"Factures proforma",menuIncidenciasFacturaProforma)         
+    menusBotones("Tornar",MenuInicial,"Introduir",menuIncidenciasIntroducir,"Consultar",menuIncidenciasConsultar,"Mirar/Corregir",menuIncidenciasCorregir,"Eliminar",menuIncidenciasEliminar,"",regresaSinNada,"Factures proforma",menuIncidenciasFacturaProforma,"",regresaSinNada,"Bloquejos",menuIncidenciasBloqueos)         
     BM1.focus()
     
     if int(usuarioNivel) >= 3:
@@ -6726,6 +6863,25 @@ def menuIncidenciasIntroducir                       ():
                 LRR22.focus() 
                 return 
 
+        # Abre la base de datos bd_incidencias
+        conn = sqlite3.connect('databases/basesDeDatosIncidencias.db')
+        c = conn.cursor()
+        # Crea una lista con todos los datos de bd_bloqueos
+        c.execute("SELECT * FROM bd_bloqueos")
+        casos = c.fetchall()
+        # Revisa todos los datos de c por si coinciden con v2
+        for row in casos:
+            # Si v2 es igual a la fecha de bloqueo
+            if v2 == row[0]:
+                # Avisamos de la anomalía y regresamos
+                LR23.config(text = "Data bloquejada")
+                LRR12.focus()
+                # Cerramos la base de datos
+                conn.close()
+                return
+        # Cerramos la base de datos
+        conn.close()
+        
         # Si v17 contiene algo
         if v17 != "":
             try:
@@ -7535,7 +7691,163 @@ def menuIncidenciasFacturaProformaEliminar          ():
         
     Boton4activado(ProformaBorraUno)
     LRR12.focus() 
+
+def menuIncidenciasBloqueos                      ():
+ 
+    global usuarioNivel
+    if int(usuarioNivel) >= 3:
+        return
     
+    global VieneDeIncGrups
+    VieneDeIncGrups = "None"
+    
+    nomUsuario.config(text = usuarioReal)
+    diaGlobaltk.set(diaGlobal)
+    mesGlobaltk.set(mesGlobal)
+    anyoGlobaltk.set(anyoGlobal)
+    MiraFecha(anyoFecha)
+    
+    ajusta_espacios_info(10,22,8,11,1,12,25,9,25,7,1,1)
+    textMenu.config(text = "BLOQUEJOS")   
+    LimpiaLabelsRellena() 
+    menusBotones("Tornar",menuIncidencias,"Bloquejar",menuIncidenciasBloqueosBloquear,"Desbloquejar",menuIncidenciasBloqueosDesbloquear)
+    BM1.focus()
+def menuIncidenciasBloqueosBloquear                 ():
+    global usuarioNivel
+    if int(usuarioNivel) >= 3:
+        return
+    ajusta_espacios_info(10,22,10,10,10,10,10,10,10,10,10,10)
+
+    
+    def menuIncidenciasBloqueosBloquea ():
+        # Rescata los valores de los campos
+        v2 = LRR12.get()
+        
+        # Coteja errores
+        try:
+            # Si el principio de v2 es 1 dígito y "/"
+            if v2[1] == "/":
+                #Añadimos un 0 delante
+                v2 = "0" + v2
+            # Si el principio de v2 no es 2 dígitos y "/"
+            if v2[0:2].isdigit() == False:
+                LR23.config(text = "Dia incorrecte")
+                LRR22.focus()
+                return
+
+            # Si la posición 4 es "/"
+            if v2[4] == "/":
+                # Añadimos un 0 entre la posición 2 y 3
+                v2 = v2[0:3] + "0" + v2[3:]
+            # Si v2 no contiene "/" dos digitos y "/"
+            if v2[3:5].isdigit() == False:
+                LR23.config(text = "Mes incorrecte")
+                LRR22.focus()
+                return
+
+            # Si el largo de la cadena v2 es inferior a 10 caracteres
+            if len(v2) <= 9:
+                # Añadimos 20 entre las posiciones 5 y 6
+                v2 = v2[0:6] + "20" + v2[6:] 
+            # Si v2 no acaba en 4 dígitos
+            if v2[6:10].isdigit() == False:
+                LR23.config(text = "Any incorrecte")
+                LRR22.focus()
+                return
+            # Si el largo es superior a 10 caracteres
+            if len(v2) > 10:
+                LR23.config(text = "Data incorrecte")
+                LRR22.focus()
+                return
+        except:
+                LR23.config(text = "Data incorrecte")
+                LRR22.focus() 
+                return 
+         
+        # Miramos si existe una incidencia con la misma fecha y hora
+        # Abrimos la base de datos de incidencias
+        conn = sqlite3.connect('databases/basesDeDatosIncidencias.db')    
+        # Creamos el cursor
+        miCursor = conn.cursor()
+        # Crea una lista con los datos FECHA
+        miCursor.execute("SELECT *,oid FROM bd_incidencias WHERE ((FECHA = '" + v2 + "'))")
+        casos = miCursor.fetchall()
+        cant_casos = len(casos)
+        # Si hay más de un caso con la misma fecha y hora
+        if cant_casos > 0:
+            global ventana2
+            ventana2 = Tk()                         # Creamos la ventana
+            ventana2.title(" ")                     # Damos titulo a la ventana
+            ventana2.geometry("500x250")            # Damos tamaño a la ventana
+            ventana2.configure(bg='red')            # Damos color de fondo a la ventana
+            ventana2.iconbitmap("image/icono.ico")  # Damos icono a la ventana
+            ventana2.deiconify()                    # Mostramos la ventana
+            ventana2label = Label(ventana2, text = "¡¡ATENCIÓ!! Ja existeix algun esdevenimen aquest dia.", bg = "red", fg = "white", font = ("Helvetica", 12))   
+            ventana2label.place(relx = 0.5, rely = 200, anchor = CENTER)               
+            ventana2label.pack()                    # Coloca el label en la ventana
+            ventana2.overrideredirect(True)         # Quitamos el marco de la ventana
+            ventana2.update()                       # Actualiza la ventana       
+            time.sleep(3)                           # 2 segundos de pausa
+            ventana2.destroy()                      # Destruye la ventana
+                                                           
+        # Salva datos
+        # Crea la base de datos o conecta con ella
+        base_datos_datos = sqlite3.connect('databases/basesDeDatosIncidencias.db')
+        
+        
+        # Crea el cursor
+        cursor = base_datos_datos.cursor()   
+    
+        # Inserta en la base de tados
+        cursor.execute("""INSERT INTO bd_Bloqueos VALUES (:fecha)""",
+                {
+                    'fecha':        v2
+                    })
+
+
+        # Asegura los cambios
+        base_datos_datos.commit()
+
+        # Cerrar conexion 
+        base_datos_datos.close() 
+                            
+        # Pinta datos en zona 3
+        query_bloqueos_Inv()
+
+        # Limpia posibles mensajes anteriores innecesarios
+        LR23.config(text = "")
+        
+        # Limpia los campos
+        LimpiaElegibles()
+                
+        # Coloca foco
+        LRR12.focus()
+           
+    # Crea la base de datos o conecta con ella
+    base_datos_datos = sqlite3.connect('databases/basesDeDatosIncidencias.db')
+        
+    LimpiaLabelsRellena()
+    menusBotones("Tornar",menuIncidenciasBloqueos ,"Bloquejar") 
+            
+    LR1.config(text = "DIA/MES/ANY:")
+    LRR12.grid(row=0, column=1) 
+          
+    Boton4activado(menuIncidenciasBloqueosBloquea)
+    query_bloqueos_Inv()
+              
+    LRR12.focus()
+def menuIncidenciasBloqueosDesbloquear              ():
+    LimpiaLabelsRellena()
+    menusBotones("Tornar",menuIncidenciasBloqueos,"",regresaSinNada,"Desbloqueja")
+
+    LR1.config(text = "DIA/MES/ANY:")
+    LRR12.grid(row=0, column=1)
+        
+    Boton4activado(bloqueoBorraUno)
+    query_bloqueos_Inv()
+
+    LRR12.focus()
+
 def menuCalendarios                             ():
     
     return # Desactivado por el momento
@@ -8674,6 +8986,17 @@ try:
         NOTAS           text,
         FACTURA         text,
         CONTACTO        text)""")
+    
+    # Ejecutar (commit) instrucción o consulta
+    base_datos_datos.commit()
+
+except:
+    
+    pass
+
+try:
+    cursor.execute("""CREATE TABLE bd_bloqueos (
+        FECHA           text)""")
     
     # Ejecutar (commit) instrucción o consulta
     base_datos_datos.commit()
