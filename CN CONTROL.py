@@ -249,6 +249,16 @@ def RepintaTodoTextoTamanyo ():
     LRR73.config(font=("Helvetica", tamanyoFont))
     LRR213.config(font=("Helvetica", tamanyoFont))
 
+def notasAmpliacion         ():
+    
+    # Si la label LRR213 tiene el foco...
+    if frameRellena.focus_get() == LRR213:
+        # aMPLIAMOS EL ANCHO DE LRR213
+        LRR213.config(width=100)
+    else:
+        LRR213.config(width=17)
+    frameRellena.after(100,notasAmpliacion)
+
 def MiraFecha               (uno):
 
     # Comprueba si diafecha, mesfecha y anyofecha contienen las fechas del dia de hoy
@@ -1320,7 +1330,7 @@ def incidenciasCorrigeUno   ():
         LRR201.insert(0,record[7])
         LRR201.config(state = "readonly")                
         LRR213.config(state = NORMAL)
-        LRR213.insert(1.0,notillas+" - "+usuarioReal+" fa canvis el "+diaGlobal+"/"+mesGlobal+"/"+anyoGlobal+": ")
+        LRR213.insert(1.0,notillas+"\n"+usuarioReal+" fa canvis el "+diaGlobal+"/"+mesGlobal+"/"+anyoGlobal+": ")
 
         nomUsuario.config(text = record[8])
         val6 =record[9]
@@ -1334,6 +1344,7 @@ def incidenciasCorrigeUno   ():
         mesFecha.config(text = mesGlobaltk)
         anyoFecha.config(text = anyoGlobaltk)
         MiraFecha(anyoFecha)
+
     # Centramos el cursor
     LRR21.focus()    
     if int(usuarioNivel) >=3:
@@ -7001,7 +7012,7 @@ def menuIncidenciasIntroducir                       ():
     LRR201['values'] = (estados)
     LR21.config(text = "NOTES:")
     LRR213.grid(row=20, column=1)
-         
+          
     Boton4activado(menuIncidenciasIntroducirIntroduce)
     query_incidencias_Inv()
     
@@ -7009,7 +7020,9 @@ def menuIncidenciasIntroducir                       ():
     if int(usuarioNivel) >= 3:
         # Ponemos el foco en el botón de estado
         LRR213.focus()
-        return   
+        return 
+    notasAmpliacion()
+          
     LRR22.focus()
 def menuIncidenciasConsultar                        ():
 
