@@ -34,6 +34,9 @@ Label(raiz, image=logo, bg="#b7b493").place(x=30, y=20) # Lo colocamos en raiz u
 # Si en cualquier momento se pulsan las teclas CTRL + R se va al menu de registro
 raiz.bind("<Control-r>", lambda event: menuRegistrosIntroducir())
 raiz.bind("<Control-R>", lambda event: menuRegistrosIntroducir())
+# Si en cualquier momento se pulsa las teclas CTRL + C intenta copiar al portapapeles
+raiz.bind("<Control-c>", lambda event: copy())
+raiz.bind("<Control-C>", lambda event: copy())
 # Si en cualquier momento se pulsan las teclas CTRL + V intenta copiar lo del portapapeles
 raiz.bind("<Control-v>", lambda event: paste())
 raiz.bind("<Control-V>", lambda event: paste())
@@ -43,9 +46,9 @@ raiz.bind("<Control-E>", lambda event: paste())
 # Si en cualquier momento se pulsan las teclas CTRL + I se va al menu de incidencias
 raiz.bind("<Control-i>", lambda event: menuIncidenciasIntroducir())
 raiz.bind("<Control-I>", lambda event: menuIncidenciasIntroducir()) 
-# Si en cualquier momento se pulsan las teclas CTRL + C se va al menu de consultar incidencias
-raiz.bind("<Control-c>", lambda event: menuIncidenciasConsultar())
-raiz.bind("<Control-C>", lambda event: menuIncidenciasConsultar())
+# Si en cualquier momento se pulsan las teclas CTRL + O se va al menu de consultar incidencias
+raiz.bind("<Control-o>", lambda event: menuIncidenciasConsultar())
+raiz.bind("<Control-O>", lambda event: menuIncidenciasConsultar())
 # Si en cualquier momento se pulsan las teclas CTRL + U se va al menu de cambio de usuario
 raiz.bind("<Control-u>", lambda event: cambioUsuario1())
 raiz.bind("<Control-U>", lambda event: cambioUsuario1())
@@ -136,6 +139,20 @@ anyoGlobaltk.set(anyoGlobal)
 puntero = 0
            
 # ------------------------------ Funciones globales ----------------------
+def copy                    ():
+    #Comprueba si el foco está en alguna label o entry.
+    if raiz.focus_get() == None:
+        return
+    else:
+        # Descubre en qué label o entry está el foco
+        foco = raiz.focus_get()
+        try:   
+            # Copia el contenido de la label o entry al portapapeles
+            texto = foco.get()
+            clipboard.copy(texto)
+        except:
+            pass
+
 def paste                   ():
     #Comprueba si el foco está en alguna label o entry.
     if raiz.focus_get() == None:
