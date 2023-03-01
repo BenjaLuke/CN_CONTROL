@@ -84,6 +84,8 @@ DatosUsuario = ()
 usuarioNivel = "0"
 usuarioReal = "No s'ha identificat"
 
+global avisoint
+avisoint = True
 global TamanyoLetra
 TamanyoLetra = 0
 
@@ -3861,8 +3863,72 @@ def preMenuTablas           ():
 # ------------------------------ Menus -------------------------------
 
 def MenuInicial                             ():
-
+    
     global usuarioNivel
+    global avisoint
+    
+    # Si el valor de nivelUsuario es mayor que 0...
+    if int(usuarioNivel) != 0 and avisoint == True:  
+        # si diaGlobal tiene 1 dígito, le añadimos un 0 delante
+        if len(diaGlobal) == 1:
+            fdia = "0" + diaGlobal
+        else:
+            fdia = diaGlobal
+        # Lo mismo con el mes
+        if len(mesGlobal) == 1:
+            fmes = "0" + mesGlobal
+        else:
+            fmes = mesGlobal
+        # Lo mismo con el año pero sies solo 2 dígitos y añaadimos 20 delante
+        if len(anyoGlobal) == 2:
+            fanyo = "20" + anyoGlobal
+        else:   
+            fanyo = anyoGlobal   
+        
+        # Creamos la fecha en formato dd/mm/aaaa
+        fechi = fdia + "/" + fmes + "/" + fanyo
+
+        # Abrimos la base de datos BaseDeDatosIncidencias.db
+        conexion = sqlite3.connect("databases/BasesDeDatosIncidencias.db")
+        # Creamos el cursor
+        cursora = conexion.cursor()
+        # Query 
+        cursora.execute("SELECT *, oid FROM bd_incidencias WHERE ((FECHA = '" + fechi + "') OR (FECHA_REV = '" + fechi + "')) AND (ESTADO != 'Fet')")
+        # Crea el fetchall
+        incidencritic = cursora.fetchall()
+        inciHoy = 0
+        inciRev = 0
+        # Por cada Incidencia de la lista...
+        for incident in incidencritic:
+            # Si la fecha de la incidencia es igual a la fecha actual...
+            if incident[0] == fechi:
+                inciHoy += 1       
+            # Si la fecha de revisión de la incidencia es igual a la fecha actual...
+            if incident[17] == fechi:
+                inciRev += 1
+        global ventana2
+        ventana2 = Tk()                         # Creamos la ventana
+        ventana2.title(" ")                     # Damos titulo a la ventana
+        ventana2.geometry("400x50")             # Damos tamaño a la ventana
+        ventana2.configure(bg='blue')           # Damos color de fondo a la ventana
+        ventana2.iconbitmap("image/icono.ico")  # Damos icono a la ventana
+        ventana2.deiconify()                    # Mostramos la ventana
+        ventana2label = Label(ventana2, text = "Hi ha "+str(inciHoy)+" incidències o grups per atendre avui", bg = "blue", fg = "white", font = ("Helvetica", 12))   
+        ventana2label.pack()                    # Coloca el label en la ventana
+        if int(usuarioNivel) <= 2:
+            ventana2label2 = Label(ventana2, text = "Hi ha "+str(inciRev)+" incidències o grups per revisar avui", bg = "blue", fg = "white", font = ("Helvetica", 12))
+            ventana2label2.pack()               # Coloca el label en la ventana    
+        ventana2.overrideredirect(True)         # Quitamos el marco de la ventana
+        ventana2.update()                       # Actualiza la ventana           
+        # Hacemos una pausa de 4 segundos
+        time.sleep(3)                       # 2 segundos de pausa
+        # Cerramos la ventana
+        ventana2.destroy()                  # Destruye la ventana     
+        # Bloqueamos que vuelva a aparecer la ventana
+        avisoint = False
+        # Cerramos la base de datos
+        conexion.close()
+             
     LimpiaLabelsRellena()
     if int(usuarioNivel) == 0:
         return
@@ -9066,5 +9132,5 @@ MenuInicial()
 
 if  DatosUsuario == ():       
     DatosUsuario = cargaUsuario()
- 
+     
 raiz.mainloop()  
