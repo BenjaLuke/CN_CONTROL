@@ -86,6 +86,8 @@ usuarioReal = "No s'ha identificat"
 
 global avisoint
 avisoint = True
+global EstamosEnIncidencias
+EstamosEnIncidencias = False
 global TamanyoLetra
 TamanyoLetra = 0
 
@@ -267,6 +269,11 @@ def RepintaTodoTextoTamanyo ():
     LRR73.config(font=("Helvetica", tamanyoFont))
     LRR213.config(font=("Helvetica", tamanyoFont))
 
+def bindNotasEvento         (text_widget):
+    # Enlazar el evento <FocusIn>
+    text_widget.bind("<FocusIn>", lambda event: notasAmpliacion())
+    # Enlazar el evento <FocusOut>
+    text_widget.bind("<FocusOut>",  lambda event: notasAmpliacion())
 def notasAmpliacion         ():
     
     # Si la label LRR213 tiene el foco...
@@ -275,7 +282,6 @@ def notasAmpliacion         ():
         LRR213.config(width=100)
     else:
         LRR213.config(width=17)
-    frameRellena.after(100,notasAmpliacion)
 
 def MiraFecha               (uno):
 
@@ -1180,12 +1186,14 @@ def del_register_yes        ():
 
 def query_incidencias       ():
     
+    global EstamosEnIncidencias
     # Creamos la base de datos o conectamos con una
     base_datos = sqlite3.connect('databases/basesDeDatosIncidencias.db')
     busqueda = "SELECT *, oid FROM bd_incidencias ORDER BY oid DESC"
     columnas = 8
     global puntero
-    query(base_datos,busqueda,columnas,"ID","DATA","HORA","PAX","PAX","PRODUCTE","IDIOMA","TELÈFON","ESTAT")
+    EstamosEnIncidencias = True
+    query(base_datos,busqueda,columnas,"ID","DATA","HORA","PAX","PRODUCTE","IDIOMA","ESTAT","CLIENT","PAGAT")    
 def prequery_incidencias    ():
     
     global puntero
@@ -1198,13 +1206,15 @@ def prequery_incidencias    ():
         query_incidencias_busca()
 def query_incidencias_Inv   ():
     
+    global EstamosEnIncidencias
     # Creamos la base de datos o conectamos con una
     base_datos = sqlite3.connect('databases/basesDeDatosIncidencias.db') 
     busqueda = "SELECT *, oid FROM bd_incidencias ORDER BY FECHA_CREA DESC, HORA DESC"
     columnas = 8
     global puntero
     puntero = 0
-    query(base_datos,busqueda,columnas,"ID","DATA","HORA","PAX","PAX","PRODUCTE","IDIOMA","TELÈFON","ESTAT")
+    EstamosEnIncidencias = True
+    query(base_datos,busqueda,columnas,"ID","DATA","HORA","PAX","PRODUCTE","IDIOMA","ESTAT","CLIENT","PAGAT")
 def query_incidencias_busca0():
     
     global puntero
@@ -1212,6 +1222,8 @@ def query_incidencias_busca0():
     query_incidencias_busca()
 def query_incidencias_busca ():
     
+    global EstamosEnIncidencias
+
     v1 = LRR11.get()
     v2 = LRR22.get()
     v3 = LRR32.get()
@@ -1251,7 +1263,8 @@ def query_incidencias_busca ():
     
     columnas = 8
     global puntero
-    query(base_datos,busqueda,columnas,"ID","DATA","HORA","PAX","PAX","PRODUCTE","IDIOMA","TELÈFON","ESTAT")
+    EstamosEnIncidencias = True
+    query(base_datos,busqueda,columnas,"ID","DATA","HORA","PAX","PRODUCTE","IDIOMA","ESTAT","CLIENT","PAGAT")
 def incidenciasCorrigeUno   ():
 
     global val1
@@ -1584,7 +1597,7 @@ def incidenciasBorraUno     ():
     busqueda = "SELECT *, oid FROM bd_incidencias WHERE (oid = '" + LRR12.get() + "')"
     columnas = 8
     global puntero
-    query(base_datos,busqueda,columnas,"ID","DATA","HORA","PAX","PAX","PRODUCTE","IDIOMA","TELÈFON","ESTAT")
+    query(base_datos,busqueda,columnas,"ID","DATA","HORA","PAX","PRODUCTE","IDIOMA","ESTAT","CLIENT","PAGAT")
     
     val1 = LRR12.get()
 
@@ -3025,6 +3038,8 @@ def del_user_yes            ():
 
 def query                   (seleccion,busc,columnas,*enunciados):
     
+    global EstamosEnIncidencias
+
     # Definimos a puntero como global para que se guarde su valor fuera de la función
     global puntero
         
@@ -3065,10 +3080,28 @@ def query                   (seleccion,busc,columnas,*enunciados):
                 globals()['VIEW%s' % num].config(text = "********")
             elif enunciados[i+1] == "":
                 num = "0" + str(i+1) + "0" + str(columna+1)
+            elif EstamosEnIncidencias == True:
+                if enunciados[i+1] == "PRODUCTE" or enunciados[i+1] == "IDIOMA":
+                    num = "0" + str(i+1) + "0" + str(columna+1)
+                    globals()['VIEW%s' % num].config(text = str(dato[i+1]))
+                elif enunciados[i+1] == "ESTAT":
+                    num = "0" + str(i+1) + "0" + str(columna+1)
+                    globals()['VIEW%s' % num].config(text = str(dato[i+2]))
+                elif enunciados[i+1] == "CLIENT": 
+                    num = "0" + str(i+1) + "0" + str(columna+1)
+                    globals()['VIEW%s' % num].config(text = str(dato[i+4]))
+                elif enunciados[i+1] == "PAGAT": 
+                    num = "0" + str(i+1) + "0" + str(columna+1)
+                    globals()['VIEW%s' % num].config(text = str(dato[i+11]))
+                else:
+                    num = "0" + str(i+1) + "0" + str(columna+1)
+                    globals()['VIEW%s' % num].config(text = str(dato[i]))                    
             else:
                 num = "0" + str(i+1) + "0" + str(columna+1)
                 globals()['VIEW%s' % num].config(text = str(dato[i]))
-        
+
+            
+                    
         columna += 1
         
         if columna == 21:
@@ -3082,7 +3115,7 @@ def query                   (seleccion,busc,columnas,*enunciados):
 
 	# Cierra la conexión con la base de datos
     seleccion.close()
-    
+    EstamosEnIncidencias = False
     return
 def del_no                  ():
     
@@ -3655,7 +3688,7 @@ def PDFProforma             ():
         datosCliente = c.fetchall()    
         
         # Creamos el nombre del archivo de salida
-        Nombre = "pdf/Proforma "+LRR22.get()+" - "+LRR31.get()+".pdf"
+        Nombre = "pdf/"+LRR22.get()+" - Proforma - "+LRR31.get()+".pdf"
         
         # Creamos el documento, DIN A4 y formato vertical
         PDF = canvas.Canvas(Nombre, pagesize=A4)
@@ -3685,7 +3718,7 @@ def PDFProforma             ():
         
         # Bajo MARCA escribimos "direccio@casanavas.cat"
         PDF.setFont('Helvetica',7)
-        PDF.drawString(39*mm,227*mm,"info@casanavas.cat")
+        PDF.drawString(41*mm,227*mm,"info@casanavas.cat")
         
         # Pinta cuadrado negro vacío a la derecha de LOGO
         PDF.setStrokeColorRGB(0,0,0)
@@ -6858,7 +6891,7 @@ def menuIncidencias                             ():
     LimpiaLabelsRellena()
        
     textMenu.config(text = "MENU INCIDÈNC./GRUPS")   
-    menusBotones("Tornar",MenuInicial,"Introduir",menuIncidenciasIntroducir,"Consultar",menuIncidenciasConsultar,"Mirar/Corregir",menuIncidenciasCorregir,"Eliminar",menuIncidenciasEliminar,"",regresaSinNada,"Factures proforma",menuIncidenciasFacturaProforma,"",regresaSinNada,"Bloquejos",menuIncidenciasBloqueos)         
+    menusBotones("Tornar",MenuInicial,"Introduir",menuIncidenciasIntroducirPre,"Consultar",menuIncidenciasConsultar,"Mirar/Corregir",menuIncidenciasCorregir,"Eliminar",menuIncidenciasEliminar,"",regresaSinNada,"Factures proforma",menuIncidenciasFacturaProforma,"",regresaSinNada,"Bloquejos",menuIncidenciasBloqueos)         
     BM1.focus()
     
     if int(usuarioNivel) >= 3:
@@ -6871,13 +6904,15 @@ def menuIncidencias                             ():
     # Campor LRR11 sólo permite que se introduzca algo de la lsita de selección
         LRR11.config(state = "readonly")
             
-    ajusta_espacios_info(10,22,8,11,8,5,5,20,11,11,20,1)
-def menuIncidenciasIntroducir                       ():
-    
+    ajusta_espacios_info(10,22,7,12,7,5,20,8,17,16,7,1)
+def menuIncidenciasIntroducirPre                    ():
     global usuarioNivel
     if int(usuarioNivel) >= 3:
         return
-    ajusta_espacios_info(10,22,8,11,8,5,5,20,11,11,20,1)
+    menuIncidenciasIntroducir()    
+def menuIncidenciasIntroducir                       ():
+    
+    ajusta_espacios_info(10,22,7,12,7,5,20,8,17,16,7,1)
     textMenu.config(text = "MENU INCIDÈNC./GRUPS")   
     
     def menuIncidenciasIntroducirIntroduce ():
@@ -6905,46 +6940,52 @@ def menuIncidenciasIntroducir                       ():
         v22 = LRR152.get()    
         
         # Coteja errores
-        try:
-            # Si el principio de v2 es 1 dígito y "/"
-            if v2[1] == "/":
-                #Añadimos un 0 delante
-                v2 = "0" + v2
-            # Si el principio de v2 no es 2 dígitos y "/"
-            if v2[0:2].isdigit() == False:
-                LR23.config(text = "Dia incorrecte")
-                LRR22.focus()
-                return
+        if v2 != "":
+            try:
+                # Si el principio de v2 es 1 dígito y "/"
+                if v2[1] == "/":
+                    #Añadimos un 0 delante
+                    v2 = "0" + v2
+                # Si el principio de v2 no es 2 dígitos y "/"
+                if v2[0:2].isdigit() == False:
+                    LR23.config(text = "Dia incorrecte")
+                    LRR22.focus()
+                    return
 
-            # Si la posición 4 es "/"
-            if v2[4] == "/":
-                # Añadimos un 0 entre la posición 2 y 3
-                v2 = v2[0:3] + "0" + v2[3:]
-            # Si v2 no contiene "/" dos digitos y "/"
-            if v2[3:5].isdigit() == False:
-                LR23.config(text = "Mes incorrecte")
-                LRR22.focus()
-                return
+                # Si la posición 4 es "/"
+                if v2[4] == "/":
+                    # Añadimos un 0 entre la posición 2 y 3
+                    v2 = v2[0:3] + "0" + v2[3:]
+                # Si v2 no contiene "/" dos digitos y "/"
+                if v2[3:5].isdigit() == False:
+                    LR23.config(text = "Mes incorrecte")
+                    LRR22.focus()
+                    return
 
-            # Si el largo de la cadena v2 es inferior a 10 caracteres
-            if len(v2) <= 9:
-                # Añadimos 20 entre las posiciones 5 y 6
-                v2 = v2[0:6] + "20" + v2[6:] 
-            # Si v2 no acaba en 4 dígitos
-            if v2[6:10].isdigit() == False:
-                LR23.config(text = "Any incorrecte")
-                LRR22.focus()
-                return
-            # Si el largo es superior a 10 caracteres
-            if len(v2) > 10:
-                LR23.config(text = "Data incorrecte")
-                LRR22.focus()
-                return
-        except:
-                LR23.config(text = "Data incorrecte")
-                LRR22.focus() 
-                return 
-
+                # Si el largo de la cadena v2 es inferior a 10 caracteres
+                if len(v2) <= 9:
+                    # Añadimos 20 entre las posiciones 5 y 6
+                    v2 = v2[0:6] + "20" + v2[6:] 
+                # Si v2 no acaba en 4 dígitos
+                if v2[6:10].isdigit() == False:
+                    LR23.config(text = "Any incorrecte")
+                    LRR22.focus()
+                    return
+                # Si el largo es superior a 10 caracteres
+                if len(v2) > 10:
+                    LR23.config(text = "Data incorrecte")
+                    LRR22.focus()
+                    return
+            except:
+                    LR23.config(text = "Data incorrecte")
+                    LRR22.focus() 
+                    return 
+        elif v2 == "" and v20 != "Pendent gaudir":
+            LR23.config(text = "Data incorrecte")
+            LRR22.focus() 
+            return
+        if v20 == "Pendent gaudir":
+            v2 = ""    
         # Abre la base de datos bd_incidencias
         conn = sqlite3.connect('databases/basesDeDatosIncidencias.db')
         c = conn.cursor()
@@ -7259,13 +7300,14 @@ def menuIncidenciasIntroducir                       ():
         # Ponemos el foco en el botón de estado
         LRR213.focus()
         return 
+
     notasAmpliacion()
-          
+      
     LRR22.focus()
 def menuIncidenciasConsultar                        ():
 
     textMenu.config(text = "MENU INCIDÈNC./GRUPS")   
-    ajusta_espacios_info(10,22,8,11,8,5,5,20,11,11,20,1)
+    ajusta_espacios_info(10,22,7,12,7,5,20,8,17,16,7,1)
     LimpiaLabelsRellena()
     menusBotones("Tornar",menuIncidencias,"",regresaSinNada,"Consultar")    
 
@@ -8914,6 +8956,7 @@ LRR73.config(font=("Helvetica", tamanyoFont),width = 17,height = 5,state = NORMA
 LRR213 = Text(frameRellena)
 LRR213.grid(rowspan=1,columnspan=1)
 LRR213.config(font=("Helvetica", tamanyoFont),width = 17,height = 5,state = NORMAL)
+bindNotasEvento(LRR213)
 
 LR22.grid(columnspan=3)
 LR22.config(fg = "blue",width = 30)
