@@ -154,7 +154,6 @@ def copy                    ():
             clipboard.copy(texto)
         except:
             pass
-
 def paste                   ():
     #Comprueba si el foco está en alguna label o entry.
     if raiz.focus_get() == None:
@@ -3686,7 +3685,7 @@ def PDFProforma             ():
         
         # Bajo MARCA escribimos "direccio@casanavas.cat"
         PDF.setFont('Helvetica',7)
-        PDF.drawString(39*mm,227*mm,"direccio@casanavas.cat")
+        PDF.drawString(39*mm,227*mm,"info@casanavas.cat")
         
         # Pinta cuadrado negro vacío a la derecha de LOGO
         PDF.setStrokeColorRGB(0,0,0)
