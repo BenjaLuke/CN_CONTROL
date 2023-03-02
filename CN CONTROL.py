@@ -1431,22 +1431,29 @@ def IncidenciasSalvaCorrecc ():
     v20 = LRR201.get()
     v21 = LRR192.get()   
     v22 = anyoGlobaltk.get() + "/" + mesGlobaltk.get() + "/" + diaGlobaltk.get()
-            
-    # Si el principio de v2 no es 2 dígitos y "/"
-    if v2[0:2].isdigit() == False or v2[2] != "/":
-        LR23.config(text = "Dia incorrecte")
-        LRR22.focus()
+    
+    if v2!= "":        
+        # Si el principio de v2 no es 2 dígitos y "/"
+        if v2[0:2].isdigit() == False or v2[2] != "/":
+            LR23.config(text = "Dia incorrecte")
+            LRR22.focus()
+            return
+        # Si v2 no contiene "/" dos digitos y "/"
+        if v2[3:5].isdigit() == False or v2[5] != "/":
+            LR23.config(text = "Mes incorrecte")
+            LRR22.focus()
+            return
+        # Si v2 no acaba en "/" y 4 dígitos
+        if v2[6:10].isdigit() == False or len(v2) != 10:
+            LR23.config(text = "Any incorrecte")
+            LRR22.focus()
+            return
+    elif v2 == "" and v20 != "Pendent gaudir":
+        LR23.config(text = "Manca data")
+        LRR22.focus() 
         return
-    # Si v2 no contiene "/" dos digitos y "/"
-    if v2[3:5].isdigit() == False or v2[5] != "/":
-        LR23.config(text = "Mes incorrecte")
-        LRR22.focus()
-        return
-    # Si v2 no acaba en "/" y 4 dígitos
-    if v2[6:10].isdigit() == False or len(v2) != 10:
-        LR23.config(text = "Any incorrecte")
-        LRR22.focus()
-        return
+    if v20 == "Pendent gaudir":
+        v2 = ""    
     # Si el principio de v17 no es 2 dígitos y "/"
     if v17 != "" and (v17[0:2].isdigit() == False or v17[2] != "/"):
         LR23.config(text = "Dia incorrecte")
@@ -6981,7 +6988,7 @@ def menuIncidenciasIntroducir                       ():
                     LRR22.focus() 
                     return 
         elif v2 == "" and v20 != "Pendent gaudir":
-            LR23.config(text = "Data incorrecte")
+            LR23.config(text = "Manca data")
             LRR22.focus() 
             return
         if v20 == "Pendent gaudir":
