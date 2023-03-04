@@ -94,6 +94,8 @@ global avisoint
 avisoint = True
 global EstamosEnIncidencias
 EstamosEnIncidencias = False
+global EstamsoEnRegistros
+EstamosEnRegistros = False
 global TamanyoLetra
 TamanyoLetra = 0
 
@@ -915,11 +917,13 @@ def menusBotones            (texto11="",enlace11=regresaSinNada,
         cambiaPasaEncima(BM0,"#b7b493","#b7b493")
 def query_registros         ():
     
+    global EstamosEnRegistros
     # Creamos la base de datos o conectamos con una
     base_datos = sqlite3.connect('databases/basesDeDatosRegistros.db')
     busqueda = "SELECT *, oid FROM bd_registros ORDER BY oid DESC"
     columnas = 8
     global puntero
+    EstamosEnRegistros = True
     query(base_datos,busqueda,columnas,"ID","","DATA","DESCRIPCIÓ","ORIGEN","HORA","PRODUCTE","FONT","")
 def prequery_registros      ():
     
@@ -933,12 +937,14 @@ def prequery_registros      ():
         query_registros_busca()
 def query_registros_Inv     ():
     
+    global EstamosEnRegistros
     # Creamos la base de datos o conectamos con una
     base_datos = sqlite3.connect('databases/basesDeDatosRegistros.db')
     busqueda = "SELECT *, oid FROM bd_registros ORDER BY FECHA DESC, oid DESC"
     columnas = 8
     global puntero
     puntero = 0
+    EstamosEnRegistros = True
     query(base_datos,busqueda,columnas,"ID","","DATA","DESCRIPCIÓ","ORIGEN","HORA","PRODUCTE","FONT","")
 def query_registros_busca0  ():
     
@@ -947,6 +953,7 @@ def query_registros_busca0  ():
     query_registros_busca()
 def query_registros_busca   ():
     
+    global EstamosEnRegistros
     # Si LRR12 mide 1, le añadimos un 0 delante
     if len(LRR12.get()) == 1:
         LRR12.insert(0,"0")
@@ -974,6 +981,7 @@ def query_registros_busca   ():
     busqueda = "SELECT *, oid FROM bd_registros WHERE ((FECHA LIKE '" + v3 + "/%' or '" + v3 + "' = '') AND (FECHA LIKE '%/" + v2 + "/%' or '" + v2 + "' = '') AND (FECHA LIKE '%/" + v1 + "' or '" + v1 + "' = '') AND (USUARIO = '" + v11 + "' or '" + v11 + "' = '') AND (DESCRIPCION = '" + v5 + "' or '" + v5 + "' = '') AND (ORIGEN = '" + v6 + "' or '" + v6 + "' = '') AND (HORA >= '" + v7 + "' or '" + v7 + "' = '')  AND (HORA <= '" + v8 + "' or '" + v8 + "' = '')  AND (PRODUCTO = '" + v9 + "' or '" + v9 + "' = '')   AND (FUENTE = '" + v10 + "' or '" + v10 + "' = '')) ORDER BY FECHA"
     columnas = 8
     global puntero
+    EstamosEnRegistros = True
     query(base_datos,busqueda,columnas,"ID","","DATA","DESCRIPCIÓ","ORIGEN","HORA","PRODUCTE","FONT","")
 def registroCorrigeUno      ():
 
@@ -3063,6 +3071,80 @@ def del_user_yes            ():
     # Borramos los datos del listado de registros
     query_usuarios() 
 
+def Registros0001         ():
+    TEXTO = VIEW0001.cget("text")
+    RegistrosFuerzoElId   (TEXTO)
+def Registros0002         ():
+    TEXTO = VIEW0002.cget("text")
+    RegistrosFuerzoElId   (TEXTO)
+def Registros0003         ():
+    TEXTO = VIEW0003.cget("text")
+    RegistrosFuerzoElId   (TEXTO)
+def Registros0004         ():
+    TEXTO = VIEW0004.cget("text")
+    RegistrosFuerzoElId   (TEXTO)
+def Registros0005         ():
+    TEXTO = VIEW0005.cget("text")
+    RegistrosFuerzoElId   (TEXTO)
+def Registros0006         ():
+    TEXTO = VIEW0006.cget("text")
+    RegistrosFuerzoElId   (TEXTO)
+def Registros0007         ():
+    TEXTO = VIEW0007.cget("text")
+    RegistrosFuerzoElId   (TEXTO)
+def Registros0008         ():
+    TEXTO = VIEW0008.cget("text")
+    RegistrosFuerzoElId   (TEXTO)
+def Registros0009         ():
+    TEXTO = VIEW0009.cget("text")
+    RegistrosFuerzoElId   (TEXTO)
+def Registros00010        ():
+    TEXTO = VIEW00010.cget("text")
+    RegistrosFuerzoElId   (TEXTO)
+def Registros00011        ():
+    TEXTO = VIEW00011.cget("text")
+    RegistrosFuerzoElId   (TEXTO)
+def Registros00012        ():
+    TEXTO = VIEW00012.cget("text")
+    RegistrosFuerzoElId   (TEXTO)
+def Registros00013        ():
+    TEXTO = VIEW00013.cget("text")
+    RegistrosFuerzoElId   (TEXTO)
+def Registros00014        ():
+    TEXTO = VIEW00014.cget("text")
+    RegistrosFuerzoElId   (TEXTO)
+def Registros00015        ():
+    TEXTO = VIEW00015.cget("text")
+    RegistrosFuerzoElId   (TEXTO)
+def Registros00016        ():
+    TEXTO = VIEW00016.cget("text")
+    RegistrosFuerzoElId   (TEXTO)
+def Registros00017        ():
+    TEXTO = VIEW00017.cget("text")
+    RegistrosFuerzoElId   (TEXTO)
+def Registros00018        ():
+    TEXTO = VIEW00018.cget("text")
+    RegistrosFuerzoElId   (TEXTO)
+def Registros00019        ():
+    TEXTO = VIEW00019.cget("text")
+    RegistrosFuerzoElId   (TEXTO)
+def Registros00020        ():
+    TEXTO = VIEW00020.cget("text")
+    RegistrosFuerzoElId   (TEXTO)
+def Registros00021        ():
+    TEXTO = VIEW00021.cget("text")
+    RegistrosFuerzoElId   (TEXTO)
+def RegistrosFuerzoElId   (VALOR):
+    MiraFecha(anyoFecha)
+    diaGlobaltk.set(diaGlobal)
+    mesGlobaltk.set(mesGlobal)
+    anyoGlobaltk.set(anyoGlobal) 
+    # Ponemos en la label LRR12 el valor VALOR
+    LRR12.delete(0,'end')
+    LRR12.insert(0,VALOR)
+    LRR22.focus()
+    registroCorrigeUno()
+
 def Incidencias0001         ():
     TEXTO = VIEW0001.cget("text")
     IncidenciasFuerzoElId   (TEXTO)
@@ -3121,7 +3203,7 @@ def Incidencias00019        ():
     TEXTO = VIEW00019.cget("text")
     IncidenciasFuerzoElId   (TEXTO)
 def Incidencias00020        ():
-    TEXTO = VIEW0002o.cget("text")
+    TEXTO = VIEW00020.cget("text")
     IncidenciasFuerzoElId   (TEXTO)
 def Incidencias00021        ():
     TEXTO = VIEW00021.cget("text")
@@ -3136,10 +3218,11 @@ def IncidenciasFuerzoElId   (VALOR):
     LRR12.insert(0,VALOR)
     LRR22.focus()
     incidenciasCorrigeUno()
+
 def query                   (seleccion,busc,columnas,*enunciados):
     
     global EstamosEnIncidencias
-
+    global EstamosEnRegistros
     # Definimos a puntero como global para que se guarde su valor fuera de la función
     global puntero
         
@@ -3174,6 +3257,51 @@ def query                   (seleccion,busc,columnas,*enunciados):
         globals()['VIEW%s' % num].config(text = str(dato[-1]))
         globals()['VIEW%s' % num].config(command=lambda: regresaSinNada() ) 
 
+        if EstamosEnRegistros == True:
+            
+            if num == "0001":
+                globals()['VIEW%s' % num].config(command=lambda: Registros0001())
+            elif num == "0002":
+                globals()['VIEW%s' % num].config(command=lambda: Registros0002())
+            elif num == "0003":
+                globals()['VIEW%s' % num].config(command=lambda: Registros0003())
+            elif num == "0004":
+                globals()['VIEW%s' % num].config(command=lambda: Registros0004())
+            elif num == "0005":
+                globals()['VIEW%s' % num].config(command=lambda: Registros0005())
+            elif num == "0006":
+                globals()['VIEW%s' % num].config(command=lambda: Registros0006())
+            elif num == "0007":
+                globals()['VIEW%s' % num].config(command=lambda: Registros0007())
+            elif num == "0008":
+                globals()['VIEW%s' % num].config(command=lambda: Registros0008())
+            elif num == "0009":
+                globals()['VIEW%s' % num].config(command=lambda: Registros0009())
+            elif num == "00010":
+                globals()['VIEW%s' % num].config(command=lambda: Registros00010())
+            elif num == "00011":
+                globals()['VIEW%s' % num].config(command=lambda: Registros00011())
+            elif num == "00012":
+                globals()['VIEW%s' % num].config(command=lambda: Registros00012())
+            elif num == "00013":
+                globals()['VIEW%s' % num].config(command=lambda: Registros00013())
+            elif num == "00014":
+                globals()['VIEW%s' % num].config(command=lambda: Registros00014())
+            elif num == "00015":
+                globals()['VIEW%s' % num].config(command=lambda: Registros00015())
+            elif num == "00016":
+                globals()['VIEW%s' % num].config(command=lambda: Registros00016())
+            elif num == "00017":
+                globals()['VIEW%s' % num].config(command=lambda: Registros00017())
+            elif num == "00018":
+                globals()['VIEW%s' % num].config(command=lambda: Registros00018())
+            elif num == "00019":
+                globals()['VIEW%s' % num].config(command=lambda: Registros00019())
+            elif num == "00020":
+                globals()['VIEW%s' % num].config(command=lambda: Registros00020())
+            elif num == "00021":
+                globals()['VIEW%s' % num].config(command=lambda: Registros00021())
+                                                                        
            
         if EstamosEnIncidencias == True:
             
@@ -3261,6 +3389,7 @@ def query                   (seleccion,busc,columnas,*enunciados):
 	# Cierra la conexión con la base de datos
     seleccion.close()
     EstamosEnIncidencias = False
+    EstamosEnRegistros = False
     return
 def del_no                  ():
     
