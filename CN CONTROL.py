@@ -801,11 +801,17 @@ def crea_espacios_info      (frame,a,b):
     for dato in range(a):
         
         for data in range(b):
-            
             num = "0" + str(dato) + "0" + str(data)
         
-            globals()['VIEW%s' % num] = Label(frame, text="",bg="#b7b493", fg="#293337",width = 10, height = 1)
-            globals()['VIEW%s' % num].grid(row=data+1,column=dato)
+            if dato == 0 and data != 0:
+
+                globals()['VIEW%s' % num] = Button(frame, text="",bg="#b7b493", fg="#293337",width = 10, height = 1)
+                globals()['VIEW%s' % num].grid(row=data+1,column=dato)
+                                
+            else:
+        
+                globals()['VIEW%s' % num] = Label(frame, text="",bg="#b7b493", fg="#293337",width = 10, height = 1)
+                globals()['VIEW%s' % num].grid(row=data+1,column=dato)
             
     columna = 0
     for dato in range (a):
@@ -3043,6 +3049,78 @@ def del_user_yes            ():
     # Borramos los datos del listado de registros
     query_usuarios() 
 
+def Incidencias0001         ():
+    TEXTO = VIEW0001.cget("text")
+    IncidenciasFuerzoElId   (TEXTO)
+def Incidencias0002         ():
+    TEXTO = VIEW0002.cget("text")
+    IncidenciasFuerzoElId   (TEXTO)
+def Incidencias0003         ():
+    TEXTO = VIEW0003.cget("text")
+    IncidenciasFuerzoElId   (TEXTO)
+def Incidencias0004         ():
+    TEXTO = VIEW0004.cget("text")
+    IncidenciasFuerzoElId   (TEXTO)
+def Incidencias0005         ():
+    TEXTO = VIEW0005.cget("text")
+    IncidenciasFuerzoElId   (TEXTO)
+def Incidencias0006         ():
+    TEXTO = VIEW0006.cget("text")
+    IncidenciasFuerzoElId   (TEXTO)
+def Incidencias0007         ():
+    TEXTO = VIEW0007.cget("text")
+    IncidenciasFuerzoElId   (TEXTO)
+def Incidencias0008         ():
+    TEXTO = VIEW0008.cget("text")
+    IncidenciasFuerzoElId   (TEXTO)
+def Incidencias0009         ():
+    TEXTO = VIEW0009.cget("text")
+    IncidenciasFuerzoElId   (TEXTO)
+def Incidencias00010        ():
+    TEXTO = VIEW00010.cget("text")
+    IncidenciasFuerzoElId   (TEXTO)
+def Incidencias00011        ():
+    TEXTO = VIEW00011.cget("text")
+    IncidenciasFuerzoElId   (TEXTO)
+def Incidencias00012        ():
+    TEXTO = VIEW00012.cget("text")
+    IncidenciasFuerzoElId   (TEXTO)
+def Incidencias00013        ():
+    TEXTO = VIEW00013.cget("text")
+    IncidenciasFuerzoElId   (TEXTO)
+def Incidencias00014        ():
+    TEXTO = VIEW00014.cget("text")
+    IncidenciasFuerzoElId   (TEXTO)
+def Incidencias00015        ():
+    TEXTO = VIEW00015.cget("text")
+    IncidenciasFuerzoElId   (TEXTO)
+def Incidencias00016        ():
+    TEXTO = VIEW00016.cget("text")
+    IncidenciasFuerzoElId   (TEXTO)
+def Incidencias00017        ():
+    TEXTO = VIEW00017.cget("text")
+    IncidenciasFuerzoElId   (TEXTO)
+def Incidencias00018        ():
+    TEXTO = VIEW00018.cget("text")
+    IncidenciasFuerzoElId   (TEXTO)
+def Incidencias00019        ():
+    TEXTO = VIEW00019.cget("text")
+    IncidenciasFuerzoElId   (TEXTO)
+def Incidencias00020        ():
+    TEXTO = VIEW0002o.cget("text")
+    IncidenciasFuerzoElId   (TEXTO)
+def Incidencias00021        ():
+    TEXTO = VIEW00021.cget("text")
+    IncidenciasFuerzoElId   (TEXTO)
+def IncidenciasFuerzoElId   (VALOR):
+    MiraFecha(anyoFecha)
+    diaGlobaltk.set(diaGlobal)
+    mesGlobaltk.set(mesGlobal)
+    anyoGlobaltk.set(anyoGlobal) 
+    # Ponemos en la label LRR12 el valor VALOR
+    LRR12.delete(0,'end')
+    LRR12.insert(0,VALOR)
+    incidenciasCorrigeUno()
 def query                   (seleccion,busc,columnas,*enunciados):
     
     global EstamosEnIncidencias
@@ -3070,16 +3148,65 @@ def query                   (seleccion,busc,columnas,*enunciados):
     puntero2 = 0
     # Loop para todos los datos
     for dato in datos:
-        
+                   
         # Si el dato que mira es inferior al puntero, no se muestra
         if puntero2 < puntero:
 
             puntero2 += 1
             continue
-
+        
         num = "000" + str(columna+1)
         globals()['VIEW%s' % num].config(text = str(dato[-1]))
-        
+           
+        if EstamosEnIncidencias == True:
+            if num == "0001":
+                globals()['VIEW%s' % num].config(command=lambda: Incidencias0001())
+            elif num == "0002":
+                globals()['VIEW%s' % num].config(command=lambda: Incidencias0002())
+            elif num == "0003":
+                globals()['VIEW%s' % num].config(command=lambda: Incidencias0003())
+            elif num == "0004":
+                globals()['VIEW%s' % num].config(command=lambda: Incidencias0004())
+            elif num == "0005":
+                globals()['VIEW%s' % num].config(command=lambda: Incidencias0005())
+            elif num == "0006":
+                globals()['VIEW%s' % num].config(command=lambda: Incidencias0006())
+            elif num == "0007":
+                globals()['VIEW%s' % num].config(command=lambda: Incidencias0007())
+            elif num == "0008":
+                globals()['VIEW%s' % num].config(command=lambda: Incidencias0008())
+            elif num == "0009":
+                globals()['VIEW%s' % num].config(command=lambda: Incidencias0009())
+            elif num == "00010":
+                globals()['VIEW%s' % num].config(command=lambda: Incidencias00010())
+            elif num == "00011":
+                globals()['VIEW%s' % num].config(command=lambda: Incidencias00011())
+            elif num == "00012":
+                globals()['VIEW%s' % num].config(command=lambda: Incidencias00012())
+            elif num == "00013":
+                globals()['VIEW%s' % num].config(command=lambda: Incidencias00013())
+            elif num == "00014":
+                globals()['VIEW%s' % num].config(command=lambda: Incidencias00014())
+            elif num == "00015":
+                globals()['VIEW%s' % num].config(command=lambda: Incidencias00015())
+            elif num == "00016":
+                globals()['VIEW%s' % num].config(command=lambda: Incidencias00016())
+            elif num == "00017":
+                globals()['VIEW%s' % num].config(command=lambda: Incidencias00017())
+            elif num == "00018":
+                globals()['VIEW%s' % num].config(command=lambda: Incidencias00018())
+            elif num == "00019":
+                globals()['VIEW%s' % num].config(command=lambda: Incidencias00019())
+            elif num == "00020":
+                globals()['VIEW%s' % num].config(command=lambda: Incidencias00020())
+            elif num == "00021":
+                globals()['VIEW%s' % num].config(command=lambda: Incidencias00021())
+                                  
+        else:
+            globals()['VIEW%s' % num].config(command=lambda: regresaSinNada() ) 
+                    
+
+                         
         for i in range (columnas):
             
             if  enunciados[i+1] == "CLAU":
@@ -3102,13 +3229,11 @@ def query                   (seleccion,busc,columnas,*enunciados):
                     globals()['VIEW%s' % num].config(text = str(dato[i+11]))
                 else:
                     num = "0" + str(i+1) + "0" + str(columna+1)
-                    globals()['VIEW%s' % num].config(text = str(dato[i]))                    
+                    globals()['VIEW%s' % num].config(text = str(dato[i]))         
             else:
                 num = "0" + str(i+1) + "0" + str(columna+1)
                 globals()['VIEW%s' % num].config(text = str(dato[i]))
-
-            
-                    
+                                
         columna += 1
         
         if columna == 21:
@@ -8772,6 +8897,7 @@ frameRellena.grid(padx=10, pady=10)
 frameLista = Frame(raiz)
 frames(frameLista,1,5,6,600,500,"#b7b493")
 frameLista.grid(padx=10, pady=10)
+frameLista._last_clicked = None                               # Para definir el atributo _last_clicked
 
 # ------------------------------- Crea Listas -----------------------------------
 
