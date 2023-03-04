@@ -812,6 +812,8 @@ def crea_espacios_info      (frame,a,b):
         
                 globals()['VIEW%s' % num] = Label(frame, text="",bg="#b7b493", fg="#293337",width = 10, height = 1)
                 globals()['VIEW%s' % num].grid(row=data+1,column=dato)
+                # jUSTIFICA A LA IZQUIERDA
+                globals()['VIEW%s' % num].config(anchor = W)
             
     columna = 0
     for dato in range (a):
