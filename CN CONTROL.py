@@ -1481,7 +1481,7 @@ def IncidenciasSalvaCorrecc ():
         LRR22.focus() 
         return
     if v20 == "Pendent gaudir":
-        v2 = ""    
+        v2 = "Per definir"    
     # Si el principio de v17 no es 2 dígitos y "/"
     if v17 != "" and (v17[0:2].isdigit() == False or v17[2] != "/"):
         LR23.config(text = "Dia incorrecte")
@@ -7259,7 +7259,7 @@ def menuIncidenciasIntroducir                       ():
             LRR22.focus() 
             return
         if v20 == "Pendent gaudir":
-            v2 = ""    
+            v2 = "Per definir"    
         # Abre la base de datos bd_incidencias
         conn = sqlite3.connect('databases/basesDeDatosIncidencias.db')
         c = conn.cursor()
