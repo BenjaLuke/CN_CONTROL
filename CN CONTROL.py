@@ -793,7 +793,7 @@ def BotonRegresarForzado    ():
 
 def Boton4activado          (Destino):
     
-    BB4.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 5, command = Destino)
+    BB4.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 10, command = Destino)
     cambiaPasaEncima(BB4,"green","#27779d") 
 def Boton5activado          (Destino):
     
@@ -805,7 +805,7 @@ def Boton6activado          (Destino):
     cambiaPasaEncima(BB6,"green","#27779d")
 def Boton7activado          (Destino):
     
-    BB7.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 5, command = Destino)
+    BB7.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 10, command = Destino)
     cambiaPasaEncima(BB7,"green","#27779d")              
         
 def crea_espacios_info      (frame,a,b):
@@ -4146,7 +4146,7 @@ def menuRegistros                               ():
     
     textMenu.config(text = "MENU REGISTRE")            
     LimpiaLabelsRellena()
-    menusBotones("Tornar",MenuInicial,"Introduir",menuRegistrosIntroducir,"Consultar",menuRegistrosConsultar,"Mirar/Corregir",menuRegistroCorregir,"Eliminar",menuRegistroEliminar)
+    menusBotones("Tornar",MenuInicial,"Introduir (R)",menuRegistrosIntroducir,"Consultar",menuRegistrosConsultar,"Mirar/Corregir",menuRegistroCorregir,"Eliminar",menuRegistroEliminar)
     BM1.focus()            
 def menuRegistrosIntroducir                         ():
     ajusta_espacios_info(10,22,7,1,12,20,19,7,16,16,1,1)
@@ -4303,7 +4303,7 @@ def menuRegistrosIntroducir                         ():
     # Cerrar conexion 
     base_datos_datos.close() 
              
-    menusBotones("Tornar",menuRegistros,"Introduir")
+    menusBotones("Tornar",menuRegistros,"Introduir (R)")
     LimpiaLabelsRellena()
     
     LR1.config(text = "ID:")
@@ -4412,13 +4412,13 @@ def menuVentas                                  ():
     
     LimpiaLabelsRellena()
     textMenu.config(text = "MENU VENDES")   
-    menusBotones("Tornar",MenuInicial,"Introduir",menuVentasIntroducir,"Consultar",menuVentasConsultar,"Mirar/Corregir",menuVentasCorregir,"Eliminar",menuVentasEliminar)
+    menusBotones("Tornar",MenuInicial,"Introduir (E)",menuVentasIntroducir,"Consultar",menuVentasConsultar,"Mirar/Corregir",menuVentasCorregir,"Eliminar",menuVentasEliminar)
     BM1.focus()
 def menuVentasIntroducir                            ():
     textMenu.config(text = "MENU VENDES")   
 
     LimpiaLabelsRellena()
-    menusBotones("Tornar",menuVentas,"Introduir")
+    menusBotones("Tornar",menuVentas,"Introduir (E)")
     
     LR1.config(text = "ID:")
     LRR1.grid(row=0, column=1)  
@@ -4438,7 +4438,7 @@ def menuVentasIntroducir                            ():
     LRR6.config(text = "multiplica valor por cantidad")
     LR7.config(text = "NOTES:")  
     LRR73.grid(row=6, column=1)
-    BB4.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 5)
+    BB4.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 10)
     cambiaPasaEncima(BB4,"green","#27779d")    
     LRR22.focus()
 def menuVentasConsultar                             ():
@@ -4467,7 +4467,7 @@ def menuVentasConsultar                             ():
     LR9.config(text = "PREU UNITARI:")  
     LRR92.grid(row=8, column=1)
 
-    BB4.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 5)
+    BB4.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 10)
     cambiaPasaEncima(BB4,"green","#27779d")    
     LRR12.focus()    
 def menuVentasCorregir                              ():
@@ -4478,7 +4478,7 @@ def menuVentasCorregir                              ():
     LR1.config(text = "ID:")
     LRR12.grid(row=0, column=1)
     
-    BB4.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 5)
+    BB4.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 10)
     cambiaPasaEncima(BB4,"green","#27779d")     
     LRR12.focus()
 def menuVentasEliminar                              ():
@@ -4489,7 +4489,7 @@ def menuVentasEliminar                              ():
     LR1.config(text = "ID:")
     LRR12.grid(row=0, column=1)
     
-    BB4.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 5)
+    BB4.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 10)
     cambiaPasaEncima(BB4,"green","#27779d")     
     LRR12.focus()       
 
@@ -6990,7 +6990,7 @@ def menuStockIntroducir                             ():
     LR2.config(text = "QUANTITAT:")  
     LRR22.grid(row=1, column=1)  
         
-    BB4.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 5)
+    BB4.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 10)
     cambiaPasaEncima(BB4,"green","#27779d")    
     LRR11.focus()           
 def menustockConsultar                              ():
@@ -7012,7 +7012,7 @@ def menustockConsultarEspecifica                        ():
     LRR11.grid(row=0, column=1)  
     LRR11['values'] = (["Guiada","Vermut","Fotogràfica","Teatralitzada"])  
     
-    BB4.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 5)
+    BB4.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 10)
     cambiaPasaEncima(BB4,"green","#27779d")    
     LRR11.focus()  
 
@@ -7036,7 +7036,7 @@ def menuIncidencias                             ():
     LimpiaLabelsRellena()
        
     textMenu.config(text = "MENU INCIDÈNC./GRUPS")   
-    menusBotones("Tornar",MenuInicial,"Introduir",menuIncidenciasIntroducirPre,"Consultar",menuIncidenciasConsultar,"Mirar/Corregir",menuIncidenciasCorregir,"Eliminar",menuIncidenciasEliminar,"",regresaSinNada,"Factures proforma",menuIncidenciasFacturaProforma,"",regresaSinNada,"Bloquejos",menuIncidenciasBloqueos)         
+    menusBotones("Tornar",MenuInicial,"Introduir (I)",menuIncidenciasIntroducirPre,"Consultar (O)",menuIncidenciasConsultar,"Mirar/Corregir",menuIncidenciasCorregir,"Eliminar",menuIncidenciasEliminar,"",regresaSinNada,"Factures proforma",menuIncidenciasFacturaProforma,"",regresaSinNada,"Bloquejos",menuIncidenciasBloqueos)         
     BM1.focus()
     
     if int(usuarioNivel) >= 3:
@@ -7383,7 +7383,7 @@ def menuIncidenciasIntroducir                       ():
     # Cerrar conexion 
     base_datos_datos.close()
     LimpiaLabelsRellena()
-    menusBotones("Tornar",menuIncidencias,"Introduir") 
+    menusBotones("Tornar",menuIncidencias,"Introduir (I)") 
     
     LR1.config(text = "ID:")
     LRR1.grid(row=0, column=1)  
@@ -7454,7 +7454,7 @@ def menuIncidenciasConsultar                        ():
     textMenu.config(text = "MENU INCIDÈNC./GRUPS")   
     ajusta_espacios_info(10,22,7,12,7,5,20,8,17,16,7,1)
     LimpiaLabelsRellena()
-    menusBotones("Tornar",menuIncidencias,"",regresaSinNada,"Consultar")    
+    menusBotones("Tornar",menuIncidencias,"",regresaSinNada,"Consultar (O)")    
 
     LR1.config(text = "CLIENT:")
     LRR11.grid(row=0, column=1)  
@@ -8153,7 +8153,7 @@ def MenuCalendarioCrearUsuarios                         ():
     LR2.config(text = "ANY:")
     LRR22.grid(row=1, column=1)
     
-    BB4.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 5)
+    BB4.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 10)
     cambiaPasaEncima(BB4,"green","#27779d")     
     LRR12.focus()       
 def MenuCalendarioCrearVisitas                          ():
@@ -8166,7 +8166,7 @@ def MenuCalendarioCrearVisitas                          ():
     LR2.config(text = "ANY:")
     LRR22.grid(row=1, column=1)
     
-    BB4.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 5)
+    BB4.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 10)
     cambiaPasaEncima(BB4,"green","#27779d")     
     LRR12.focus()   
 def menuCalendarioMostrar                           ():
@@ -8189,7 +8189,7 @@ def menuCalendarioMostrarUsuarios                       ():
     LR2.config(text = "ANY:")
     LRR22.grid(row=1, column=1)
     
-    BB4.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 5)
+    BB4.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 10)
     cambiaPasaEncima(BB4,"green","#27779d")     
     LRR12.focus()   
 def menuCalendarioMostrarVisitas                        ():
@@ -8202,7 +8202,7 @@ def menuCalendarioMostrarVisitas                        ():
     LR2.config(text = "ANY:")
     LRR22.grid(row=1, column=1)
     
-    BB4.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 5)
+    BB4.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 10)
     cambiaPasaEncima(BB4,"green","#27779d")     
     LRR12.focus()   
 def menuCalendarioMostrarHoras                          ():
@@ -8223,7 +8223,7 @@ def menuCalendarioMostrarHoras                          ():
     LR3.config(text = "ANY:")
     LRR32.grid(row=2, column=1)
     
-    BB4.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 5)
+    BB4.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 10)
     cambiaPasaEncima(BB4,"green","#27779d")     
     LRR12.focus()   
 
@@ -8415,7 +8415,7 @@ def MenuDatosProductoCorregir                           ():
     LR1.config(text = "ID:")
     LRR12.grid(row=0, column=1)
     
-    BB4.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 5,  command = productoCorrigeUno)
+    BB4.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 10,  command = productoCorrigeUno)
     cambiaPasaEncima(BB4,"green","#27779d")     
     LRR12.focus()
 def menuDatosProductoEliminar                           ():
@@ -8579,7 +8579,7 @@ def MenuDatosClienteIntroducir                          ():
     LR11.config(text = "MAIL CONTACTE:")
     LRR112.grid(row=10,column=1)
         
-    BB4.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 5, command =MenuDatosClienteIntroducirIntroduce)
+    BB4.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 10, command =MenuDatosClienteIntroducirIntroduce)
     cambiaPasaEncima(BB4,"green","#27779d") 
     
     query_clientes_Inv()
@@ -9023,9 +9023,9 @@ cambiaPasaEncima(BB6,"green","#27779d")
 
 Label(frameBotones,text=" ",bg="#b7b493").grid(row=0,column=6)
 
-BB7 = Button(frameBotones, text="PDF", font=(10))
+BB7 = Button(frameBotones, text="PDF (P)", font=(10))
 BB7.grid(row=0, column=7)
-BB7.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 5)
+BB7.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 10)
 cambiaPasaEncima(BB7,"green","#27779d")
 
 Label(frameBotones,text=" ",bg="#b7b493").grid(row=0,column=8)
@@ -9109,15 +9109,15 @@ LR22.config(fg = "blue",width = 30)
 LR23.grid(columnspan=3)
 LR23.config(fg = "red",width = 30)
 
-BB4 = Button(frameRellena, text="valida", font=(10))
+BB4 = Button(frameRellena, text="Valida  (int)", font=(10))
 BB4.grid(row=23, column=0,columnspan=1)
-BB4.config(bg="#27779d",fg="#27779d",  height = 1, width = 5)
+BB4.config(bg="#27779d",fg="#27779d",  height = 1, width = 10)
 BB4.grid(padx=10, pady=10)
 
 cambiaPasaEncima(BB4,"grey","#27779d")
-BB3 = Button(frameRellena, text="neteja", command=LimpiaElegibles, font=(10))
+BB3 = Button(frameRellena, text="neteja (N)", command=LimpiaElegibles, font=(10))
 BB3.grid(row=23, column=1, columnspan=1)
-BB3.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 5)
+BB3.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 10)
 BB3.grid(padx=10, pady=10)
 
 cambiaPasaEncima(BB3,"green","#27779d")
