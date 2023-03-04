@@ -55,6 +55,12 @@ raiz.bind("<Control-U>", lambda event: cambioUsuario1())
 # Si en cualquier momento se pulsan las teclas CTRL + N se limpian las celdas de texto
 raiz.bind("<Control-n>", lambda event: LimpiaElegibles())
 raiz.bind("<Control-N>", lambda event: LimpiaElegibles())
+# Si en cualquier momento se pulsan las teclas CTRL + L se pone el cursor en el primer boton de la lista
+raiz.bind("<Control-l>", lambda event: BotonPrimeroL())
+raiz.bind("<Control-L>", lambda event: BotonPrimeroL())
+# Si en cualquier momento se pulsan las teclas CTRL + M se pone el cursor en el primer boton del menu
+raiz.bind("<Control-m>", lambda event: BotonPrimeroM())
+raiz.bind("<Control-M>", lambda event: BotonPrimeroM())
 # Si en cualquier momento se pulsan las teclas CTRL + + se aumenta el tamaño de la letra
 raiz.bind("<Control-plus>", lambda event: TamanyoMas())
 # Si en cualquier momento se pulsan las teclas CTRL + - se disminuye el tamaño de la letra
@@ -329,7 +335,13 @@ def FechaActualIncrustadaGru():
     LRR42.insert(0,"31")
     LRR52.insert(0,mesGlobal)
     LRR62.insert(0,anyoGlobal)
-            
+
+def BotonPrimeroM           ():
+    # Colocamos el foco en la primera label de FrameMenu
+    BM1.focus()
+def BotonPrimeroL           ():
+    # Colocamos el foco en la primera label de FrameRellena
+    VIEW0001.focus()             
 def LimpiaElegibles         ():
     
     for i in range(1,24):
@@ -3122,6 +3134,7 @@ def IncidenciasFuerzoElId   (VALOR):
     # Ponemos en la label LRR12 el valor VALOR
     LRR12.delete(0,'end')
     LRR12.insert(0,VALOR)
+    LRR22.focus()
     incidenciasCorrigeUno()
 def query                   (seleccion,busc,columnas,*enunciados):
     
@@ -3159,8 +3172,11 @@ def query                   (seleccion,busc,columnas,*enunciados):
         
         num = "000" + str(columna+1)
         globals()['VIEW%s' % num].config(text = str(dato[-1]))
+        globals()['VIEW%s' % num].config(command=lambda: regresaSinNada() ) 
+
            
         if EstamosEnIncidencias == True:
+            
             if num == "0001":
                 globals()['VIEW%s' % num].config(command=lambda: Incidencias0001())
             elif num == "0002":
@@ -3203,12 +3219,7 @@ def query                   (seleccion,busc,columnas,*enunciados):
                 globals()['VIEW%s' % num].config(command=lambda: Incidencias00020())
             elif num == "00021":
                 globals()['VIEW%s' % num].config(command=lambda: Incidencias00021())
-                                  
-        else:
-            globals()['VIEW%s' % num].config(command=lambda: regresaSinNada() ) 
-                    
-
-                         
+                                                                        
         for i in range (columnas):
             
             if  enunciados[i+1] == "CLAU":
