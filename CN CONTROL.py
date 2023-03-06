@@ -30,7 +30,8 @@ raiz.config(relief="groove")                            # Le da un tipo de borde
 logo = PhotoImage(file="image/logo.png")                # Carga laimagen del logo
 logo = logo.subsample(8, 8)                             # Lo colocamos en raiz utilizando la transparencia
 Label(raiz, image=logo, bg="#b7b493").place(x=30, y=20) # Lo colocamos en raiz utilizando la transparencia
-raiz.attributes("-toolwindow", 1)                      # desactivar el botón de maximizar en la barra de título
+raiz.attributes("-toolwindow", 1)                       # desactivar el botón de maximizar en la barra de título
+
 # Si en cualquier momento se pulsan las teclas CTRL + R se va al menu de registro
 raiz.bind("<Control-r>", lambda event: menuRegistrosIntroducir())
 raiz.bind("<Control-R>", lambda event: menuRegistrosIntroducir())
@@ -495,26 +496,17 @@ def abreLasListas           ():
     
     # --- Productos ---
     global productos
-    productos = ""
     
     try:
         cursor = sqlite3.connect('databases/basesDeDatosDatos.db').cursor()
         cursor.execute("SELECT NOM FROM bd_productos")
         datos = cursor.fetchall()
+        # Crea una lista llamada productos que contiene los nombres de todos los clientes
+        productos = []
+        for i in datos:
+            productos.append(i[0])
             
-        datos = str(datos)
-        separa = datos.split("',), ('")
-        separa = str(separa).replace("[('","")
-        separa = str(separa).replace("',)]","")
-        productos = separa
-        productos = str(productos).replace(" '","")
-        productos = str(productos).replace("'","")
-        productos = str(productos).replace(' "',"")
-        productos = str(productos).replace('"',"")
-        productos = str(productos).replace('[',"")
-        productos = str(productos).replace(']',"")
-        
-        productos = list(map(str,productos.split(',')))
+        # Ordena la lista  
         productos.sort()
         cursor.close()    
 
@@ -522,26 +514,17 @@ def abreLasListas           ():
         pass
     # --- Productos registrables---
     global productosR
-    productosR = ""
     
     try:
         cursor = sqlite3.connect('databases/basesDeDatosDatos.db').cursor()
         cursor.execute("SELECT NOM FROM bd_productos WHERE REGISTRABLE = 'Registre'")
         datos = cursor.fetchall()
+        # Crea una lista llamada productosR que contiene los nombres de todos los clientes
+        productosR = []
+        for i in datos:
+            productosR.append(i[0])
             
-        datos = str(datos)
-        separa = datos.split("',), ('")
-        separa = str(separa).replace("[('","")
-        separa = str(separa).replace("',)]","")
-        productosR = separa
-        productosR = str(productosR).replace(" '","")
-        productosR = str(productosR).replace("'","")
-        productosR = str(productosR).replace(' "',"")
-        productosR = str(productosR).replace('"',"")
-        productosR = str(productosR).replace('[',"")
-        productosR = str(productosR).replace(']',"")
-        
-        productosR = list(map(str,productosR.split(',')))
+        # Ordena la lista  
         productosR.sort()
         cursor.close()    
 
@@ -549,26 +532,17 @@ def abreLasListas           ():
         pass
     # --- Productos stockables---
     global productosS
-    productosS = ""
     
     try:
         cursor = sqlite3.connect('databases/basesDeDatosDatos.db').cursor()
         cursor.execute("SELECT NOM FROM bd_productos WHERE REGISTRABLE = 'Stock'")
         datos = cursor.fetchall()
+        # Crea una lista llamada productosS que contiene los nombres de todos los clientes
+        productosS = []
+        for i in datos:
+            productosS.append(i[0])
             
-        datos = str(datos)
-        separa = datos.split("',), ('")
-        separa = str(separa).replace("[('","")
-        separa = str(separa).replace("',)]","")
-        productosS = separa
-        productosS = str(productosS).replace(" '","")
-        productosS = str(productosS).replace("'","")
-        productosS = str(productosS).replace(' "',"")
-        productosS = str(productosS).replace('"',"")
-        productosS = str(productosS).replace('[',"")
-        productosS = str(productosS).replace(']',"")
-        
-        productosS = list(map(str,productosS.split(',')))
+        # Ordena la lista  
         productosS.sort()
         cursor.close()    
 
@@ -576,31 +550,26 @@ def abreLasListas           ():
         pass
     # --- Clientes ---  
     global clientes
-    clientes = ""
     
     try:
+    
         cursor = sqlite3.connect('databases/basesDeDatosClientes.db').cursor()
         cursor.execute("SELECT NOM FROM bd_clientes")
         datos = cursor.fetchall()
+        # Crea una lista llamada clientes que contiene los nombres de todos los clientes
+        clientes = []
+        for i in datos:
+            print(i[0])
+            clientes.append(i[0])
             
-        datos = str(datos)
-        separa = datos.split("',), ('")
-        separa = str(separa).replace("[('","")
-        separa = str(separa).replace("',)]","")
-        clientes = separa
-        clientes = str(clientes).replace(" '","")
-        clientes = str(clientes).replace("'","")
-        clientes = str(clientes).replace(' "',"")
-        clientes = str(clientes).replace('"',"")
-        clientes = str(clientes).replace('[',"")
-        clientes = str(clientes).replace(']',"")
-        
-        clientes = list(map(str,clientes.split(',')))
+        # Ordena la lista        
         clientes.sort()
+            
         cursor.close()  
     
     except:
-        pass    
+        pass  
+      
 def cargaUsuario            ():
 
     # Si no existe ningún usuario, ejecuta la introducción de uno.
@@ -4257,6 +4226,10 @@ def MenuInicial                             ():
     
     textMenu.config(text = "MENU PRINCIPAL") 
     menusBotones("Tornar",cambioUsuario,"Registre",menuRegistros,"Venda",menuVentas,"Taules",menuTablas,"Arqueijos",menuArqueos,"Stock",menuStocks,"Incidències/grups",menuIncidencias,"Calendaris",menuCalendarios,"Dades",menuDatos,"Seguretat",menuSeguridad)
+    print("llegué")
+    
+    # Nos enfocamos en raiz
+    raiz.deiconify()
     BM1.focus()           
 
     if int(usuarioNivel) >= 2:
@@ -4268,7 +4241,7 @@ def MenuInicial                             ():
         BM4.config(text="")
     if int(usuarioNivel) == 5:
         BM2.config(text="")
-    
+        
 def menuRegistros                               ():
 
     # Globaliza las variables
@@ -8579,7 +8552,7 @@ def MenuDatosProductoConsultar                          ():
     Boton5activado(prequery_productos)
     Boton6activado(query_productos_busca)
  
-    LRR12.focus() 
+    LRR11.focus() 
 def MenuDatosProductoCorregir                           ():
     
     LimpiaLabelsRellena()
@@ -9048,8 +9021,7 @@ def menuSeguridadLimpiarIncidenciasGrupos           ():
 def cambioUsuario1          ():
     
     MenuInicial()
-    cambioUsuario()
-     
+    cambioUsuario()   
 #  ------------------------------- Frames ----------------------------------
 
 def frames(nombreFrame,fila,columna,expansioncolumnas,largo,alto,color):
