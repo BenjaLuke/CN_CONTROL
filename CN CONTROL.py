@@ -30,7 +30,7 @@ raiz.config(relief="groove")                            # Le da un tipo de borde
 logo = PhotoImage(file="image/logo.png")                # Carga laimagen del logo
 logo = logo.subsample(8, 8)                             # Lo colocamos en raiz utilizando la transparencia
 Label(raiz, image=logo, bg="#b7b493").place(x=30, y=20) # Lo colocamos en raiz utilizando la transparencia
-
+raiz.attributes("-toolwindow", 1)                      # desactivar el botón de maximizar en la barra de título
 # Si en cualquier momento se pulsan las teclas CTRL + R se va al menu de registro
 raiz.bind("<Control-r>", lambda event: menuRegistrosIntroducir())
 raiz.bind("<Control-R>", lambda event: menuRegistrosIntroducir())
@@ -122,6 +122,10 @@ productosR = ""
 global productosS
 productosS = ""
 
+# Hacemos globales las variables que vamos a usar
+global vr1,vr2,vr3,vr4,vr5,vr6,vr7
+vr1,vr2,vr3,vr4,vr5,vr6,vr7 = "","","","","","",False
+    
 global puntero
 
 global fecha
@@ -3135,6 +3139,17 @@ def Registros00021        ():
     TEXTO = VIEW00021.cget("text")
     RegistrosFuerzoElId   (TEXTO)
 def RegistrosFuerzoElId   (VALOR):
+    
+    # Hacemos globales las variables que vamos a usar
+    global vr1,vr2,vr3,vr4,vr5,vr6,vr7
+    # Guardamos los valores del registro
+    vr1 = LRR21.get()
+    vr2 = LRR31.get()
+    vr3 = LRR41.get()
+    vr4 = LRR51.get()
+    vr5 = LRR61.get()
+    vr6 = LRR73.get(1.0,END)
+    print(vr1,vr2,vr3,vr4,vr5,vr6)
     MiraFecha(anyoFecha)
     diaGlobaltk.set(diaGlobal)
     mesGlobaltk.set(mesGlobal)
@@ -3144,6 +3159,7 @@ def RegistrosFuerzoElId   (VALOR):
     LRR12.insert(0,VALOR)
     LRR22.focus()
     registroCorrigeUno()
+    vr7 = True
 
 def Incidencias0001         ():
     TEXTO = VIEW0001.cget("text")
@@ -4255,6 +4271,11 @@ def MenuInicial                             ():
     
 def menuRegistros                               ():
 
+    # Globaliza las variables
+    global vr1,vr2,vr3,vr4,vr5,vr6,vr7
+    # bORRA LAS VARIABLES
+    vr1,vr2,vr3,vr4,vr5,vr6,vr7 = "","","","","","",False
+        
     # Si aquí se pulsan las teclas CTRL + D no pasa nada
     raiz.bind("<Control-d>", lambda event: regresaSinNada())
     raiz.bind("<Control-D>", lambda event: regresaSinNada())
@@ -4383,6 +4404,17 @@ def menuRegistrosIntroducir                         ():
 
         # Limpia posibles mensajes anteriores innecesarios
         LR23.config(text = "")
+        # Crea la base de datos o conecta con ella
+        base_datos_datos = sqlite3.connect('databases/basesDeDatosRegistros.db')
+        # Crea el cursor
+        cursor = base_datos_datos.cursor()        
+        # Coge el valor del ultimo oid
+        cursor.execute("SELECT *, oid FROM bd_registros WHERE ((FECHA LIKE'" +v7 + "/" + v8 + "/" + v9+"')AND(HORA ='"+ v3+"'))")
+        # Sumatorio = a la cantidad de registros de la fecha y hora introducida
+        sumatorio = cursor.fetchall()
+        # Cerrar conexion 
+        base_datos_datos.close()
+        LR23.config(text = "grup: "+str(len(sumatorio)))
 
         # Pinta la lista actualizada
         # Crea la base de datos o conecta con ella
@@ -4410,7 +4442,7 @@ def menuRegistrosIntroducir                         ():
 
         # Coloca foco
         LRR21.focus()
-
+        
     # Crea la base de datos o conecta con ella
     base_datos_datos = sqlite3.connect('databases/basesDeDatosRegistros.db')
         
@@ -4457,6 +4489,18 @@ def menuRegistrosIntroducir                         ():
     LR7.config(text = "NOTES:")  
     LRR73.grid(row=6, column=1)
 
+    # Hacemos globales las variables que vamos a usar
+    global vr1,vr2,vr3,vr4,vr5,vr6,vr7
+    print(vr1,vr2,vr3,vr4,vr5,vr6)
+    # Si las variables vr1 a vr7 tienen datos, se copia esos valroes a las labels respectivas
+    if vr7 == True:
+        LRR21.set(vr1)
+        LRR31.set(vr2)
+        LRR41.set(vr3)
+        LRR51.set(vr4)
+        LRR61.set(vr5)
+        LRR73.insert(1.0,vr6)
+        vr7 = False
     Boton4activado(menuRegistrosIntroducirIntroduce)
     query_registros_Inv()  
     LRR21.focus() 
@@ -7341,7 +7385,7 @@ def menuIncidenciasIntroducir                       ():
                 cant_casos -= 1
                 print(cant_casos)
         # Si hay más de un caso con la misma fecha y hora
-        if cant_casos > 0:
+        if cant_casos > 0 and v20 != "Pendent gaudir":
             global ventana2
             ventana2 = Tk()                         # Creamos la ventana
             ventana2.title(" ")                     # Damos titulo a la ventana
