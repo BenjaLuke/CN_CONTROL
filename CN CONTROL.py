@@ -559,7 +559,6 @@ def abreLasListas           ():
         # Crea una lista llamada clientes que contiene los nombres de todos los clientes
         clientes = []
         for i in datos:
-            print(i[0])
             clientes.append(i[0])
             
         # Ordena la lista        
@@ -3118,7 +3117,6 @@ def RegistrosFuerzoElId   (VALOR):
     vr4 = LRR51.get()
     vr5 = LRR61.get()
     vr6 = LRR73.get(1.0,END)
-    print(vr1,vr2,vr3,vr4,vr5,vr6)
     MiraFecha(anyoFecha)
     diaGlobaltk.set(diaGlobal)
     mesGlobaltk.set(mesGlobal)
@@ -4226,7 +4224,6 @@ def MenuInicial                             ():
     
     textMenu.config(text = "MENU PRINCIPAL") 
     menusBotones("Tornar",cambioUsuario,"Registre",menuRegistros,"Venda",menuVentas,"Taules",menuTablas,"Arqueijos",menuArqueos,"Stock",menuStocks,"Incidències/grups",menuIncidencias,"Calendaris",menuCalendarios,"Dades",menuDatos,"Seguretat",menuSeguridad)
-    print("llegué")
     
     # Nos enfocamos en raiz
     raiz.deiconify()
@@ -4464,7 +4461,6 @@ def menuRegistrosIntroducir                         ():
 
     # Hacemos globales las variables que vamos a usar
     global vr1,vr2,vr3,vr4,vr5,vr6,vr7
-    print(vr1,vr2,vr3,vr4,vr5,vr6)
     # Si las variables vr1 a vr7 tienen datos, se copia esos valroes a las labels respectivas
     if vr7 == True:
         LRR21.set(vr1)
@@ -7356,7 +7352,6 @@ def menuIncidenciasIntroducir                       ():
         for caso in casos:
             if caso[-1] == v1:
                 cant_casos -= 1
-                print(cant_casos)
         # Si hay más de un caso con la misma fecha y hora
         if cant_casos > 0 and v20 != "Pendent gaudir":
             global ventana2
