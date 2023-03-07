@@ -30,7 +30,6 @@ raiz.config(relief="groove")                            # Le da un tipo de borde
 logo = PhotoImage(file="image/logo.png")                # Carga laimagen del logo
 logo = logo.subsample(8, 8)                             # Lo colocamos en raiz utilizando la transparencia
 Label(raiz, image=logo, bg="#b7b493").place(x=30, y=20) # Lo colocamos en raiz utilizando la transparencia
-raiz.attributes("-toolwindow", 1)                       # desactivar el botón de maximizar en la barra de título
 
 # Si en cualquier momento se pulsan las teclas CTRL + R se va al menu de registro
 raiz.bind("<Control-r>", lambda event: menuRegistrosIntroducir())
@@ -91,12 +90,9 @@ DatosUsuario = ()
 usuarioNivel = "0"
 usuarioReal = "No s'ha identificat"
 
-global avisoint
-avisoint = True
-global EstamosEnIncidencias
-EstamosEnIncidencias = False
-global EstamsoEnRegistros
-EstamosEnRegistros = False
+global avisoint, EstamosEnIncidencias, EstamosEnRegistros, EstamosEnProforma, EstamosEnBloqueos, EstamosEnProductos
+avisoint, EstamosEnIncidencias, EstamosEnRegistros, EstamosEnProforma, EstamosEnBloqueos, EstamosEnProductos = True, False, False, False, False, False
+
 global TamanyoLetra
 TamanyoLetra = 0
 
@@ -598,6 +594,7 @@ def cargaUsuario            ():
         return
         
     raiz.iconify()
+    raiz.attributes("-toolwindow", 1)                       # desactivar el botón de maximizar en la barra de título
 
     rUsuario = Tk()
     rUsuario.title("Identificació d'usuari")
@@ -686,6 +683,8 @@ def cargaUsuario            ():
                 DatosUsuario = datos
                 
                 rUsuario.destroy()
+                # Activar el botón de maximizar en la barra de título
+                raiz.attributes("-toolwindow", 0)
                 raiz.deiconify()
                 nomUsuario.config(text = usuarioReal)           
                 MenuInicial()      
@@ -887,16 +886,21 @@ def menusBotones            (texto11="",enlace11=regresaSinNada,
             globals()['BM%s' % (i+1)].config(takefocus = True)
         BM0.config(text = " ",bg = "#b7b493",command = regresaSinNada,relief='flat')
         cambiaPasaEncima(BM0,"#b7b493","#b7b493")
-def query_registros         ():
+
+def query_todos             (archivo,seleccion,column,variableTrue,*datosAlQuery):
     
-    global EstamosEnRegistros
-    # Creamos la base de datos o conectamos con una
-    base_datos = sqlite3.connect('databases/basesDeDatosRegistros.db')
-    busqueda = "SELECT *, oid FROM bd_registros ORDER BY oid DESC"
-    columnas = 8
+
+    global EstamosEnRegistros,EstamosEnIncidencias,EstamosEnProforma,EstamosEnBloqueos,EstamosEnProduto,EstamosEnClientes,EstamosEnProductos,EstamosEnClientes,EstamosEnUsuarios
+    
+   # Creamos la base de datos o conectamos con una
+    base_datos = sqlite3.connect(archivo)
+    busqueda = seleccion
+    columnas = column
     global puntero
-    EstamosEnRegistros = True
-    query(base_datos,busqueda,columnas,"ID","","DATA","DESCRIPCIÓ","ORIGEN","HORA","PRODUCTE","FONT","")
+    puntero = 0
+    globals()[variableTrue] = True
+    query(base_datos,busqueda,columnas,*datosAlQuery)    
+
 def prequery_registros      ():
     
     global puntero
@@ -907,17 +911,6 @@ def prequery_registros      ():
     else:
         puntero -= 42
         query_registros_busca()
-def query_registros_Inv     ():
-    
-    global EstamosEnRegistros
-    # Creamos la base de datos o conectamos con una
-    base_datos = sqlite3.connect('databases/basesDeDatosRegistros.db')
-    busqueda = "SELECT *, oid FROM bd_registros ORDER BY FECHA DESC, oid DESC"
-    columnas = 8
-    global puntero
-    puntero = 0
-    EstamosEnRegistros = True
-    query(base_datos,busqueda,columnas,"ID","","DATA","DESCRIPCIÓ","ORIGEN","HORA","PRODUCTE","FONT","")
 def query_registros_busca0  ():
     
     global puntero
@@ -949,12 +942,7 @@ def query_registros_busca   ():
     v11= LRR101.get()
        
     # Creamos la base de datos o conectamos con una
-    base_datos = sqlite3.connect('databases/basesDeDatosRegistros.db')
-    busqueda = "SELECT *, oid FROM bd_registros WHERE ((FECHA LIKE '" + v3 + "/%' or '" + v3 + "' = '') AND (FECHA LIKE '%/" + v2 + "/%' or '" + v2 + "' = '') AND (FECHA LIKE '%/" + v1 + "' or '" + v1 + "' = '') AND (USUARIO = '" + v11 + "' or '" + v11 + "' = '') AND (DESCRIPCION = '" + v5 + "' or '" + v5 + "' = '') AND (ORIGEN = '" + v6 + "' or '" + v6 + "' = '') AND (HORA >= '" + v7 + "' or '" + v7 + "' = '')  AND (HORA <= '" + v8 + "' or '" + v8 + "' = '')  AND (PRODUCTO = '" + v9 + "' or '" + v9 + "' = '')   AND (FUENTE = '" + v10 + "' or '" + v10 + "' = '')) ORDER BY FECHA"
-    columnas = 8
-    global puntero
-    EstamosEnRegistros = True
-    query(base_datos,busqueda,columnas,"ID","","DATA","DESCRIPCIÓ","ORIGEN","HORA","PRODUCTE","FONT","")
+    query_todos('databases/basesDeDatosRegistros.db',"SELECT *, oid FROM bd_registros WHERE ((FECHA LIKE '" + v3 + "/%' or '" + v3 + "' = '') AND (FECHA LIKE '%/" + v2 + "/%' or '" + v2 + "' = '') AND (FECHA LIKE '%/" + v1 + "' or '" + v1 + "' = '') AND (USUARIO = '" + v11 + "' or '" + v11 + "' = '') AND (DESCRIPCION = '" + v5 + "' or '" + v5 + "' = '') AND (ORIGEN = '" + v6 + "' or '" + v6 + "' = '') AND (HORA >= '" + v7 + "' or '" + v7 + "' = '')  AND (HORA <= '" + v8 + "' or '" + v8 + "' = '')  AND (PRODUCTO = '" + v9 + "' or '" + v9 + "' = '')   AND (FUENTE = '" + v10 + "' or '" + v10 + "' = '')) ORDER BY FECHA",8,"EstamosEnRegistros","ID","","DATA","DESCRIPCIÓ","ORIGEN","HORA","PRODUCTE","FONT","")
 def registroCorrigeUno      ():
 
     global val1
@@ -1182,18 +1170,8 @@ def del_register_yes        ():
     ventana2.destroy()
 
     # Borramos los datos del listado de registros
-    query_registros() 
+    query_todos('databases/basesDeDatosRegistros.db',"SELECT *, oid FROM bd_registros ORDER BY oid DESC",8,"EstamosEnRegistros","ID","","DATA","DESCRIPCIÓ","ORIGEN","HORA","PRODUCTE","FONT","")
 
-def query_incidencias       ():
-    
-    global EstamosEnIncidencias
-    # Creamos la base de datos o conectamos con una
-    base_datos = sqlite3.connect('databases/basesDeDatosIncidencias.db')
-    busqueda = "SELECT *, oid FROM bd_incidencias ORDER BY oid DESC"
-    columnas = 8
-    global puntero
-    EstamosEnIncidencias = True
-    query(base_datos,busqueda,columnas,"ID","DATA","HORA","PAX","PRODUCTE","IDIOMA","ESTAT","CLIENT","PAGAT")    
 def prequery_incidencias    ():
     
     global puntero
@@ -1204,17 +1182,6 @@ def prequery_incidencias    ():
     else:
         puntero -= 42
         query_incidencias_busca()
-def query_incidencias_Inv   ():
-    
-    global EstamosEnIncidencias
-    # Creamos la base de datos o conectamos con una
-    base_datos = sqlite3.connect('databases/basesDeDatosIncidencias.db') 
-    busqueda = "SELECT *, oid FROM bd_incidencias ORDER BY FECHA_CREA DESC, HORA DESC"
-    columnas = 8
-    global puntero
-    puntero = 0
-    EstamosEnIncidencias = True
-    query(base_datos,busqueda,columnas,"ID","DATA","HORA","PAX","PRODUCTE","IDIOMA","ESTAT","CLIENT","PAGAT")
 def query_incidencias_busca0():
     
     global puntero
@@ -1258,13 +1225,7 @@ def query_incidencias_busca ():
     if len(v10) == 2:
         v10 = "20" + v10
     # Creamos la base de datos o conectamos con una
-    base_datos = sqlite3.connect('databases/basesDeDatosIncidencias.db')
-    busqueda = "SELECT *, oid FROM bd_incidencias WHERE ((CLIENTE = '" + v1 + "' or '" + v1 + "' = '') AND (FECHA LIKE '" + v2 + "/%' or '" + v2 + "' = '') AND (FECHA LIKE '%/" + v3 + "/%' or '" + v3 + "' = '') AND (FECHA LIKE '%/" + v4 + "' or '" + v4 + "' = '') AND (PRODUCTO = '" + v5 + "' or '" + v5 + "' = '') AND (IDIOMA = '" + v6 + "' or '" + v6 + "' = '') AND (AGENDADO = '" + v7 + "' or '" + v7 + "' = '') AND (FECHA_REV LIKE '" + v8 + "/%' or '" + v8 + "' = '') AND (FECHA_REV LIKE '%/" + v9 + "/%' or '" + v9 + "' = '')  AND (FECHA_REV LIKE '%/" + v10 + "' or '" + v10 + "' = '') AND (ESTADO = '" + v12 + "' or '" + v12 + "' = '') AND (NOTAS = '" + v11 + "' or '" + v11 + "' = '') AND (PAGAT = '" + v13 + "' OR '" + v13 + "' = '') AND (MAIL_EXTRA = '" + v14 + "' OR '" + v14 + "' = '')) ORDER BY FECHA, HORA"
-    
-    columnas = 8
-    global puntero
-    EstamosEnIncidencias = True
-    query(base_datos,busqueda,columnas,"ID","DATA","HORA","PAX","PRODUCTE","IDIOMA","ESTAT","CLIENT","PAGAT")
+    query_todos('databases/basesDeDatosIncidencias.db',"SELECT *, oid FROM bd_incidencias WHERE ((CLIENTE = '" + v1 + "' or '" + v1 + "' = '') AND (FECHA LIKE '" + v2 + "/%' or '" + v2 + "' = '') AND (FECHA LIKE '%/" + v3 + "/%' or '" + v3 + "' = '') AND (FECHA LIKE '%/" + v4 + "' or '" + v4 + "' = '') AND (PRODUCTO = '" + v5 + "' or '" + v5 + "' = '') AND (IDIOMA = '" + v6 + "' or '" + v6 + "' = '') AND (AGENDADO = '" + v7 + "' or '" + v7 + "' = '') AND (FECHA_REV LIKE '" + v8 + "/%' or '" + v8 + "' = '') AND (FECHA_REV LIKE '%/" + v9 + "/%' or '" + v9 + "' = '')  AND (FECHA_REV LIKE '%/" + v10 + "' or '" + v10 + "' = '') AND (ESTADO = '" + v12 + "' or '" + v12 + "' = '') AND (NOTAS = '" + v11 + "' or '" + v11 + "' = '') AND (PAGAT = '" + v13 + "' OR '" + v13 + "' = '') AND (MAIL_EXTRA = '" + v14 + "' OR '" + v14 + "' = '')) ORDER BY FECHA, HORA",8,"EstamosEnIncidencias","ID","DATA","HORA","PAX","PRODUCTE","IDIOMA","ESTAT","CLIENT","PAGAT")
 def incidenciasCorrigeUno   ():
 
     global val1
@@ -1659,7 +1620,8 @@ def del_incidence_yes       ():
     ventana2.destroy()
 
     # Borramos los datos del listado de registros
-    query_incidencias()
+    query_todos('databases/basesDeDatosIncidencias.db',"SELECT *, oid FROM bd_incidencias ORDER BY oid DESC",8,"EstamosEnIncidencias","ID","DATA","HORA","PAX","PRODUCTE","IDIOMA","ESTAT","CLIENT","PAGAT")        
+
     
     # Foco
     LRR12.focus() 
@@ -1784,14 +1746,6 @@ def ProformaClonaUno        ():
         
     # Centramos el cursor
     LRR22.focus()
-def query_proforma          ():
-    
-    # Creamos la base de datos o conectamos con una
-    base_datos = sqlite3.connect('databases/basesDeDatosProforma.db')
-    busqueda = "SELECT *, oid FROM bd_proforma ORDER BY NUM_PRO"
-    columnas = 8
-    global puntero
-    query(base_datos,busqueda,columnas,"ID","DATA","","PROFORMA","CLIENT","QUANTITAT","CONCEPTE","PREU","")
 def prequery_proforma       ():
     
     global puntero
@@ -1802,21 +1756,14 @@ def prequery_proforma       ():
     else:
         puntero -= 21
         query_proforma_busca()
-def query_proforma_Inv      ():
-
-# Creamos la base de datos o conectamos con una
-    base_datos = sqlite3.connect('databases/basesDeDatosProforma.db')
-    busqueda = "SELECT *, oid FROM bd_proforma ORDER BY NUM_PRO DESC"
-    columnas = 8
-    global puntero
-    puntero = 0
-    query(base_datos,busqueda,columnas,"ID","DATA","","PROFORMA","CLIENT","QUANTITAT","CONCEPTE","PREU","")
 def query_proforma_busca0   ():
     
     global puntero
     puntero = 0
     query_proforma_busca()
 def query_proforma_busca    ():
+    
+    global EstamosEnProforma
     # Canviar esto en base a búsqueda
     v1 = LRR12.get() # PROFORMA
     v2 = LRR21.get() # CLIENT
@@ -1835,13 +1782,8 @@ def query_proforma_busca    ():
     if len(v5) == 2:
         v5 = "20" + v5
         
-    # Cambiar esto en base a búsqueda   
     # Creamos la base de datos o conectamos con una
-    base_datos = sqlite3.connect('databases/basesDeDatosProforma.db')
-    busqueda = "SELECT *, oid FROM bd_Proforma WHERE ((NUM_PRO = '" + v1 + "' or '" + v1 + "' = '') AND (CLIENTE ='" + v2 + "' or '" + v2 + "' = '') AND ((PRECIO_1 = '" + v7 + "' or '" + v7 + "' = '') OR (PRECIO_2 = '" + v7 + "' OR '" + v7 + "' = '')) AND  ((CANT_1 = '" + v6 + "' OR '" + v6 + "' = '') OR (CANT_2 = '" + v6 + "' or '" + v6 + "' = '')) AND (FECHA LIKE '" + v3 + "/%' or '" + v3 + "' = '') AND (FECHA LIKE '%/" + v4 + "/%' or '" + v4 + "' = '') AND (FECHA LIKE '%/" + v5 + "' or '" + v5 + "' = '')) ORDER BY NUM_PRO DESC"
-    columnas = 8
-    global puntero
-    query(base_datos,busqueda,columnas,"ID","DATA","","PROFORMA","CLIENT","QUANTITAT","CONCEPTE","PREU","")
+    query_todos('databases/basesDeDatosProforma.db',"SELECT *, oid FROM bd_Proforma WHERE ((NUM_PRO = '" + v1 + "' or '" + v1 + "' = '') AND (CLIENTE ='" + v2 + "' or '" + v2 + "' = '') AND ((PRECIO_1 = '" + v7 + "' or '" + v7 + "' = '') OR (PRECIO_2 = '" + v7 + "' OR '" + v7 + "' = '')) AND  ((CANT_1 = '" + v6 + "' OR '" + v6 + "' = '') OR (CANT_2 = '" + v6 + "' or '" + v6 + "' = '')) AND (FECHA LIKE '" + v3 + "/%' or '" + v3 + "' = '') AND (FECHA LIKE '%/" + v4 + "/%' or '" + v4 + "' = '') AND (FECHA LIKE '%/" + v5 + "' or '" + v5 + "' = '')) ORDER BY NUM_PRO DESC",8,"EstamosEnProforma","ID","DATA","","PROFORMA","CLIENT","QUANTITAT","CONCEPTE","PREU","")
 def ProformaCorrigeUno      ():
     
     global val1
@@ -2225,7 +2167,8 @@ def del_proform_yes         ():
     ventana2.destroy()
 
     # Borramos los datos del listado de registros
-    query_proforma()
+    query_todos('databases/basesDeDatosProforma.db',"SELECT *, oid FROM bd_proforma ORDER BY NUM_PRO",8,"EstamosEnProformas","ID","DATA","","PROFORMA","CLIENT","QUANTITAT","CONCEPTE","PREU","")        
+
     
     # Foco
     LRR12.focus() 
@@ -2241,26 +2184,13 @@ def query_bloqueos          ():
     else:
         puntero -= 42
         query_bloqueos_busca()    
-def query_bloqueos_Inv      ():
-
-# Creamos la base de datos o conectamos con una
-    base_datos = sqlite3.connect('databases/basesDeDatosIncidencias.db')
-    busqueda = "SELECT *, oid FROM bd_bloqueos ORDER BY FECHA"
-    columnas = 8
-    global puntero
-    puntero = 0
-    query(base_datos,busqueda,columnas,"ID","DATES","","","","","","","")
 def query_bloqueos_busca    ():
-        
+    
+    global EstamosEnBloqueos    
     v2 = LRR12.get()
 
     # Creamos la base de datos o conectamos con una
-    base_datos = sqlite3.connect('databases/basesDeDatosIncidencias.db')
-    busqueda = "SELECT *, oid FROM bd_bloqueos WHERE (FECHA = '" + v2 + "')"
-    
-    columnas = 8
-    global puntero
-    query(base_datos,busqueda,columnas,"ID","DATA","","","","","","","")
+    query_todos('databases/basesDeDatosIncidencias.db',"SELECT *, oid FROM bd_bloqueos WHERE (FECHA = '" + v2 + "')",8,"EstamosEnBloqueos","ID","DATA","","","","","","","")
 def bloqueoBorraUno         ():
 
     global v2
@@ -2367,14 +2297,6 @@ def del_block_yes           ():
     # Foco
     LRR12.focus() 
             
-def query_productos         ():
-    
-    # Creamos la base de datos o conectamos con una
-    base_datos = sqlite3.connect('databases/basesDeDatosDatos.db')
-    busqueda = "SELECT *, oid FROM bd_productos ORDER BY NOM"
-    columnas = 4
-    global puntero
-    query(base_datos,busqueda,columnas,"ID","NOM","PREU REAL","PREU ACTUAL","TIPUS")
 def prequery_productos      ():
     
     global puntero
@@ -2385,15 +2307,6 @@ def prequery_productos      ():
     else:
         puntero -= 21
         query_productos_busca()
-def query_productos_Inv     ():
-    
-    # Creamos la base de datos o conectamos con una
-    base_datos = sqlite3.connect('databases/basesDeDatosDatos.db')
-    busqueda = "SELECT *, oid FROM bd_productos ORDER BY oid DESC"
-    columnas = 4
-    global puntero
-    puntero = 0
-    query(base_datos,busqueda,columnas,"ID","NOM","PREU REAL","PREU ACTUAL","TIPUS")
 def query_productos_busca0  ():
     
     global puntero
@@ -2401,17 +2314,14 @@ def query_productos_busca0  ():
     query_productos_busca()
 def query_productos_busca   ():
     
+    global EstamosEnProductos
     v1 = LRR11.get()
     v2 = LRR22.get()
     v3 = LRR32.get()
     v4 = LRR41.get()
        
     # Creamos la base de datos o conectamos con una
-    base_datos = sqlite3.connect('databases/basesDeDatosDatos.db')
-    busqueda = "SELECT *, oid FROM bd_productos WHERE ((NOM = '" + v1 + "' or '" + v1 + "' = '') AND (PREU_HABITUAL = '" + v2 + "' or '" + v2 + "' = '') AND (PREU_ACTUAL = '" + v3 + "' or '" + v3 + "' = '') AND (REGISTRABLE = '" + v4 + "' or '" + v4 + "' = '')) ORDER BY NOM"
-    columnas = 4
-    global puntero
-    query(base_datos,busqueda,columnas,"ID","NOM","PREU REAL","PREU ACTUAL","TIPUS")
+    query_todos('databases/basesDeDatosDatos.db',"SELECT *, oid FROM bd_productos WHERE ((NOM = '" + v1 + "' or '" + v1 + "' = '') AND (PREU_HABITUAL = '" + v2 + "' or '" + v2 + "' = '') AND (PREU_ACTUAL = '" + v3 + "' or '" + v3 + "' = '') AND (REGISTRABLE = '" + v4 + "' or '" + v4 + "' = '')) ORDER BY NOM",4,"EstamosEnProductos","ID","NOM","PREU REAL","PREU ACTUAL","TIPUS")
 def productoCorrigeUno      ():
 
     global val1
@@ -2583,16 +2493,8 @@ def del_product_yes         ():
     ventana2.destroy()
 
     # Borramos los datos del listado de registros
-    query_productos() 
+    query_todos('databases/basesDeDatosDatos.db',"SELECT *, oid FROM bd_productos ORDER BY NOM",4,"EstamosEnProductos","ID","NOM","PREU REAL","PREU ACTUAL","TIPUS")
 
-def query_clientes          ():
-    
-    # Creamos la base de datos o conectamos con una
-    base_datos = sqlite3.connect('databases/basesDeDatosClientes.db')
-    busqueda = "SELECT *, oid FROM bd_clientes ORDER BY NOM"
-    columnas = 7
-    global puntero
-    query(base_datos,busqueda,columnas,"ID","NOM","","","CIUTAT/PAIS","TELÈFON","MAIL","NIF/CIF")
 def prequery_clientes       ():
     
     global puntero
@@ -2603,15 +2505,6 @@ def prequery_clientes       ():
     else:
         puntero -= 21
         query_clientes_busca()
-def query_clientes_Inv      ():
-    
-    # Creamos la base de datos o conectamos con una
-    base_datos = sqlite3.connect('databases/basesDeDatosClientes.db')
-    busqueda = "SELECT *, oid FROM bd_clientes ORDER BY oid DESC"
-    columnas = 7
-    global puntero
-    puntero = 0
-    query(base_datos,busqueda,columnas,"ID","NOM","","","CIUTAT/PAIS","TELÈFON","MAIL","NIF/CIF")
 def query_clientes_busca0   ():
     
     global puntero
@@ -2619,17 +2512,14 @@ def query_clientes_busca0   ():
     query_clientes_busca()
 def query_clientes_busca    ():
     
+    global EstamosEnClientes
     v1 = LRR11.get()
     v2 = LRR22.get()
     v3 = LRR32.get()
     v4 = LRR42.get()
        
     # Creamos la base de datos o conectamos con una
-    base_datos = sqlite3.connect('databases/basesDeDatosClientes.db')
-    busqueda = "SELECT *, oid FROM bd_clientes WHERE ((NOM = '" + v1 + "' or '" + v1 + "' = '') AND (TELEFONO = '" + v2 + "' or '" + v2 + "' = '') AND (MAIL = '" + v3 + "' or '" + v3 + "' = '') AND (NIFCIF = '" + v4 + "' or '" + v4 + "' = '')) ORDER BY NOM"
-    columnas = 7
-    global puntero
-    query(base_datos,busqueda,columnas,"ID","NOM","","","CIUTAT/PAIS","TELÈFON","MAIL","NIF/CIF")
+    query_todos('databases/basesDeDatosClientes.db',"SELECT *, oid FROM bd_clientes WHERE ((NOM = '" + v1 + "' or '" + v1 + "' = '') AND (TELEFONO = '" + v2 + "' or '" + v2 + "' = '') AND (MAIL = '" + v3 + "' or '" + v3 + "' = '') AND (NIFCIF = '" + v4 + "' or '" + v4 + "' = '')) ORDER BY NOM",7,"EstamosEnClientes","ID","NOM","","","CIUTAT/PAIS","TELÈFON","MAIL","NIF/CIF")
 def clienteCorrigeUno       ():
 
     global val1
@@ -2810,16 +2700,8 @@ def del_client_yes          ():
     ventana2.destroy()
 
     # Borramos los datos del listado de registros
-    query_clientes() 
+    query_todos('databases/basesDeDatosClientes.db',"SELECT *, oid FROM bd_clientes ORDER BY NOM",7,"EstamosEnClientes","ID","NOM","","","CIUTAT/PAIS","TELÈFON","MAIL","NIF/CIF")
 
-def query_usuarios          ():
-    
-    # Creamos la base de datos o conectamos con una
-    base_datos = sqlite3.connect('databases/basesDeDatosDatos.db')
-    busqueda = "SELECT *, oid FROM bd_usuarios ORDER BY NOM"
-    columnas = 7
-    global puntero
-    query(base_datos,busqueda,columnas,"ID","NOM","CLAU","NIVELL","ANGLÈS","CASTELLÀ"," CATALÀ","FRANCÈS")
 def prequery_usuarios       ():
     
     global puntero
@@ -2830,15 +2712,6 @@ def prequery_usuarios       ():
     else:
         puntero -= 21
         query_usuarios_busca()
-def query_usuarios_Inv      ():
-    
-    # Creamos la base de datos o conectamos con una
-    base_datos = sqlite3.connect('databases/basesDeDatosDatos.db')
-    busqueda = "SELECT *, oid FROM bd_usuarios ORDER BY oid DESC"
-    columnas = 7
-    global puntero
-    puntero = 0
-    query(base_datos,busqueda,columnas,"ID","NOM","CLAU","NIVELL","ANGLÈS","CASTELLÀ"," CATALÀ","FRANCÈS")
 def query_usuarios_busca0   ():
     
     global puntero
@@ -2846,6 +2719,7 @@ def query_usuarios_busca0   ():
     query_usuarios_busca()
 def query_usuarios_busca    ():
 
+    global EstamosEnUsuarios
     v1 = LRR11.get()
     v2 = LRR21.get()
     v3 = LRR31.get()
@@ -2853,13 +2727,8 @@ def query_usuarios_busca    ():
     v5 = LRR51.get()
     v6 = LRR61.get()
     
-       
     # Creamos la base de datos o conectamos con una
-    base_datos = sqlite3.connect('databases/basesDeDatosDatos.db')
-    busqueda = "SELECT *, oid FROM bd_usuarios WHERE ((NOM = '" + v1 + "' or '" + v1 + "' = '') AND (NIVEL = '" + v2 + "' or '" + v2 + "' = '') AND (INGLES = '" + v3 + "' or '" + v3 + "' = '') AND (CASTELLANO = '" + v4 + "' or '" + v4 + "' = '') AND (CATALAN = '" + v5 + "' or '" + v5 + "' = '') AND (FRANCES = '" + v6 + "' or '" + v6 + "' = '')) ORDER BY NOM"    
-    columnas = 7
-    global puntero
-    query(base_datos,busqueda,columnas,"ID","NOM","CLAU","NIVELL","ANGLÈS","CASTELLÀ"," CATALÀ","FRANCÈS")
+    query_todos('databases/basesDeDatosDatos.db',"SELECT *, oid FROM bd_usuarios WHERE ((NOM = '" + v1 + "' or '" + v1 + "' = '') AND (NIVEL = '" + v2 + "' or '" + v2 + "' = '') AND (INGLES = '" + v3 + "' or '" + v3 + "' = '') AND (CASTELLANO = '" + v4 + "' or '" + v4 + "' = '') AND (CATALAN = '" + v5 + "' or '" + v5 + "' = '') AND (FRANCES = '" + v6 + "' or '" + v6 + "' = '')) ORDER BY NOM",7,"EstamosEnUsuarios","ID","NOM","CLAU","NIVELL","ANGLÈS","CASTELLÀ"," CATALÀ","FRANCÈS")
 def usuariosCorrigeUno      ():
 
     global val1
@@ -3041,7 +2910,7 @@ def del_user_yes            ():
     ventana2.destroy()
 
     # Borramos los datos del listado de registros
-    query_usuarios() 
+    query_todos('databases/basesDeDatosDatos.db',"SELECT *, oid FROM bd_usuarios ORDER BY NOM",7,"EstamosEnUsuarios","ID","NOM","CLAU","NIVELL","ANGLÈS","CASTELLÀ"," CATALÀ","FRANCÈS")
 
 def Registros0001         ():
     TEXTO = VIEW0001.cget("text")
@@ -3202,10 +3071,11 @@ def IncidenciasFuerzoElId   (VALOR):
     LRR22.focus()
     incidenciasCorrigeUno()
 
+
 def query                   (seleccion,busc,columnas,*enunciados):
     
-    global EstamosEnIncidencias
-    global EstamosEnRegistros
+    global EstamosEnIncidencias,EstamosEnRegistros,EstamosEnProforma,EstamosEnBloqueos,EstamosEnProductos,EstamosEnClientes,EstamosEnProductos,EstamosEnClientes,EstamosEnUsuarios
+
     # Definimos a puntero como global para que se guarde su valor fuera de la función
     global puntero
         
@@ -3241,7 +3111,7 @@ def query                   (seleccion,busc,columnas,*enunciados):
         globals()['VIEW%s' % num].config(command=lambda: regresaSinNada() ) 
 
         if EstamosEnRegistros == True:
-            
+     
             if num == "0001":
                 globals()['VIEW%s' % num].config(command=lambda: Registros0001())
             elif num == "0002":
@@ -3284,7 +3154,7 @@ def query                   (seleccion,busc,columnas,*enunciados):
                 globals()['VIEW%s' % num].config(command=lambda: Registros00020())
             elif num == "00021":
                 globals()['VIEW%s' % num].config(command=lambda: Registros00021())
-                                                                        
+                                                                
            
         if EstamosEnIncidencias == True:
             
@@ -4368,10 +4238,10 @@ def menuRegistrosIntroducir                         ():
 
         # Cerrar conexion 
         base_datos_datos.close() 
-                            
+                   
         # Pinta datos en zona 3
-        query_registros_Inv()
-
+        query_todos('databases/basesDeDatosRegistros.db',"SELECT *, oid FROM bd_registros ORDER BY FECHA DESC, oid DESC",8,"EstamosEnRegistros","ID","","DATA","DESCRIPCIÓ","ORIGEN","HORA","PRODUCTE","FONT","")        
+        
         # Limpia posibles mensajes anteriores innecesarios
         LR23.config(text = "")
         # Crea la base de datos o conecta con ella
@@ -4471,7 +4341,7 @@ def menuRegistrosIntroducir                         ():
         LRR73.insert(1.0,vr6)
         vr7 = False
     Boton4activado(menuRegistrosIntroducirIntroduce)
-    query_registros_Inv()  
+    query_todos('databases/basesDeDatosRegistros.db',"SELECT *, oid FROM bd_registros ORDER BY FECHA DESC, oid DESC",8,"EstamosEnRegistros","ID","","DATA","DESCRIPCIÓ","ORIGEN","HORA","PRODUCTE","FONT","")        
     LRR21.focus() 
 def menuRegistrosConsultar                          ():
            
@@ -7463,7 +7333,8 @@ def menuIncidenciasIntroducir                       ():
         base_datos_datos.close() 
                             
         # Pinta datos en zona 3
-        query_incidencias_Inv()
+        query_todos('databases/basesDeDatosIncidencias.db',"SELECT *, oid FROM bd_incidencias ORDER BY FECHA_CREA DESC, HORA DESC",8,"EstamosEnIncidencias","ID","DATA","HORA","PAX","PRODUCTE","IDIOMA","ESTAT","CLIENT","PAGAT")        
+
 
         # Limpia posibles mensajes anteriores innecesarios
         LR23.config(text = "")
@@ -7579,7 +7450,7 @@ def menuIncidenciasIntroducir                       ():
     LRR213.grid(row=20, column=1)
           
     Boton4activado(menuIncidenciasIntroducirIntroduce)
-    query_incidencias_Inv()
+    query_todos('databases/basesDeDatosIncidencias.db',"SELECT *, oid FROM bd_incidencias ORDER BY FECHA_CREA DESC, HORA DESC",8,"EstamosEnIncidencias","ID","DATA","HORA","PAX","PRODUCTE","IDIOMA","ESTAT","CLIENT","PAGAT")        
     
     # Si el usuario tiene un nivel de 3 o más...
     if int(usuarioNivel) >= 3:
@@ -7921,7 +7792,7 @@ def menuIncidenciasFacturaProformaIntroducirCrear       ():
         base_datos_datos.close() 
                             
         # Pinta datos en zona 3
-        query_proforma_Inv()
+        query_todos('databases/basesDeDatosProforma.db',"SELECT *, oid FROM bd_proforma ORDER BY NUM_PRO DESC",8,"EstamosEnProformas","ID","DATA","","PROFORMA","CLIENT","QUANTITAT","CONCEPTE","PREU","")        
 
         # Limpia posibles mensajes anteriores innecesarios
         LR23.config(text = "")
@@ -8045,7 +7916,7 @@ def menuIncidenciasFacturaProformaIntroducirCrear       ():
     raiz.bind("<Control-P>", lambda event: BotonImprimirForzado())     
     Boton7activado(PDFProforma)
     Boton4activado(menuProformaIntroducirIntroduce)
-    query_proforma_Inv()
+    query_todos('databases/basesDeDatosProforma.db',"SELECT *, oid FROM bd_proforma ORDER BY NUM_PRO DESC",8,"EstamosEnProformas","ID","DATA","","PROFORMA","CLIENT","QUANTITAT","CONCEPTE","PREU","")        
     
     LRR22.focus()  
 def menuIncidenciasFacturaProformaConsultar         ():
@@ -8222,7 +8093,7 @@ def menuIncidenciasBloqueosBloquear                 ():
         base_datos_datos.close() 
                             
         # Pinta datos en zona 3
-        query_bloqueos_Inv()
+        query_todos('databases/basesDeDatosIncidencias.db',"SELECT *, oid FROM bd_bloqueos ORDER BY FECHA",8,"EstamosEnBloqueos","ID","DATES","","","","","","","")
 
         # Limpia posibles mensajes anteriores innecesarios
         LR23.config(text = "")
@@ -8243,7 +8114,7 @@ def menuIncidenciasBloqueosBloquear                 ():
     LRR12.grid(row=0, column=1) 
           
     Boton4activado(menuIncidenciasBloqueosBloquea)
-    query_bloqueos_Inv()
+    query_todos('databases/basesDeDatosIncidencias.db',"SELECT *, oid FROM bd_bloqueos ORDER BY FECHA",8,"EstamosEnBloqueos","ID","DATES","","","","","","","")
               
     LRR12.focus()
 def menuIncidenciasBloqueosDesbloquear              ():
@@ -8254,7 +8125,8 @@ def menuIncidenciasBloqueosDesbloquear              ():
     LRR12.grid(row=0, column=1)
         
     Boton4activado(bloqueoBorraUno)
-    query_bloqueos_Inv()
+    query_todos('databases/basesDeDatosIncidencias.db',"SELECT *, oid FROM bd_bloqueos ORDER BY FECHA",8,"EstamosEnBloqueos","ID","DATES","","","","","","","")
+
 
     LRR12.focus()
 
@@ -8451,7 +8323,8 @@ def MenuDatosProductoIntroducir                         ():
         base_datos_datos.close() 
         
         # Pinta datos en zona 3
-        query_productos_Inv()
+        query_todos('databases/basesDeDatosDatos.db',"SELECT *, oid FROM bd_productos ORDER BY oid DESC",4,"EstamosEnProductos","ID","NOM","PREU REAL","PREU ACTUAL","TIPUS")
+
 
         # Limpia posibles mensajes anteriores innecesarios
         LR23.config(text = "")
@@ -8525,7 +8398,7 @@ def MenuDatosProductoIntroducir                         ():
     LRR51['values'] = (["Registre","Stock"])
     
     Boton4activado(MenuDatosProductoIntroducirIntroduce)
-    query_productos_Inv()  
+    query_todos('databases/basesDeDatosDatos.db',"SELECT *, oid FROM bd_productos ORDER BY oid DESC",4,"EstamosEnProductos","ID","NOM","PREU REAL","PREU ACTUAL","TIPUS")
     LRR22.focus()
 def MenuDatosProductoConsultar                          ():
  
@@ -8594,6 +8467,13 @@ def MenuDatosClienteIntroducir                          ():
             LRR22.focus()
             return
         
+        # Si se incluye ' o " en el nombre, No se puede avanzar
+        if "'" in v1 or '"' in v1:
+            
+            LR23.config(text = "No es pot utilitzar ' o \" al nom")  
+            LRR22.focus()
+            return         
+        
         if v4 != "":
             try:
                 
@@ -8636,7 +8516,7 @@ def MenuDatosClienteIntroducir                          ():
         base_datos_datos.close() 
         
         # Pinta datos en zona 3
-        query_clientes_Inv()
+        query_todos('databases/basesDeDatosClientes.db',"SELECT *, oid FROM bd_clientes ORDER BY oid DESC",7,"EstamosEnClientes","ID","NOM","","","CIUTAT/PAIS","TELÈFON","MAIL","NIF/CIF")
 
         # Limpia posibles mensajes anteriores innecesarios
         LR23.config(text = "")
@@ -8723,7 +8603,7 @@ def MenuDatosClienteIntroducir                          ():
     BB4.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 10, command =MenuDatosClienteIntroducirIntroduce)
     cambiaPasaEncima(BB4,"green","#27779d") 
     
-    query_clientes_Inv()
+    query_todos('databases/basesDeDatosClientes.db',"SELECT *, oid FROM bd_clientes ORDER BY oid DESC",7,"EstamosEnClientes","ID","NOM","","","CIUTAT/PAIS","TELÈFON","MAIL","NIF/CIF")
        
     LRR22.focus()    
 def MenuDatosClienteConsultar                           ():
@@ -8834,7 +8714,8 @@ def menuDatosUsuarioIntroducir                          ():
         base_datos_datos.close() 
         
         # Pinta datos en zona 3
-        query_usuarios_Inv()       
+        query_todos('databases/basesDeDatosDatos.db',"SELECT *, oid FROM bd_usuarios ORDER BY oid DESC",7,"EstamosEnUsuarios","ID","NOM","CLAU","NIVELL","ANGLÈS","CASTELLÀ"," CATALÀ","FRANCÈS")
+      
 
         # Limpia posibles mensajes anteriores innecesarios
         LR23.config(text = "")
@@ -8884,7 +8765,7 @@ def menuDatosUsuarioIntroducir                          ():
     LRR81['values'] = (["Sí","No"])
     
     Boton4activado(MenuDatosUsuarioIntroducirIntroduce)
-    query_usuarios_Inv()
+    query_todos('databases/basesDeDatosDatos.db',"SELECT *, oid FROM bd_usuarios ORDER BY oid DESC",7,"EstamosEnUsuarios","ID","NOM","CLAU","NIVELL","ANGLÈS","CASTELLÀ"," CATALÀ","FRANCÈS")
     LRR12.focus()       
 def menuDatosUsuarioConsultar                           ():
       
