@@ -27,10 +27,16 @@ raiz.iconbitmap("image/icono.ico")                      # Le da un icono a la ve
 raiz.config(bg="#b7b493")                               # Le da un color de fondo a la ventana
 raiz.config(bd=10)                                      # Le da un borde a la ventana
 raiz.config(relief="groove")                            # Le da un tipo de borde a la ventana
+alto = raiz.winfo_screenheight()                        # Obtiene el alto de la pantalla
+ancho = raiz.winfo_screenwidth()                        # Obtiene el ancho de la pantalla
+raiz.geometry(f"{ancho}x{alto}")                        # Le da el tamaño de la pantalla a la ventana
+raiz.resizable(0, 0)                                    # Evita que se pueda cambiar el tamaño de la ventana
+raiz.state("zoomed")                                    # Ajusta la ventana a la pantalla
+
 logo = PhotoImage(file="image/logo.png")                # Carga laimagen del logo
 logo = logo.subsample(8, 8)                             # Lo colocamos en raiz utilizando la transparencia
 Label(raiz, image=logo, bg="#b7b493").place(x=30, y=20) # Lo colocamos en raiz utilizando la transparencia
-
+        
 # Si en cualquier momento se pulsan las teclas CTRL + R se va al menu de registro
 raiz.bind("<Control-r>", lambda event: menuRegistrosIntroducir())
 raiz.bind("<Control-R>", lambda event: menuRegistrosIntroducir())
@@ -83,73 +89,37 @@ raiz.bind("<Control-d>", lambda event: regresaSinNada())
 raiz.bind("<Control-D>", lambda event: regresaSinNada())
 #  ---------------------- Definiendo variables necesarias ---------------------
 
-global  DatosUsuario    
-global usuarioNivel
+global  DatosUsuario, usuarioReal, usuarioNivel                             # Definimos las variables que vamos a usar   
+DatosUsuario, usuarioReal, usuarioNivel = (), "No s'ha identificat", "0"    # Inicializamos las variables
 
-DatosUsuario = ()
-usuarioNivel = "0"
-usuarioReal = "No s'ha identificat"
+global avisoint, EstamosEnIncidencias, EstamosEnRegistros, EstamosEnProforma, EstamosEnBloqueos, EstamosEnProductos                                     # Definimos las variables que vamos a usar
+avisoint, EstamosEnIncidencias, EstamosEnRegistros, EstamosEnProforma, EstamosEnBloqueos, EstamosEnProductos = True, False, False, False, False, False  # Inicializamos las variables
 
-global avisoint, EstamosEnIncidencias, EstamosEnRegistros, EstamosEnProforma, EstamosEnBloqueos, EstamosEnProductos
-avisoint, EstamosEnIncidencias, EstamosEnRegistros, EstamosEnProforma, EstamosEnBloqueos, EstamosEnProductos = True, False, False, False, False, False
+global TamanyoLetra                                                         # Definimos las variables que vamos a usar
+TamanyoLetra = 0                                                            # Inicializamos las variables
 
-global TamanyoLetra
-TamanyoLetra = 0
+global origenes, idiomas, horas, fuentes, descripciones, tiposPago, estados, usoUsuarios, productos, productosR, productosS                             # Definimos las variables que vamos a usar      
+origenes, idiomas, horas, fuentes, descripciones, tiposPago, estados, usoUsuarios, productos, productosR, productosS = "","","","","","","","","","","" # Inicializamos las variables
 
-global origenes
-origenes = ""
-global idiomas
-idiomas = ""
-global horas
-horas = ""
-global fuentes
-fuentes = ""
-global descripciones
-descripciones = ""
-global tiposPago
-tiposPago = ""  
-global estados
-estados = "" 
-global usoUsuarios
-usoUsuarios = ""
-global productos
-productos = ""
-global productosR
-productosR = ""
-global productosS
-productosS = ""
-
-# Hacemos globales las variables que vamos a usar
-global vr1,vr2,vr3,vr4,vr5,vr6,vr7
-vr1,vr2,vr3,vr4,vr5,vr6,vr7 = "","","","","","",False
+global vr1,vr2,vr3,vr4,vr5,vr6,vr7                                          # Definimos las variables que vamos a usar
+vr1,vr2,vr3,vr4,vr5,vr6,vr7 = "","","","","","",False                       # Inicializamos las variables
     
-global puntero
+global fecha, diaGlobal, diaGlobaltk, mesGlobal, mesGlobaltk, anyoGlobal, anyoGlobaltk, diaFecha, mesFecha, anyoFecha
 
-global fecha
-global diaGlobal
-global diaGlobaltk
-global mesGlobal
-global mesGlobaltk
-global anyoGlobal
-global anyoGlobaltk
-global diaFecha
-global mesFecha
-global anyoFecha
-
-fecha = datetime.now()
-diaGlobal = str(fecha.day)
-diaGlobaltk = StringVar()
-diaGlobaltk.set(diaGlobal)
-mesGlobal = str(fecha.month)
-mesGlobaltk = StringVar()
-mesGlobaltk.set(mesGlobal)
-anyoGlobal = str(fecha.year)
-anyoGlobaltk = StringVar()
-anyoGlobaltk.set(anyoGlobal)
+fecha = datetime.now()              # Obtenemos la fecha actual
+diaGlobal = str(fecha.day)          # Obtenemos el día actual
+diaGlobaltk = StringVar()           # Creamos una variable de tipo StringVar para poder usarla en Tkinter
+diaGlobaltk.set(diaGlobal)          # Asignamos el valor de la variable diaGlobal a la variable diaGlobaltk 
+mesGlobal = str(fecha.month)        # Obtenemos el mes actual
+mesGlobaltk = StringVar()           # Creamos una variable de tipo StringVar para poder usarla en Tkinter
+mesGlobaltk.set(mesGlobal)          # Asignamos el valor de la variable mesGlobal a la variable mesGlobaltk
+anyoGlobal = str(fecha.year)        # Obtenemos el año actual
+anyoGlobaltk = StringVar()          # Creamos una variable de tipo StringVar para poder usarla en Tkinter
+anyoGlobaltk.set(anyoGlobal)        # Asignamos el valor de la variable anyoGlobal a la variable anyoGlobaltk
 
 # Variables del sector 3
-# Definimos el valor del puntero para cuando los listados som más largos que el espacio en pantalla
-puntero = 0
+global puntero                      # Definimos las variables que vamos a usar
+puntero = 0                         # Definimos el valor del puntero para cuando los listados som más largos que el espacio en pantalla
            
 # ------------------------------ Funciones globales ----------------------
 def copy                    ():
@@ -596,15 +566,15 @@ def cargaUsuario            ():
     raiz.iconify()
     raiz.attributes("-toolwindow", 1)                       # desactivar el botón de maximizar en la barra de título
 
-    rUsuario = Tk()
-    rUsuario.title("Identificació d'usuari")
-    rUsuario.iconbitmap("image/icono.ico")
+    rUsuario = Tk()                                         # Crea la ventana para identificar el usuario
+    rUsuario.title("Identificació d'usuari")                # Le pone un título
+    rUsuario.iconbitmap("image/icono.ico")                  # Le pone un icono
     rUsuario.config(bg="#b7b493")
     rUsuario.config(bd=10)
     rUsuario.config(relief="groove")
-    rUsuario.config(width = 300, heigh = 300)   
-    rUsuario.deiconify()
-    rUsuario.overrideredirect(True)
+    rUsuario.config(width = 300, heigh = 300)               #
+    rUsuario.deiconify()                                    # 
+    rUsuario.overrideredirect(True)                         # 
     
     # Si en cualquier momento se pulsan las teclas CTRL + ESC se fuerza el pulsado del botón SALIR 
     rUsuario.bind("<Escape>", lambda event: salir())   
@@ -682,21 +652,19 @@ def cargaUsuario            ():
                 datos = cursor.fetchall()
                 DatosUsuario = datos
                 
-                rUsuario.destroy()
-                # Activar el botón de maximizar en la barra de título
-                raiz.attributes("-toolwindow", 0)
-                raiz.deiconify()
-                nomUsuario.config(text = usuarioReal)           
-                MenuInicial()      
-                return(DatosUsuario)
+                rUsuario.destroy()                                      # Destruye la ventana de usuario
+                
+                raiz.attributes("-toolwindow", 0)                       # Activar el botón de maximizar en la barra de título
+                raiz.deiconify()                                        # Para que la ventana se muestre
+                nomUsuario.config(text = usuarioReal)                   # Muestra el nombre del usuario en la barra de estado       
+                MenuInicial()                                           # Llama a la función que crea el menú inicial
+                return(DatosUsuario)                                    # Devuelve los datos del usuario
             
-        LMensaje.config(text = "Clau incorrecte")
-        
-        # Limpia el campo de la clave
-        EClave.delete(0, END)
-        # Pone el foco en el campo de la clave            
-        EClave.focus()
-        return
+        LMensaje.config(text = "Clau incorrecte")                       # Muestra el mensaje de error 
+        EClave.delete(0, END)                                           # Limpia el campo de la clave
+        EClave.focus()                                                  # Pone el foco en el campo de la clave            
+
+        return                                                          # Sale de la función
         
 
     # Botones
