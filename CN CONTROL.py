@@ -19,6 +19,8 @@ from reportlab.pdfbase.ttfonts import TTFont            # Para crear el PDF
 import shutil                                           # Para copiar archivos
 import os                                               # Para borrar archivos
 import time                                             # Para trabajar con el tiempo
+import copy                                             # Para crear copias de variables
+import keyboard                                         # Para detectar pulsaciones de teclas
 #  ----------------------------------- Raiz -----------------------------------
 
 raiz = Tk()                                             # Crea la ventana raiz
@@ -41,8 +43,8 @@ Label(raiz, image=logo, bg="#b7b493").place(x=30, y=20) # Lo colocamos en raiz u
 raiz.bind("<Control-r>", lambda event: menuRegistrosIntroducir())
 raiz.bind("<Control-R>", lambda event: menuRegistrosIntroducir())
 # Si en cualquier momento se pulsa las teclas CTRL + C intenta copiar al portapapeles
-raiz.bind("<Control-c>", lambda event: copy())
-raiz.bind("<Control-C>", lambda event: copy())
+raiz.bind("<Control-c>", lambda event: copia())
+raiz.bind("<Control-C>", lambda event: copia())
 # Si en cualquier momento se pulsan las teclas CTRL + V intenta copiar lo del portapapeles
 raiz.bind("<Control-v>", lambda event: paste())
 raiz.bind("<Control-V>", lambda event: paste())
@@ -92,8 +94,8 @@ raiz.bind("<Control-D>", lambda event: regresaSinNada())
 global  DatosUsuario, usuarioReal, usuarioNivel                             # Definimos las variables que vamos a usar   
 DatosUsuario, usuarioReal, usuarioNivel = (), "No s'ha identificat", "0"    # Inicializamos las variables
 
-global avisoint, EstamosEnIncidencias, EstamosEnRegistros, EstamosEnProforma, EstamosEnBloqueos, EstamosEnProductos                                     # Definimos las variables que vamos a usar
-avisoint, EstamosEnIncidencias, EstamosEnRegistros, EstamosEnProforma, EstamosEnBloqueos, EstamosEnProductos = True, False, False, False, False, False  # Inicializamos las variables
+global avisoint, EstamosEnIncidencias, EstamosEnRegistros, EstamosEnProforma, EstamosEnBloqueos, EstamosEnProductos, EstamosEnClientes, EstamosEnUsuarios                                                   # Definimos las variables que vamos a usar
+avisoint, EstamosEnIncidencias, EstamosEnRegistros, EstamosEnProforma, EstamosEnBloqueos, EstamosEnProductos, EstamosEnClientes, EstamosEnUsuarios = True, False, False, False, False, False, False, False  # Inicializamos las variables
 
 global TamanyoLetra                                                         # Definimos las variables que vamos a usar
 TamanyoLetra = 0                                                            # Inicializamos las variables
@@ -122,49 +124,44 @@ global puntero                      # Definimos las variables que vamos a usar
 puntero = 0                         # Definimos el valor del puntero para cuando los listados som más largos que el espacio en pantalla
            
 # ------------------------------ Funciones globales ----------------------
-def copy                    ():
-    #Comprueba si el foco está en alguna label o entry.
-    if raiz.focus_get() == None:
-        return
-    else:
-        # Descubre en qué label o entry está el foco
-        foco = raiz.focus_get()
-        try:   
-            # Copia el contenido de la label o entry al portapapeles
-            texto = foco.get()
-            clipboard.copy(texto)
-        except:
-            pass
+def copia                    ():
+    if raiz.focus_get() == None:                # Comprueba si el foco está en alguna label o entry.
+        return                                  # Si no está en ninguna label o entry, no hace nada
+    else:                                       # Si está en alguna label o entry, hace lo siguiente
+        foco = raiz.focus_get()                 # Descubre en qué label o entry está el foco
+
+        try:                                    # intenta hacer lo siguiente   
+            texto = foco.get()                  # Obtiene el contenido de la label o entry
+            clipboard.copy(texto)               # Copia el contenido de la label o entry al portapapeles
+        except:                                 # Si no puede hacer lo anterior... 
+            pass                                # No hace nada
 def paste                   ():
-    #Comprueba si el foco está en alguna label o entry.
-    if raiz.focus_get() == None:
-        return 
-    else:
-        # Descubre en qué label o entry está el foco
-        foco = raiz.focus_get()
-        try:
-            # Pega el contenido del portapapeles dentro de la label o entry
-            foco.insert(INSERT, clipboard_get())
-        except:
-            
-            pass
+    if raiz.focus_get() == None:                # Comprueba si el foco está en alguna label o entry.
+        return                                  # Si no está en ninguna label o entry, no hace nada
+    else:                                       # Si está en alguna label o entry, hace lo siguiente
+        foco = raiz.focus_get()                 # Descubre en qué label o entry está el foco
+
+        try:                                    # intenta hacer lo siguiente
+            foco.insert(INSERT, clipboard_get())# Pega el contenido del portapapeles dentro de la label o entry
+        except:                                 # Si no puede hacer lo anterior...
+            pass                                # No hace nada
 def CopiaSeguridadGlobal    ():
     
     # Ventana de aviso
     # Preparamos la ventana Tk donde trabajaremos
-    global ventana2
+    global ventana2                             # Definimos la variable ventana2 como global
     ventana2 = Tk()                             # Creamos la ventana
     ventana2.title(" ")                         # Título de la ventana
     ventana2.geometry("400x25")                 # Damos tamaño a la ventana
     ventana2.configure(bg='blue')               # Color de fondo
     ventana2.iconbitmap("image/icono.ico")      # Icono de la ventana
     ventana2.deiconify()                        # Mostramos la ventana
-    ventana2label = Label(ventana2, text = "Fent còpia de seguretat...", bg = "blue", fg = "white", font = ("Helvetica", 12))   
-    ventana2label.pack()                    # Coloca el label en la ventana
-    ventana2.overrideredirect(True)         # Quitamos el marco de la ventana
-    ventana2.update()                       # Actualiza la ventana
+    ventana2label = Label(ventana2, text = "Fent còpia de seguretat...", bg = "blue", fg = "white", font = ("Helvetica", 12))   # Creamos el label  
+    ventana2label.pack()                        # Coloca el label en la ventana
+    ventana2.overrideredirect(True)             # Quitamos el marco de la ventana
+    ventana2.update()                           # Actualiza la ventana
 
-    fecha = datetime.now()
+    fecha = datetime.now()                      # Obtenemos la fecha actual
     # Crea en la carpeta Security una carpeta con nombre fecha y hora actual
     os.mkdir("Security/" + str(anyoGlobal) + "-" + str(mesGlobal) + "-" + str(diaGlobal) + " " + str(fecha.hour) + "-" + str(fecha.minute) + "-" + str(fecha.second))
     # Copia la carpeta databases dentro de esta carpeta
@@ -176,9 +173,9 @@ def CopiaSeguridadGlobal    ():
 
 def Saliendo                ():
     
-    CopiaSeguridadGlobal()
-    # Cerramos tkinter
-    raiz.destroy()      
+    CopiaSeguridadGlobal()                      # Hacemos una copia de seguridad antes de salir
+    raiz.destroy()                              # Cerramos tkinter
+   
 def cambiaPasaEncima        (boton, colorEncima, colorFuera): 
   
     boton.bind("<Enter>", func=lambda e: boton.config(background=colorEncima))
@@ -726,8 +723,11 @@ def BotonSubirForzado       ():
     BB4.focus()
     BB5.invoke()
 def BotonBajarForzado       ():
+
     BB4.focus()    
     BB6.invoke()
+
+     
 def BotonRegresarForzado    ():
     
     BM11.invoke()        
@@ -2880,71 +2880,10 @@ def del_user_yes            ():
     # Borramos los datos del listado de registros
     query_todos('databases/basesDeDatosDatos.db',"SELECT *, oid FROM bd_usuarios ORDER BY NOM",7,"EstamosEnUsuarios","ID","NOM","CLAU","NIVELL","ANGLÈS","CASTELLÀ"," CATALÀ","FRANCÈS")
 
-def Registros0001         ():
-    TEXTO = VIEW0001.cget("text")
-    RegistrosFuerzoElId   (TEXTO)
-def Registros0002         ():
-    TEXTO = VIEW0002.cget("text")
-    RegistrosFuerzoElId   (TEXTO)
-def Registros0003         ():
-    TEXTO = VIEW0003.cget("text")
-    RegistrosFuerzoElId   (TEXTO)
-def Registros0004         ():
-    TEXTO = VIEW0004.cget("text")
-    RegistrosFuerzoElId   (TEXTO)
-def Registros0005         ():
-    TEXTO = VIEW0005.cget("text")
-    RegistrosFuerzoElId   (TEXTO)
-def Registros0006         ():
-    TEXTO = VIEW0006.cget("text")
-    RegistrosFuerzoElId   (TEXTO)
-def Registros0007         ():
-    TEXTO = VIEW0007.cget("text")
-    RegistrosFuerzoElId   (TEXTO)
-def Registros0008         ():
-    TEXTO = VIEW0008.cget("text")
-    RegistrosFuerzoElId   (TEXTO)
-def Registros0009         ():
-    TEXTO = VIEW0009.cget("text")
-    RegistrosFuerzoElId   (TEXTO)
-def Registros00010        ():
-    TEXTO = VIEW00010.cget("text")
-    RegistrosFuerzoElId   (TEXTO)
-def Registros00011        ():
-    TEXTO = VIEW00011.cget("text")
-    RegistrosFuerzoElId   (TEXTO)
-def Registros00012        ():
-    TEXTO = VIEW00012.cget("text")
-    RegistrosFuerzoElId   (TEXTO)
-def Registros00013        ():
-    TEXTO = VIEW00013.cget("text")
-    RegistrosFuerzoElId   (TEXTO)
-def Registros00014        ():
-    TEXTO = VIEW00014.cget("text")
-    RegistrosFuerzoElId   (TEXTO)
-def Registros00015        ():
-    TEXTO = VIEW00015.cget("text")
-    RegistrosFuerzoElId   (TEXTO)
-def Registros00016        ():
-    TEXTO = VIEW00016.cget("text")
-    RegistrosFuerzoElId   (TEXTO)
-def Registros00017        ():
-    TEXTO = VIEW00017.cget("text")
-    RegistrosFuerzoElId   (TEXTO)
-def Registros00018        ():
-    TEXTO = VIEW00018.cget("text")
-    RegistrosFuerzoElId   (TEXTO)
-def Registros00019        ():
-    TEXTO = VIEW00019.cget("text")
-    RegistrosFuerzoElId   (TEXTO)
-def Registros00020        ():
-    TEXTO = VIEW00020.cget("text")
-    RegistrosFuerzoElId   (TEXTO)
-def Registros00021        ():
-    TEXTO = VIEW00021.cget("text")
-    RegistrosFuerzoElId   (TEXTO)
-def RegistrosFuerzoElId   (VALOR):
-    
+def Registros_Todo          (num):
+
+    TEXTO = globals()['VIEW%s' % num].cget("text")
+   
     # Hacemos globales las variables que vamos a usar
     global vr1,vr2,vr3,vr4,vr5,vr6,vr7
     # Guardamos los valores del registro
@@ -2960,89 +2899,104 @@ def RegistrosFuerzoElId   (VALOR):
     anyoGlobaltk.set(anyoGlobal) 
     # Ponemos en la label LRR12 el valor VALOR
     LRR12.delete(0,'end')
-    LRR12.insert(0,VALOR)
+    LRR12.insert(0,TEXTO)
     LRR22.focus()
     registroCorrigeUno()
     vr7 = True
+def Incidencias_Todo        (num):
+    
+    TEXTO = globals()['VIEW%s' % num].cget("text")
 
-def Incidencias0001         ():
-    TEXTO = VIEW0001.cget("text")
-    IncidenciasFuerzoElId   (TEXTO)
-def Incidencias0002         ():
-    TEXTO = VIEW0002.cget("text")
-    IncidenciasFuerzoElId   (TEXTO)
-def Incidencias0003         ():
-    TEXTO = VIEW0003.cget("text")
-    IncidenciasFuerzoElId   (TEXTO)
-def Incidencias0004         ():
-    TEXTO = VIEW0004.cget("text")
-    IncidenciasFuerzoElId   (TEXTO)
-def Incidencias0005         ():
-    TEXTO = VIEW0005.cget("text")
-    IncidenciasFuerzoElId   (TEXTO)
-def Incidencias0006         ():
-    TEXTO = VIEW0006.cget("text")
-    IncidenciasFuerzoElId   (TEXTO)
-def Incidencias0007         ():
-    TEXTO = VIEW0007.cget("text")
-    IncidenciasFuerzoElId   (TEXTO)
-def Incidencias0008         ():
-    TEXTO = VIEW0008.cget("text")
-    IncidenciasFuerzoElId   (TEXTO)
-def Incidencias0009         ():
-    TEXTO = VIEW0009.cget("text")
-    IncidenciasFuerzoElId   (TEXTO)
-def Incidencias00010        ():
-    TEXTO = VIEW00010.cget("text")
-    IncidenciasFuerzoElId   (TEXTO)
-def Incidencias00011        ():
-    TEXTO = VIEW00011.cget("text")
-    IncidenciasFuerzoElId   (TEXTO)
-def Incidencias00012        ():
-    TEXTO = VIEW00012.cget("text")
-    IncidenciasFuerzoElId   (TEXTO)
-def Incidencias00013        ():
-    TEXTO = VIEW00013.cget("text")
-    IncidenciasFuerzoElId   (TEXTO)
-def Incidencias00014        ():
-    TEXTO = VIEW00014.cget("text")
-    IncidenciasFuerzoElId   (TEXTO)
-def Incidencias00015        ():
-    TEXTO = VIEW00015.cget("text")
-    IncidenciasFuerzoElId   (TEXTO)
-def Incidencias00016        ():
-    TEXTO = VIEW00016.cget("text")
-    IncidenciasFuerzoElId   (TEXTO)
-def Incidencias00017        ():
-    TEXTO = VIEW00017.cget("text")
-    IncidenciasFuerzoElId   (TEXTO)
-def Incidencias00018        ():
-    TEXTO = VIEW00018.cget("text")
-    IncidenciasFuerzoElId   (TEXTO)
-def Incidencias00019        ():
-    TEXTO = VIEW00019.cget("text")
-    IncidenciasFuerzoElId   (TEXTO)
-def Incidencias00020        ():
-    TEXTO = VIEW00020.cget("text")
-    IncidenciasFuerzoElId   (TEXTO)
-def Incidencias00021        ():
-    TEXTO = VIEW00021.cget("text")
-    IncidenciasFuerzoElId   (TEXTO)
-def IncidenciasFuerzoElId   (VALOR):
     MiraFecha(anyoFecha)
     diaGlobaltk.set(diaGlobal)
     mesGlobaltk.set(mesGlobal)
     anyoGlobaltk.set(anyoGlobal) 
     # Ponemos en la label LRR12 el valor VALOR
     LRR12.delete(0,'end')
-    LRR12.insert(0,VALOR)
+    LRR12.insert(0,TEXTO)
     LRR22.focus()
     incidenciasCorrigeUno()
+def Proforma_Todo           (num):
+    
+    TEXTO = globals()['VIEW%s' % num].cget("text")
 
+    MiraFecha(anyoFecha)
+    diaGlobaltk.set(diaGlobal)
+    mesGlobaltk.set(mesGlobal)
+    anyoGlobaltk.set(anyoGlobal) 
+    # Ponemos en la label LRR12 el valor VALOR
+    LRR12.delete(0,'end')
+    LRR12.insert(0,TEXTO)
+    LRR22.focus()
+    ProformaCorrigeUno()
+def Bloqueos_Todo           (num):
+    
+    TEXTO = globals()['VIEW%s' % num].cget("text")
 
+    # Buscamos en bd_bloqueos el registro que queremos
+    # Creamos la base de datos o conectamos con una
+    base_datos = sqlite3.connect('databases/basesDeDatosIncidencias.db')
+    # Creamos el cursor
+    c = base_datos.cursor()
+    # Buscamos el registro
+    c.execute("SELECT * FROM bd_bloqueos WHERE (oid = '" + TEXTO + "')")
+    # Guardamos los datos en una variable
+    registros = c.fetchall()
+    # TEXTO tiene que valer ahora el valor de la columna 1
+    TEXTO = registros[0][0]
+    
+    MiraFecha(anyoFecha)
+    diaGlobaltk.set(diaGlobal)
+    mesGlobaltk.set(mesGlobal)
+    anyoGlobaltk.set(anyoGlobal) 
+    # Ponemos en la label LRR12 el valor VALOR
+    LRR12.delete(0,'end')
+    LRR12.insert(0,TEXTO)
+    LRR22.focus()
+    BloqueosCorrigeUno()
+def Productos_Todo          (num):
+    
+    TEXTO = globals()['VIEW%s' % num].cget("text")
+
+    MiraFecha(anyoFecha)
+    diaGlobaltk.set(diaGlobal)
+    mesGlobaltk.set(mesGlobal)
+    anyoGlobaltk.set(anyoGlobal) 
+    # Ponemos en la label LRR12 el valor VALOR
+    LRR12.delete(0,'end')
+    LRR12.insert(0,TEXTO)
+    LRR22.focus()
+    productoCorrigeUno()
+def Clientes_Todo           (num):
+    
+    TEXTO = globals()['VIEW%s' % num].cget("text")
+
+    MiraFecha(anyoFecha)
+    diaGlobaltk.set(diaGlobal)
+    mesGlobaltk.set(mesGlobal)
+    anyoGlobaltk.set(anyoGlobal) 
+    # Ponemos en la label LRR12 el valor VALOR
+    LRR12.delete(0,'end')
+    LRR12.insert(0,TEXTO)
+    LRR22.focus()
+    clienteCorrigeUno()
+def Usuarios_Todo           (num):
+    
+    TEXTO = globals()['VIEW%s' % num].cget("text")
+
+    MiraFecha(anyoFecha)
+    diaGlobaltk.set(diaGlobal)
+    mesGlobaltk.set(mesGlobal)
+    anyoGlobaltk.set(anyoGlobal) 
+    # Ponemos en la label LRR12 el valor VALOR
+    LRR12.delete(0,'end')
+    LRR12.insert(0,TEXTO)
+    LRR22.focus()
+    usuariosCorrigeUno()
+    
 def query                   (seleccion,busc,columnas,*enunciados):
     
-    global EstamosEnIncidencias,EstamosEnRegistros,EstamosEnProforma,EstamosEnBloqueos,EstamosEnProductos,EstamosEnClientes,EstamosEnProductos,EstamosEnClientes,EstamosEnUsuarios
+    global EstamosEnIncidencias,EstamosEnRegistros,EstamosEnProforma,EstamosEnBloqueos,EstamosEnProductos,EstamosEnClientes,EstamosEnUsuarios
 
     # Definimos a puntero como global para que se guarde su valor fuera de la función
     global puntero
@@ -3065,6 +3019,7 @@ def query                   (seleccion,busc,columnas,*enunciados):
         columna += 1
     columna = 0
     puntero2 = 0
+    num_dicc = {}
     # Loop para todos los datos
     for dato in datos:
                    
@@ -3079,96 +3034,47 @@ def query                   (seleccion,busc,columnas,*enunciados):
         globals()['VIEW%s' % num].config(command=lambda: regresaSinNada() ) 
 
         if EstamosEnRegistros == True:
-     
-            if num == "0001":
-                globals()['VIEW%s' % num].config(command=lambda: Registros0001())
-            elif num == "0002":
-                globals()['VIEW%s' % num].config(command=lambda: Registros0002())
-            elif num == "0003":
-                globals()['VIEW%s' % num].config(command=lambda: Registros0003())
-            elif num == "0004":
-                globals()['VIEW%s' % num].config(command=lambda: Registros0004())
-            elif num == "0005":
-                globals()['VIEW%s' % num].config(command=lambda: Registros0005())
-            elif num == "0006":
-                globals()['VIEW%s' % num].config(command=lambda: Registros0006())
-            elif num == "0007":
-                globals()['VIEW%s' % num].config(command=lambda: Registros0007())
-            elif num == "0008":
-                globals()['VIEW%s' % num].config(command=lambda: Registros0008())
-            elif num == "0009":
-                globals()['VIEW%s' % num].config(command=lambda: Registros0009())
-            elif num == "00010":
-                globals()['VIEW%s' % num].config(command=lambda: Registros00010())
-            elif num == "00011":
-                globals()['VIEW%s' % num].config(command=lambda: Registros00011())
-            elif num == "00012":
-                globals()['VIEW%s' % num].config(command=lambda: Registros00012())
-            elif num == "00013":
-                globals()['VIEW%s' % num].config(command=lambda: Registros00013())
-            elif num == "00014":
-                globals()['VIEW%s' % num].config(command=lambda: Registros00014())
-            elif num == "00015":
-                globals()['VIEW%s' % num].config(command=lambda: Registros00015())
-            elif num == "00016":
-                globals()['VIEW%s' % num].config(command=lambda: Registros00016())
-            elif num == "00017":
-                globals()['VIEW%s' % num].config(command=lambda: Registros00017())
-            elif num == "00018":
-                globals()['VIEW%s' % num].config(command=lambda: Registros00018())
-            elif num == "00019":
-                globals()['VIEW%s' % num].config(command=lambda: Registros00019())
-            elif num == "00020":
-                globals()['VIEW%s' % num].config(command=lambda: Registros00020())
-            elif num == "00021":
-                globals()['VIEW%s' % num].config(command=lambda: Registros00021())
-                                                                
-           
+            
+            num_dicc['num%s' % num] = num
+            func = lambda val: Registros_Todo(val)
+            globals()['VIEW%s' % num].config(command=lambda func=func, val=num_dicc['num%s' % num]: func(val))
+                                                
         if EstamosEnIncidencias == True:
             
-            if num == "0001":
-                globals()['VIEW%s' % num].config(command=lambda: Incidencias0001())
-            elif num == "0002":
-                globals()['VIEW%s' % num].config(command=lambda: Incidencias0002())
-            elif num == "0003":
-                globals()['VIEW%s' % num].config(command=lambda: Incidencias0003())
-            elif num == "0004":
-                globals()['VIEW%s' % num].config(command=lambda: Incidencias0004())
-            elif num == "0005":
-                globals()['VIEW%s' % num].config(command=lambda: Incidencias0005())
-            elif num == "0006":
-                globals()['VIEW%s' % num].config(command=lambda: Incidencias0006())
-            elif num == "0007":
-                globals()['VIEW%s' % num].config(command=lambda: Incidencias0007())
-            elif num == "0008":
-                globals()['VIEW%s' % num].config(command=lambda: Incidencias0008())
-            elif num == "0009":
-                globals()['VIEW%s' % num].config(command=lambda: Incidencias0009())
-            elif num == "00010":
-                globals()['VIEW%s' % num].config(command=lambda: Incidencias00010())
-            elif num == "00011":
-                globals()['VIEW%s' % num].config(command=lambda: Incidencias00011())
-            elif num == "00012":
-                globals()['VIEW%s' % num].config(command=lambda: Incidencias00012())
-            elif num == "00013":
-                globals()['VIEW%s' % num].config(command=lambda: Incidencias00013())
-            elif num == "00014":
-                globals()['VIEW%s' % num].config(command=lambda: Incidencias00014())
-            elif num == "00015":
-                globals()['VIEW%s' % num].config(command=lambda: Incidencias00015())
-            elif num == "00016":
-                globals()['VIEW%s' % num].config(command=lambda: Incidencias00016())
-            elif num == "00017":
-                globals()['VIEW%s' % num].config(command=lambda: Incidencias00017())
-            elif num == "00018":
-                globals()['VIEW%s' % num].config(command=lambda: Incidencias00018())
-            elif num == "00019":
-                globals()['VIEW%s' % num].config(command=lambda: Incidencias00019())
-            elif num == "00020":
-                globals()['VIEW%s' % num].config(command=lambda: Incidencias00020())
-            elif num == "00021":
-                globals()['VIEW%s' % num].config(command=lambda: Incidencias00021())
-                                                                        
+            num_dicc['num%s' % num] = num
+            func = lambda val: Incidencias_Todo(val)
+            globals()['VIEW%s' % num].config(command=lambda func=func, val=num_dicc['num%s' % num]: func(val))
+
+        if EstamosEnProforma == True:
+            
+            num_dicc['num%s' % num] = num
+            func = lambda val: Proforma_Todo(val)
+            globals()['VIEW%s' % num].config(command=lambda func=func, val=num_dicc['num%s' % num]: func(val))
+        
+        if EstamosEnBloqueos == True:
+            
+            num_dicc['num%s' % num] = num
+            func = lambda val: Bloqueos_Todo(val)
+            globals()['VIEW%s' % num].config(command=lambda func=func, val=num_dicc['num%s' % num]: func(val))
+            
+        if EstamosEnProductos == True:
+            
+            num_dicc['num%s' % num] = num
+            func = lambda val: Productos_Todo(val)
+            globals()['VIEW%s' % num].config(command=lambda func=func, val=num_dicc['num%s' % num]: func(val))
+            
+        if EstamosEnClientes == True:
+            
+            num_dicc['num%s' % num] = num
+            func = lambda val: Clientes_Todo(val)
+            globals()['VIEW%s' % num].config(command=lambda func=func, val=num_dicc['num%s' % num]: func(val))
+            
+        if EstamosEnUsuarios == True:
+            
+            num_dicc['num%s' % num] = num
+            func = lambda val: Usuarios_Todo(val)
+            globals()['VIEW%s' % num].config(command=lambda func=func, val=num_dicc['num%s' % num]: func(val)) 
+                                                                                       
         for i in range (columnas):
             
             if  enunciados[i+1] == "CLAU":
@@ -3209,8 +3115,9 @@ def query                   (seleccion,busc,columnas,*enunciados):
 
 	# Cierra la conexión con la base de datos
     seleccion.close()
-    EstamosEnIncidencias = False
-    EstamosEnRegistros = False
+    
+    # Todo es falso
+    EstamosEnIncidencias, EstamosEnRegistros, EstamosEnProforma, EstamosEnBloqueos, EstamosEnProductos, EstamosEnClientes, EstamosEnProductos, EstamosEnClientes, EstamosEnUsuarios = False, False, False, False, False, False, False, False, False
     return
 def del_no                  ():
     
@@ -8008,6 +7915,11 @@ def menuIncidenciasBloqueosBloquear                 ():
                 LR23.config(text = "Data incorrecte")
                 LRR22.focus()
                 return
+            # Si v2 no contiene 2 dígitos, "/", 2 dígitos, "/", 4 dígitos
+            if v2[2] != "/" or v2[5] != "/":
+                LR23.config(text = "Data incorrecte")
+                LRR22.focus()
+                return
         except:
                 LR23.config(text = "Data incorrecte")
                 LRR22.focus() 
@@ -8763,7 +8675,7 @@ def menuDatosUsuarioConsultar                           ():
     Boton4activado(query_usuarios_busca0)
     Boton5activado(prequery_usuarios)
     Boton6activado(query_usuarios_busca)
-    LRR12.focus() 
+    LRR11.focus() 
 def menuDatosUsuarioCorregir                            ():
     
     LimpiaLabelsRellena()
