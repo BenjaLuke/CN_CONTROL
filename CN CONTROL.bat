@@ -1,5 +1,5 @@
 echo off
-echo CN CONTROL V.3.15.33
+echo CN CONTROL V.3.15.35
 echo by: Benjamin Miguel Miralpeix
 echo 2021/2023
 echo ultima actualizacion: 2023/03/11
@@ -32,6 +32,6 @@ echo ------------------------------------------------------------
 echo CTRL + (+)			AUGMENTA LA MIDA DE LA LLETRA
 echo CTRL + (-)			REDUEIX LA MIDA DE LA LLETRA
 echo CTRL + U			CANVI D'USUARI
-echo ESC				SURT DE CN CONTROL
+echo Fin				SURT DE CN CONTROL
 echo ------------------------------------------------------------
 python "CN CONTROL.py"

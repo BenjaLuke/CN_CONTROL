@@ -84,8 +84,8 @@ raiz.bind("<Control-Up>", lambda event: BotonSubirForzado())
 raiz.bind("<Control-Down>", lambda event: BotonBajarForzado())
 # Si en cualquier momento se pulsan las teclas CTRL + CURSOR IZQUIERDA se fuerza el pulsado del botón REGRESAR
 raiz.bind("<Control-Left>", lambda event: BotonRegresarForzado())
-# Si en cualquier momento se pulsan las teclas ESC se fuerza el pulsado del botón SALIR 
-raiz.bind("<Escape>", lambda event: Saliendo())
+# Si en cualquier momento se pulsan las teclas FIN se fuerza el pulsado del botón SALIR
+raiz.bind("<End>", lambda event: Saliendo())
 # Si aquí se pulsan las teclas CTRL + D no pasa nada
 raiz.bind("<Control-d>", lambda event: regresaSinNada())
 raiz.bind("<Control-D>", lambda event: regresaSinNada())
