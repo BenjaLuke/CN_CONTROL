@@ -4163,7 +4163,7 @@ def menuRegistrosIntroducir                         ():
         sumatorio = cursor.fetchall()
         # Cerrar conexion 
         base_datos_datos.close()
-        LR23.config(text = "grup: "+str(len(sumatorio)))
+        LR23.config(text = "Recompte parcial: "+str(len(sumatorio)))
 
         # Pinta la lista actualizada
         # Crea la base de datos o conecta con ella
