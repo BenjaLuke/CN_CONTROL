@@ -185,9 +185,15 @@ def pulsaTeclaCombobox      (event):
         return
     # Si la tecla pulsada es una letra o un espacio
     letter = event.char                          # Obtener la tecla presionada
-    if  event.char.isalpha() or event.char == " ":
+
+    if  event.char.isalpha() or event.char == " " or event.char in "`,´,',À,È,Ì,Ò,Ù,Á,É,Í,Ú,Ó":
+    
+        try:
+            letter = letter.upper()                     # Convertir la letra a mayúsculas
+        except:
+            pass
         
-        stringBusqueda += letter                 # Añadir la letra a la cadena de búsqueda
+        stringBusqueda += letter                    # Añadir la letra a la cadena de búsqueda
         values = LRR31.cget('values')               # Obtener las opciones del combobox
         for value in values:                        # Buscar la primera opción que comience con la cadena de búsqueda
 
@@ -4222,7 +4228,6 @@ def menuRegistrosIntroducir                         ():
     LRR21['values'] = (descripciones)  
     LR3.config(text = "ORIGEN:")  
     LRR31.grid(row=2, column=1)
-    #LRR31.config(state = "readandwrite")
     LRR31['values'] = (origenes)  
     LR4.config(text = "HORA:")  
     LRR41.grid(row=3, column=1)  
@@ -9015,7 +9020,8 @@ for i in range (1,24):
     globals()['LRR%s' % (i) + '2'].config(font=("Helvetica", tamanyoFont),width = 18)
     globals()['LRR%s' % (i) + '2'].grid(padx=10, pady=10)
 
-LRR31.bind('<Key>', pulsaTeclaCombobox)
+LRR31.bind('<Key>', pulsaTeclaCombobox)                 # Para que se actualice el combobox cuando se pulsa una tecla
+
 LRR1 = Label(frameRellena,text="PENDIENTE")                                                                                      
 LRR1.grid(rowspan=1,columnspan=1)
 LRR1.config(padx = 5,bg="#b7b493",fg="#FFFFFF", anchor = W, font=("Helvetica", tamanyoFont),width = 15)
