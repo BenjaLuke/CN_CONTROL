@@ -749,9 +749,7 @@ def BotonSubirForzado       ():
 def BotonBajarForzado       ():
 
     BB4.focus()    
-    BB6.invoke()
-
-     
+    BB6.invoke()     
 def BotonRegresarForzado    ():
     
     BM11.invoke()        
@@ -889,7 +887,7 @@ def query_todos             (archivo,seleccion,column,variableTrue,*datosAlQuery
     busqueda = seleccion
     columnas = column
     global puntero
-    puntero = 0
+    #puntero = 0
     globals()[variableTrue] = True
     query(base_datos,busqueda,columnas,*datosAlQuery)    
 
