@@ -119,12 +119,14 @@ anyoGlobal = str(fecha.year)        # Obtenemos el año actual
 anyoGlobaltk = StringVar()          # Creamos una variable de tipo StringVar para poder usarla en Tkinter
 anyoGlobaltk.set(anyoGlobal)        # Asignamos el valor de la variable anyoGlobal a la variable anyoGlobaltk
 
+stringBusqueda = ""                 # Definimos la variable que vamos a usar para escribir la búsqueda en un combobox
+
 # Variables del sector 3
 global puntero                      # Definimos las variables que vamos a usar
 puntero = 0                         # Definimos el valor del puntero para cuando los listados som más largos que el espacio en pantalla
            
 # ------------------------------ Funciones globales ----------------------
-def copia                    ():
+def copia                   ():
     if raiz.focus_get() == None:                # Comprueba si el foco está en alguna label o entry.
         return                                  # Si no está en ninguna label o entry, no hace nada
     else:                                       # Si está en alguna label o entry, hace lo siguiente
@@ -175,7 +177,29 @@ def Saliendo                ():
     
     CopiaSeguridadGlobal()                      # Hacemos una copia de seguridad antes de salir
     raiz.destroy()                              # Cerramos tkinter
-   
+
+def pulsaTeclaCombobox      (event):
+    global stringBusqueda                       # Creamos global la variable de lo escrito
+    # Si el foco no está sobre LRR31...
+    if raiz.focus_get() != LRR31:
+        return
+    # Si la tecla pulsada es una letra o un espacio
+    letter = event.char                          # Obtener la tecla presionada
+    if  event.char.isalpha() or event.char == " ":
+        
+        stringBusqueda += letter                 # Añadir la letra a la cadena de búsqueda
+        values = LRR31.cget('values')               # Obtener las opciones del combobox
+        for value in values:                        # Buscar la primera opción que comience con la cadena de búsqueda
+
+                if value.startswith(stringBusqueda):
+                    
+                    LRR31.set(value)                    # Seleccionar la opción encontrada y salir del bucle
+
+                    break
+    # Si la letra presionada no es letra o número...
+    else:                                               # Si la tecla pulsada no es una letra o un espacio    
+
+        stringBusqueda = ""         
 def cambiaPasaEncima        (boton, colorEncima, colorFuera): 
   
     boton.bind("<Enter>", func=lambda e: boton.config(background=colorEncima))
@@ -2551,7 +2575,14 @@ def ClienteSalvaCorreccion  ():
         LR23.config(text = "Nom del client obligatori")
         LRR22.focus()
         return
-        
+
+    # Si se incluye ' o " en el nombre, No se puede avanzar
+    if "'" in v1 or '"' in v1:
+            
+        LR23.config(text = "No es pot utilitzar ' o \" al nom")  
+        LRR22.focus()
+        return 
+             
     if v4 != "":
         try:
                 
@@ -4016,9 +4047,12 @@ def menuRegistros                               ():
 def menuRegistrosIntroducir                         ():
     ajusta_espacios_info(10,22,7,1,12,20,19,7,16,16,1,1)
     textMenu.config(text = "MENU REGISTRE")            
-
+    global stringBusqueda
+    stringBusqueda = ""
     def menuRegistrosIntroducirIntroduce ():
-        
+        global stringBusqueda 
+        stringBusqueda = ""
+    
         # Rescata valores
         v1 = LRR21.get()
         v2 = LRR31.get()
@@ -4190,7 +4224,7 @@ def menuRegistrosIntroducir                         ():
     LRR21['values'] = (descripciones)  
     LR3.config(text = "ORIGEN:")  
     LRR31.grid(row=2, column=1)
-    LRR31.config(state = "readandwrite")
+    #LRR31.config(state = "readandwrite")
     LRR31['values'] = (origenes)  
     LR4.config(text = "HORA:")  
     LRR41.grid(row=3, column=1)  
@@ -8983,7 +9017,7 @@ for i in range (1,24):
     globals()['LRR%s' % (i) + '2'].config(font=("Helvetica", tamanyoFont),width = 18)
     globals()['LRR%s' % (i) + '2'].grid(padx=10, pady=10)
 
-
+LRR31.bind('<Key>', pulsaTeclaCombobox)
 LRR1 = Label(frameRellena,text="PENDIENTE")                                                                                      
 LRR1.grid(rowspan=1,columnspan=1)
 LRR1.config(padx = 5,bg="#b7b493",fg="#FFFFFF", anchor = W, font=("Helvetica", tamanyoFont),width = 15)
