@@ -604,7 +604,7 @@ def cargaUsuario            ():
     rUsuario.overrideredirect(True)                         # 
     
     # Si en cualquier momento se pulsan las teclas CTRL + ESC se fuerza el pulsado del botón SALIR 
-    rUsuario.bind("<Escape>", lambda event: salir())   
+    rUsuario.bind("<End>", lambda event: salir())   
     # Si en cualquier momento se pulsan las teclas CTRL + INTRO se fuerza el pulsado del botón VALIDAR
     rUsuario.bind("<Control-Return>", lambda event: regreso())
 
@@ -7080,8 +7080,8 @@ def menuIncidenciasIntroducir                       ():
         casos = c.fetchall()
         # Revisa todos los datos de c por si coinciden con v2
         for row in casos:
-            # Si v2 es igual a la fecha de bloqueo
-            if v2 == row[0]:
+            # Si v2 es igual a la fecha de bloqueo y la hora está entre las horas de la fecha de bloqueo
+            if v2 == row[0] and v6 >= row[1] and v6 <= row[2]:
                 # Avisamos de la anomalía y regresamos
                 LR23.config(text = "Data bloquejada")
                 LRR12.focus()
@@ -7938,7 +7938,7 @@ def menuIncidenciasBloqueos                      ():
     anyoGlobaltk.set(anyoGlobal)
     MiraFecha(anyoFecha)
     
-    ajusta_espacios_info(10,22,8,11,1,12,25,9,25,7,1,1)
+    ajusta_espacios_info(10,22,10,10,10,10,10,10,10,10,10,10)
     textMenu.config(text = "BLOQUEJOS")   
     LimpiaLabelsRellena() 
     menusBotones("Tornar",menuIncidencias,"Bloquejar",menuIncidenciasBloqueosBloquear,"Desbloquejar",menuIncidenciasBloqueosDesbloquear)
@@ -7953,6 +7953,8 @@ def menuIncidenciasBloqueosBloquear                 ():
     def menuIncidenciasBloqueosBloquea ():
         # Rescata los valores de los campos
         v2 = LRR12.get()
+        v3 = LRR21.get()
+        v4 = LRR31.get()
         
         # Coteja errores
         try:
@@ -8006,7 +8008,7 @@ def menuIncidenciasBloqueosBloquear                 ():
         # Creamos el cursor
         miCursor = conn.cursor()
         # Crea una lista con los datos FECHA
-        miCursor.execute("SELECT *,oid FROM bd_incidencias WHERE ((FECHA = '" + v2 + "'))")
+        miCursor.execute("SELECT *,oid FROM bd_incidencias WHERE ((FECHA = '" + v2 + "') AND (HORA >='"+ v3 + "') AND (HORA <'" + v4 + "'))")
         casos = miCursor.fetchall()
         cant_casos = len(casos)
         # Si hay más de un caso con la misma fecha y hora
@@ -8018,7 +8020,7 @@ def menuIncidenciasBloqueosBloquear                 ():
             ventana2.configure(bg='red')            # Damos color de fondo a la ventana
             ventana2.iconbitmap("image/icono.ico")  # Damos icono a la ventana
             ventana2.deiconify()                    # Mostramos la ventana
-            ventana2label = Label(ventana2, text = "¡¡ATENCIÓ!! Ja existeix algun esdevenimen aquest dia.", bg = "red", fg = "white", font = ("Helvetica", 12))   
+            ventana2label = Label(ventana2, text = "¡¡ATENCIÓ!! Ja existeixen incidències a la franja.", bg = "red", fg = "white", font = ("Helvetica", 12))   
             ventana2label.place(relx = 0.5, rely = 200, anchor = CENTER)               
             ventana2label.pack()                    # Coloca el label en la ventana
             ventana2.overrideredirect(True)         # Quitamos el marco de la ventana
@@ -8035,9 +8037,11 @@ def menuIncidenciasBloqueosBloquear                 ():
         cursor = base_datos_datos.cursor()   
     
         # Inserta en la base de tados
-        cursor.execute("""INSERT INTO bd_Bloqueos VALUES (:fecha)""",
+        cursor.execute("""INSERT INTO bd_Bloqueos VALUES (:fecha, :desde, :hasta)""",
                 {
-                    'fecha':        v2
+                    'fecha':        v2,
+                    'desde':        v3,
+                    'hasta':        v4
                     })
 
 
@@ -8048,7 +8052,7 @@ def menuIncidenciasBloqueosBloquear                 ():
         base_datos_datos.close() 
                             
         # Pinta datos en zona 3
-        query_todos('databases/basesDeDatosIncidencias.db',"SELECT *, oid FROM bd_bloqueos ORDER BY FECHA",8,"EstamosEnBloqueos","ID","DATES","","","","","","","")
+        query_todos('databases/basesDeDatosIncidencias.db',"SELECT *, oid FROM bd_bloqueos ORDER BY FECHA",8,"EstamosEnBloqueos","ID","DATA","DESDE","FINS","","","","","")
 
         # Limpia posibles mensajes anteriores innecesarios
         LR23.config(text = "")
@@ -8067,9 +8071,14 @@ def menuIncidenciasBloqueosBloquear                 ():
             
     LR1.config(text = "DIA/MES/ANY:")
     LRR12.grid(row=0, column=1) 
-          
+    LR2.config(text = "HORA INICI:")  
+    LRR21.grid(row=1, column=1)  
+    LRR21['values'] = (horas)
+    LR3.config(text = "HORA FINAL:")  
+    LRR31.grid(row=2, column=1)  
+    LRR31['values'] = (horas)            
     Boton4activado(menuIncidenciasBloqueosBloquea)
-    query_todos('databases/basesDeDatosIncidencias.db',"SELECT *, oid FROM bd_bloqueos ORDER BY FECHA",8,"EstamosEnBloqueos","ID","DATES","","","","","","","")
+    query_todos('databases/basesDeDatosIncidencias.db',"SELECT *, oid FROM bd_bloqueos ORDER BY FECHA",8,"EstamosEnBloqueos","ID","DATA","DESDE","FINS","","","","","")
               
     LRR12.focus()
 def menuIncidenciasBloqueosDesbloquear              ():
@@ -8080,7 +8089,7 @@ def menuIncidenciasBloqueosDesbloquear              ():
     LRR12.grid(row=0, column=1)
         
     Boton4activado(bloqueoBorraUno)
-    query_todos('databases/basesDeDatosIncidencias.db',"SELECT *, oid FROM bd_bloqueos ORDER BY FECHA",8,"EstamosEnBloqueos","ID","DATES","","","","","","","")
+    query_todos('databases/basesDeDatosIncidencias.db',"SELECT *, oid FROM bd_bloqueos ORDER BY FECHA",8,"EstamosEnBloqueos","ID","DATA","DESDE","FINS","","","","","")
 
 
     LRR12.focus()
@@ -9280,7 +9289,9 @@ except:
 
 try:
     cursor.execute("""CREATE TABLE bd_bloqueos (
-        FECHA           text)""")
+        FECHA           text,
+        DESDE           text,
+        HASTA           text)""")
     
     # Ejecutar (commit) instrucción o consulta
     base_datos_datos.commit()
