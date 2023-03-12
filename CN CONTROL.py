@@ -94,8 +94,8 @@ raiz.bind("<Control-D>", lambda event: regresaSinNada())
 global  DatosUsuario, usuarioReal, usuarioNivel                             # Definimos las variables que vamos a usar   
 DatosUsuario, usuarioReal, usuarioNivel = (), "No s'ha identificat", "0"    # Inicializamos las variables
 
-global avisoint, EstamosEnIncidencias, EstamosEnRegistros, EstamosEnProforma, EstamosEnBloqueos, EstamosEnProductos, EstamosEnClientes, EstamosEnUsuarios                                                   # Definimos las variables que vamos a usar
-avisoint, EstamosEnIncidencias, EstamosEnRegistros, EstamosEnProforma, EstamosEnBloqueos, EstamosEnProductos, EstamosEnClientes, EstamosEnUsuarios = True, False, False, False, False, False, False, False  # Inicializamos las variables
+global avisoint, EstamosEnIncidencias, EstamosEnRegistros, EstamosEnProforma, EstamosEnBloqueos, EstamosEnProductos, EstamosEnClientes, EstamosEnUsuarios, EstamosEnIntroducir                                                   # Definimos las variables que vamos a usar
+avisoint, EstamosEnIncidencias, EstamosEnRegistros, EstamosEnProforma, EstamosEnBloqueos, EstamosEnProductos, EstamosEnClientes, EstamosEnUsuarios, EstamosEnIntroducir = True, False, False, False, False, False, False, False, False               # Inicializamos las variables
 
 global TamanyoLetra                                                         # Definimos las variables que vamos a usar
 TamanyoLetra = 0                                                            # Inicializamos las variables
@@ -886,14 +886,15 @@ def menusBotones            (texto11="",enlace11=regresaSinNada,
 def query_todos             (archivo,seleccion,column,variableTrue,*datosAlQuery):
     
 
-    global EstamosEnRegistros,EstamosEnIncidencias,EstamosEnProforma,EstamosEnBloqueos,EstamosEnProduto,EstamosEnClientes,EstamosEnProductos,EstamosEnClientes,EstamosEnUsuarios
+    global EstamosEnRegistros,EstamosEnIncidencias,EstamosEnProforma,EstamosEnBloqueos,EstamosEnProduto,EstamosEnClientes,EstamosEnProductos,EstamosEnClientes,EstamosEnUsuarios, EstamosEnIntroducir 
     
    # Creamos la base de datos o conectamos con una
     base_datos = sqlite3.connect(archivo)
     busqueda = seleccion
     columnas = column
     global puntero
-    #puntero = 0
+    if EstamosEnIntroducir == True:
+        puntero = 0
     globals()[variableTrue] = True
     query(base_datos,busqueda,columnas,*datosAlQuery)    
 
@@ -4049,6 +4050,10 @@ def menuRegistros                               ():
     menusBotones("Tornar",MenuInicial,"Introduir (R)",menuRegistrosIntroducir,"Consultar",menuRegistrosConsultar,"Mirar/Corregir",menuRegistroCorregir,"Eliminar",menuRegistroEliminar)
     BM1.focus()            
 def menuRegistrosIntroducir                         ():
+    
+    global EstamosEnIntroducir
+    EstamosEnIntroducir = True
+
     ajusta_espacios_info(10,22,7,1,12,20,19,7,16,16,1,1)
     textMenu.config(text = "MENU REGISTRE")            
     global stringBusqueda
@@ -4256,6 +4261,9 @@ def menuRegistrosIntroducir                         ():
     query_todos('databases/basesDeDatosRegistros.db',"SELECT *, oid FROM bd_registros ORDER BY FECHA DESC, oid DESC",8,"EstamosEnRegistros","ID","","DATA","DESCRIPCIÓ","ORIGEN","HORA","PRODUCTE","FONT","")        
     LRR21.focus() 
 def menuRegistrosConsultar                          ():
+
+    global EstamosEnIntroducir
+    EstamosEnIntroducir = False
            
     LimpiaLabelsRellena()    
     menusBotones("Tornar",menuRegistros,"",regresaSinNada,"Consultar")
@@ -4299,6 +4307,9 @@ def menuRegistrosConsultar                          ():
     LRR12.focus()      
 def menuRegistroCorregir                            ():
 
+    global EstamosEnIntroducir
+    EstamosEnIntroducir = False
+
     MiraFecha(anyoFecha)
 
     diaGlobaltk.set(diaGlobal)
@@ -4314,6 +4325,9 @@ def menuRegistroCorregir                            ():
     Boton4activado(registroCorrigeUno)
     LRR12.focus() 
 def menuRegistroEliminar                            ():
+
+    global EstamosEnIntroducir
+    EstamosEnIntroducir = False
         
     LimpiaLabelsRellena()
     menusBotones("Tornar",menuRegistros,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Eliminar")
@@ -6980,6 +6994,9 @@ def menuIncidenciasIntroducirPre                    ():
         return
     menuIncidenciasIntroducir()    
 def menuIncidenciasIntroducir                       ():
+
+    global EstamosEnIntroducir
+    EstamosEnIntroducir = True
     
     ajusta_espacios_info(10,22,7,12,7,5,20,8,17,16,7,1)
     textMenu.config(text = "MENU INCIDÈNC./GRUPS")   
@@ -7375,6 +7392,9 @@ def menuIncidenciasIntroducir                       ():
     LRR22.focus()
 def menuIncidenciasConsultar                        ():
 
+    global EstamosEnIntroducir
+    EstamosEnIntroducir = False
+
     textMenu.config(text = "MENU INCIDÈNC./GRUPS")   
     ajusta_espacios_info(10,22,7,12,7,5,20,8,17,16,7,1)
     LimpiaLabelsRellena()
@@ -7428,6 +7448,9 @@ def menuIncidenciasConsultar                        ():
     LRR11.focus()     
 def menuIncidenciasCorregir                         ():
 
+    global EstamosEnIntroducir
+    EstamosEnIntroducir = False
+
     MiraFecha(anyoFecha)
 
     diaGlobaltk.set(diaGlobal)
@@ -7443,6 +7466,9 @@ def menuIncidenciasCorregir                         ():
     Boton4activado(incidenciasCorrigeUno)
     LRR12.focus()     
 def menuIncidenciasEliminar                         ():
+
+    global EstamosEnIntroducir
+    EstamosEnIntroducir = False
 
     LimpiaLabelsRellena()
     menusBotones("Tornar",menuIncidencias,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Eliminar")
@@ -7502,6 +7528,9 @@ def menuIncidenciasFacturaProformaIntroducirClonar      ():
     Boton4activado(ProformaClonaUno)
     LRR12.focus()
 def menuIncidenciasFacturaProformaIntroducirCrear       ():
+    
+    global EstamosEnIntroducir
+    EstamosEnIntroducir = True
     
     global VieneDeIncGrups
     ajusta_espacios_info(10,22,8,11,1,12,25,9,25,7,1,1)
@@ -7833,6 +7862,9 @@ def menuIncidenciasFacturaProformaIntroducirCrear       ():
     LRR22.focus()  
 def menuIncidenciasFacturaProformaConsultar         ():
     
+    global EstamosEnIntroducir
+    EstamosEnIntroducir = False
+
     LimpiaLabelsRellena()    
     menusBotones("Tornar",menuIncidenciasFacturaProforma,"",regresaSinNada,"Consultar")
 
@@ -7862,6 +7894,9 @@ def menuIncidenciasFacturaProformaConsultar         ():
     LRR12.focus()   
 def menuIncidenciasFacturaProformaCorregir          ():
 
+    global EstamosEnIntroducir
+    EstamosEnIntroducir = False
+
     diaGlobaltk.set(diaGlobal)
     mesGlobaltk.set(mesGlobal)
     anyoGlobaltk.set(anyoGlobal) 
@@ -7875,6 +7910,9 @@ def menuIncidenciasFacturaProformaCorregir          ():
     Boton4activado(ProformaCorrigeUno)
     LRR12.focus()   
 def menuIncidenciasFacturaProformaEliminar          ():
+
+    global EstamosEnIntroducir
+    EstamosEnIntroducir = False
 
     LimpiaLabelsRellena()
     menusBotones("Tornar",menuIncidenciasFacturaProforma,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Eliminar")
@@ -8180,6 +8218,9 @@ def MenuDatosProducto                               ():
     menusBotones("Tornar",menuDatos,"Introduir",MenuDatosProductoIntroducir,"Consultar",MenuDatosProductoConsultar,"Mirar/Corregir",MenuDatosProductoCorregir,"Eliminar",menuDatosProductoEliminar)            
     BM1.focus()
 def MenuDatosProductoIntroducir                         ():
+
+    global EstamosEnIntroducir
+    EstamosEnIntroducir = True
     
     def MenuDatosProductoIntroducirIntroduce():
        
@@ -8319,6 +8360,9 @@ def MenuDatosProductoIntroducir                         ():
     LRR22.focus()
 def MenuDatosProductoConsultar                          ():
  
+    global EstamosEnIntroducir
+    EstamosEnIntroducir = False
+
     LimpiaLabelsRellena()
     menusBotones("Tornar",MenuDatosProducto,"",regresaSinNada,"Consultar")
 
@@ -8340,6 +8384,9 @@ def MenuDatosProductoConsultar                          ():
     LRR11.focus() 
 def MenuDatosProductoCorregir                           ():
     
+    global EstamosEnIntroducir
+    EstamosEnIntroducir = False
+
     LimpiaLabelsRellena()
     menusBotones("Tornar",MenuDatosProducto,"",regresaSinNada,"",regresaSinNada,"Mirar/Corregir")
     
@@ -8351,6 +8398,9 @@ def MenuDatosProductoCorregir                           ():
     LRR12.focus()
 def menuDatosProductoEliminar                           ():
     
+    global EstamosEnIntroducir
+    EstamosEnIntroducir = False
+
     LimpiaLabelsRellena()
     menusBotones("Tornar",MenuDatosProducto,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Eliminar")
     
@@ -8370,6 +8420,9 @@ def MenuDatosCliente                                ():
     menusBotones("Tornar",menuDatos,"Introduir",MenuDatosClienteIntroducir,"Consultar",MenuDatosClienteConsultar,"Mirar/Corregir",MenuDatosClienteCorregir,"Eliminar",menuDatosClienteEliminar)            
     BM1.focus()
 def MenuDatosClienteIntroducir                          ():
+
+    global EstamosEnIntroducir
+    EstamosEnIntroducir = True
 
     def MenuDatosClienteIntroducirIntroduce():
        
@@ -8525,6 +8578,9 @@ def MenuDatosClienteIntroducir                          ():
     LRR22.focus()    
 def MenuDatosClienteConsultar                           ():
  
+    global EstamosEnIntroducir
+    EstamosEnIntroducir = False
+
     LimpiaLabelsRellena()
     menusBotones("Tornar",MenuDatosCliente,"",regresaSinNada,"Consultar")
     
@@ -8544,6 +8600,9 @@ def MenuDatosClienteConsultar                           ():
     LRR11.focus()
 def MenuDatosClienteCorregir                            ():
     
+    global EstamosEnIntroducir
+    EstamosEnIntroducir = False
+
     LimpiaLabelsRellena()
     menusBotones("Tornar",MenuDatosCliente,"",regresaSinNada,"",regresaSinNada,"Mirar/Corregir")
     
@@ -8554,6 +8613,9 @@ def MenuDatosClienteCorregir                            ():
     LRR12.focus()
 def menuDatosClienteEliminar                            ():
     
+    global EstamosEnIntroducir
+    EstamosEnIntroducir = False
+
     LimpiaLabelsRellena()
     menusBotones("Tornar",MenuDatosCliente,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Eliminar")
     
@@ -8579,6 +8641,9 @@ def menuDatosUsuario                                ():
     BM1.focus()
 def menuDatosUsuarioIntroducir                          ():
     
+    global EstamosEnIntroducir
+    EstamosEnIntroducir = True
+
     def MenuDatosUsuarioIntroducirIntroduce():
         
         # Rescata valores
@@ -8686,6 +8751,9 @@ def menuDatosUsuarioIntroducir                          ():
     LRR12.focus()       
 def menuDatosUsuarioConsultar                           ():
       
+    global EstamosEnIntroducir
+    EstamosEnIntroducir = False
+
     global usuariosO
     LimpiaLabelsRellena()
     menusBotones("Tornar",menuDatosUsuario,"",regresaSinNada,"Consultar")
@@ -8715,6 +8783,9 @@ def menuDatosUsuarioConsultar                           ():
     LRR11.focus() 
 def menuDatosUsuarioCorregir                            ():
     
+    global EstamosEnIntroducir
+    EstamosEnIntroducir = False
+
     LimpiaLabelsRellena()
     menusBotones("Tornar",menuDatosUsuario,"",regresaSinNada,"",regresaSinNada,"Mirar/Corregir")
     
@@ -8725,6 +8796,9 @@ def menuDatosUsuarioCorregir                            ():
     LRR12.focus()   
 def menuDatosUsuarioEliminar                            ():
     
+    global EstamosEnIntroducir
+    EstamosEnIntroducir = False
+
     LimpiaLabelsRellena()
     menusBotones("Tornar",menuDatosUsuario,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Eliminar")
 
