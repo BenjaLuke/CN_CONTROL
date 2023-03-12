@@ -7081,7 +7081,8 @@ def menuIncidenciasIntroducir                       ():
         # Revisa todos los datos de c por si coinciden con v2
         for row in casos:
             # Si v2 es igual a la fecha de bloqueo y la hora está entre las horas de la fecha de bloqueo
-            if v2 == row[0] and v6 >= row[1] and v6 <= row[2]:
+            if v2 == row[0] and v6 >= row[1] and v6 < row[2]:
+                print(str(v2) + " "+str(row[0])+" "+str(row[1]+" "+str(row[2])))
                 # Avisamos de la anomalía y regresamos
                 LR23.config(text = "Data bloquejada")
                 LRR12.focus()
@@ -7170,38 +7171,42 @@ def menuIncidenciasIntroducir                       ():
                                    
         # Si TELF_EXTRA es ""
         if v4 == "":
-            # Abre la base de datos de clientes
-            base_datos_clientes = sqlite3.connect('databases/basesDeDatosClientes.db')
-            # Crea el cursor
-            cursor1 = base_datos_clientes.cursor()
-            # Busca el cliente 
-            cursor1.execute("SELECT * FROM bd_Clientes WHERE NOM ='"+v3+"'")
-            clientes = cursor1.fetchall()
-            # Si cursor1 tiene una sóla linea
-            largo = len(clientes)
-            if largo == 1:
-                # Buscamos el valor TELEFONO DE la linea CLIENTE
-                v4 = clientes[0][4]
-            # Cierra la base de datos
-            base_datos_clientes.close() 
-
+            try:
+                # Abre la base de datos de clientes
+                base_datos_clientes = sqlite3.connect('databases/basesDeDatosClientes.db')
+                # Crea el cursor
+                cursor1 = base_datos_clientes.cursor()
+                # Busca el cliente 
+                cursor1.execute("SELECT * FROM bd_Clientes WHERE NOM ='"+v3+"'")
+                clientes = cursor1.fetchall()
+                # Si cursor1 tiene una sóla linea
+                largo = len(clientes)
+                if largo == 1:
+                    # Buscamos el valor TELEFONO DE la linea CLIENTE
+                    v4 = clientes[0][4]
+                # Cierra la base de datos
+                base_datos_clientes.close() 
+            except:
+                pass
         # Si MAIL_EXTRA es ""
         if v5 == "":
-            # Abre la base de datos de clientes
-            base_datos_clientes = sqlite3.connect('databases/basesDeDatosClientes.db')
-            # Crea el cursor
-            cursor1 = base_datos_clientes.cursor()
-            # Busca el cliente 
-            cursor1.execute("SELECT * FROM bd_Clientes WHERE NOM ='"+v3+"'")
-            clientes = cursor1.fetchall()
-            # Si cursor1 tiene una sóla linea
-            largo = len(clientes)
-            if largo == 1:
-                # Buscamos el valor MAIL de la linea CLIENTE
-                v5 = clientes[0][5]
-            # Cierra la base de datos
-            base_datos_clientes.close()
-            
+            try:
+                # Abre la base de datos de clientes
+                base_datos_clientes = sqlite3.connect('databases/basesDeDatosClientes.db')
+                # Crea el cursor
+                cursor1 = base_datos_clientes.cursor()
+                # Busca el cliente 
+                cursor1.execute("SELECT * FROM bd_Clientes WHERE NOM ='"+v3+"'")
+                clientes = cursor1.fetchall()
+                # Si cursor1 tiene una sóla linea
+                largo = len(clientes)
+                if largo == 1:
+                    # Buscamos el valor MAIL de la linea CLIENTE
+                    v5 = clientes[0][5]
+                # Cierra la base de datos
+                base_datos_clientes.close()
+            except:
+                pass
         # Si CONTACTE es ""
         if v22 == "":
             # Abre la base de datos de clientes
@@ -7944,6 +7949,9 @@ def menuIncidenciasBloqueos                      ():
     menusBotones("Tornar",menuIncidencias,"Bloquejar",menuIncidenciasBloqueosBloquear,"Desbloquejar",menuIncidenciasBloqueosDesbloquear)
     BM1.focus()
 def menuIncidenciasBloqueosBloquear                 ():
+
+    global EstamosEnIntroducir
+    EstamosEnIntroducir = True
     global usuarioNivel
     if int(usuarioNivel) >= 3:
         return
@@ -8082,6 +8090,9 @@ def menuIncidenciasBloqueosBloquear                 ():
               
     LRR12.focus()
 def menuIncidenciasBloqueosDesbloquear              ():
+
+    global EstamosEnIntroducir
+    EstamosEnIntroducir = True
     LimpiaLabelsRellena()
     menusBotones("Tornar",menuIncidenciasBloqueos,"",regresaSinNada,"Desbloqueja")
 
