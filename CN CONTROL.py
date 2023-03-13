@@ -4327,7 +4327,7 @@ def menuRegistroCorregir                            ():
 def menuRegistroEliminar                            ():
 
     global EstamosEnIntroducir
-    EstamosEnIntroducir = False
+    EstamosEnIntroducir = True
         
     LimpiaLabelsRellena()
     menusBotones("Tornar",menuRegistros,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Eliminar")
@@ -7488,7 +7488,7 @@ def menuIncidenciasCorregir                         ():
 def menuIncidenciasEliminar                         ():
 
     global EstamosEnIntroducir
-    EstamosEnIntroducir = False
+    EstamosEnIntroducir = True
 
     LimpiaLabelsRellena()
     menusBotones("Tornar",menuIncidencias,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Eliminar")
@@ -7932,7 +7932,7 @@ def menuIncidenciasFacturaProformaCorregir          ():
 def menuIncidenciasFacturaProformaEliminar          ():
 
     global EstamosEnIntroducir
-    EstamosEnIntroducir = False
+    EstamosEnIntroducir = True
 
     LimpiaLabelsRellena()
     menusBotones("Tornar",menuIncidenciasFacturaProforma,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Eliminar")
@@ -8434,7 +8434,7 @@ def MenuDatosProductoCorregir                           ():
 def menuDatosProductoEliminar                           ():
     
     global EstamosEnIntroducir
-    EstamosEnIntroducir = False
+    EstamosEnIntroducir = True
 
     LimpiaLabelsRellena()
     menusBotones("Tornar",MenuDatosProducto,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Eliminar")
@@ -8649,7 +8649,7 @@ def MenuDatosClienteCorregir                            ():
 def menuDatosClienteEliminar                            ():
     
     global EstamosEnIntroducir
-    EstamosEnIntroducir = False
+    EstamosEnIntroducir = True
 
     LimpiaLabelsRellena()
     menusBotones("Tornar",MenuDatosCliente,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Eliminar")
@@ -8832,7 +8832,7 @@ def menuDatosUsuarioCorregir                            ():
 def menuDatosUsuarioEliminar                            ():
     
     global EstamosEnIntroducir
-    EstamosEnIntroducir = False
+    EstamosEnIntroducir = True
 
     LimpiaLabelsRellena()
     menusBotones("Tornar",menuDatosUsuario,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Eliminar")
