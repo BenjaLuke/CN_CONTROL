@@ -7002,6 +7002,7 @@ def menuIncidenciasIntroducir                       ():
     textMenu.config(text = "MENU INCIDÈNC./GRUPS")   
     
     def menuIncidenciasIntroducirIntroduce ():
+        global horas
         # Rescata los valores de los campos
         v1 = LR1.cget("text")
         v2 = LRR22.get()
@@ -7080,9 +7081,23 @@ def menuIncidenciasIntroducir                       ():
         casos = c.fetchall()
         # Revisa todos los datos de c por si coinciden con v2
         for row in casos:
+            
+            horasConcretas = []
+            activo = False
+            for i in horas:
+                print("valor a cotejar:"+str(i))
+                print("desde:" +str(row[1]))
+                print("hasta:" +str(row[2]))
+                if i == row[1]:
+                    activo = True
+                if i == row[2]:
+                    activo = False
+                if  activo == True:
+                    # Añadimos i a la lista de horas concretas
+                    horasConcretas.append(i)
+            
             # Si v2 es igual a la fecha de bloqueo y la hora está entre las horas de la fecha de bloqueo
-            if v2 == row[0] and v6 >= row[1] and v6 < row[2]:
-                print(str(v2) + " "+str(row[0])+" "+str(row[1]+" "+str(row[2])))
+            if v2 == row[0] and v6 in horasConcretas:
                 # Avisamos de la anomalía y regresamos
                 LR23.config(text = "Data bloquejada")
                 LRR12.focus()
