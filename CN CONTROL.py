@@ -103,8 +103,8 @@ TamanyoLetra = 0                                                            # In
 global origenes, idiomas, horas, fuentes, descripciones, tiposPago, estados, usoUsuarios, productos, productosR, productosS                             # Definimos las variables que vamos a usar      
 origenes, idiomas, horas, fuentes, descripciones, tiposPago, estados, usoUsuarios, productos, productosR, productosS = "","","","","","","","","","","" # Inicializamos las variables
 
-global vr1,vr2,vr3,vr4,vr5,vr6,vr7                                          # Definimos las variables que vamos a usar
-vr1,vr2,vr3,vr4,vr5,vr6,vr7 = "","","","","","",False                       # Inicializamos las variables
+global vr1,vr2,vr3,vr4,vr5,vr6,vr7,vr8,vr9,vr10,vr11,vr12,vr13,vr14                                         # Definimos las variables que vamos a usar
+vr1,vr2,vr3,vr4,vr5,vr6,vr7,vr8,vr9,vr10,vr11,vr12,vr13,vr14 = "","","","","","",False,"","","","","","",False                       # Inicializamos las variables
     
 global fecha, diaGlobal, diaGlobaltk, mesGlobal, mesGlobaltk, anyoGlobal, anyoGlobaltk, diaFecha, mesFecha, anyoFecha
 
@@ -2943,6 +2943,22 @@ def Incidencias_Todo        (num):
     
     TEXTO = globals()['VIEW%s' % num].cget("text")
 
+    # Hacemos globales las variables que vamos a usar
+    global vr1,vr2,vr3,vr4,vr5,vr6,vr7,vr8,vr9,vr10,vr11,vr12,vr13,vr14
+    # Guardamos los valores del registro    
+    vr1 = LRR22.get()
+    vr2 = LRR32.get()
+    vr3 = LRR42.get()
+    vr4 = LRR51.get()
+    vr5 = LRR61.get()
+    vr6 = LRR71.get()
+    vr8 = LRR82.get()
+    vr9 = LRR92.get()
+    vr10 = LRR102.get()
+    vr11 = LRR112.get()
+    vr12 = LRR121.get()
+    vr13 = LRR131.get()
+         
     MiraFecha(anyoFecha)
     diaGlobaltk.set(diaGlobal)
     mesGlobaltk.set(mesGlobal)
@@ -2952,6 +2968,7 @@ def Incidencias_Todo        (num):
     LRR12.insert(0,TEXTO)
     LRR22.focus()
     incidenciasCorrigeUno()
+    vr14 = True
 def Proforma_Todo           (num):
     
     TEXTO = globals()['VIEW%s' % num].cget("text")
@@ -6956,6 +6973,11 @@ def menustockConsultarEspecifica                        ():
 
 def menuIncidencias                             ():
 
+    # Globaliza las variables
+    global vr1,vr2,vr3,vr4,vr5,vr6,vr7,vr8,vr9,vr10,vr11,vr12,vr13,vr14
+    # Borra las variables
+    vr1,vr2,vr3,vr4,vr5,vr6,vr7,vr8,vr9,vr10,vr11,vr12,vr13,vr14 = "","","","","","",False,"","","","","","",False                       # Inicializamos las variables
+        
     # Si aquí se pulsan las teclas CTRL + D no pasa nada
     raiz.bind("<Control-d>", lambda event: regresaSinNada())
     raiz.bind("<Control-D>", lambda event: regresaSinNada())
@@ -7403,7 +7425,7 @@ def menuIncidenciasIntroducir                       ():
         # Ponemos el foco en el botón de estado
         LRR213.focus()
         return 
-
+        
     notasAmpliacion()
       
     LRR22.focus()
@@ -7454,7 +7476,25 @@ def menuIncidenciasConsultar                        ():
     LRR131['values'] = (["Si","No"])
     LR14.config(text = "MAIL:")
     LRR142.grid(row=13, column=1)
-        
+
+    # Hacemos globales las variables que vamos a usar
+    global vr1,vr2,vr3,vr4,vr5,vr6,vr7,vr8,vr9,vr10,vr11,vr12,vr13,vr14
+    # Si las variables vr1 a vr7 tienen datos, se copia esos valroes a las labels respectivas
+    if vr14 == True:
+        LRR22.insert(0,vr1)
+        LRR32.insert(0,vr2)
+        LRR42.insert(0,vr3)
+        LRR51.set(vr4)
+        LRR61.set(vr5)
+        LRR71.set(vr6)
+        LRR82.insert(0,vr8)
+        LRR92.insert(0,vr9)
+        LRR102.insert(0,vr10)
+        LRR112.insert(0,vr11)
+        LRR121.set(vr12)
+        LRR131.set(vr13)
+
+        vr14 = False        
     # Si aquí se pulsan las teclas CTRL + D se pone la fecha actual
     raiz.bind("<Control-d>", lambda event: FechaActualIncrustadaInc())
     raiz.bind("<Control-D>", lambda event: FechaActualIncrustadaInc())
