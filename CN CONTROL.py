@@ -3963,7 +3963,7 @@ def MenuInicial                             ():
         # Creamos el cursor
         cursora = conexion.cursor()
         # Query 
-        cursora.execute("SELECT *, oid FROM bd_incidencias WHERE ((FECHA = '" + fechi + "') OR (FECHA_REV = '" + fechi + "')) AND (ESTADO != 'Fet')")
+        cursora.execute("SELECT *, oid FROM bd_incidencias WHERE ((FECHA = '" + fechi + "') OR (FECHA_REV = '" + fechi + "')) AND (ESTADO != 'Fet') AND (ESTADO != 'Anul.lat')")
         # Crea el fetchall
         incidencritic = cursora.fetchall()
         inciHoy = 0
@@ -7085,9 +7085,6 @@ def menuIncidenciasIntroducir                       ():
             horasConcretas = []
             activo = False
             for i in horas:
-                print("valor a cotejar:"+str(i))
-                print("desde:" +str(row[1]))
-                print("hasta:" +str(row[2]))
                 if i == row[1]:
                     activo = True
                 if i == row[2]:
@@ -7668,15 +7665,14 @@ def menuIncidenciasFacturaProformaIntroducirCrear       ():
                 LR23.config(text = "Data incorrecte")
                 LRR42.focus() 
                 return 
-
+        
         # Si v5 no es un número y no está en blanco
         if v5 != "" and v5.isdigit() == False:
             LR23.config(text = "Quantitat incorrecte")
             LRR52.focus()
             return
-        
-        # Si v7 no es un número y no está en blanco
-        if v7 != "" and v7.isdigit() == False:
+        # Si v7 no es un número real y no está en blanco
+        if v7 != "" and v7.replace(".","",1).isdigit() == False:
             LR23.config(text = "Preu incorrecte")
             LRR72.focus()
             return
