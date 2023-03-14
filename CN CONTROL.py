@@ -3901,7 +3901,7 @@ def PDFProforma             ():
         PDF.save()
         
         # Cerramos el proceso
-        ventana2label.config(text = "PDF generat", bg = "green")    
+        ventana2label.config(text = "PDF generat. Recorda salvar l'arxiu", bg = "green")    
         ventana2.config(bg = "green")       # Cambiamos el fondo del la ventana a verde
         ventana2.update()                   # Actualizamos la ventana
         
