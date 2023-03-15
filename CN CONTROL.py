@@ -1827,7 +1827,7 @@ def ProformaCorrigeUno      ():
     global  TipoIva
     global  IncluidoIva
     global  IdIncidencia
-    
+    global  parte    
       
     # Loop para volcar los resultados
     
@@ -1845,13 +1845,16 @@ def ProformaCorrigeUno      ():
         LRR92.insert(0,record[8])
         LRR102.insert(0,record[9])
         LRR111.config(state = "readandwrite")
+        # Borra el contenido
+        LRR111.delete(0,END)
         LRR111.insert(0,record[10])
         LRR111.config(state = "readonly")
         LRR122.insert(0,record[11])
         LRR131.config(state = "readandwrite")
         LRR131.insert(0,record[12])
-        LRR131.config(state = "readonly")        
-        
+        LRR131.config(state = "readonly")
+        LRR142.delete(0,END)        
+        LRR142.insert(0,record[14])
         val6 =record[0]
         val7 = []
         for t in val6.split("/"):
@@ -1898,6 +1901,7 @@ def ProformaSalvaCorrecc    ():
     v13 = LRR131.get()
     # Guardamos en v14 el valor de ID de incedències/grups si existe
     v14 = VieneDeIncGrups
+    v15 = LRR142.get()
             
     # Coteja errores
     # Miramos si v2 está vacío
@@ -2064,7 +2068,8 @@ def ProformaSalvaCorrecc    ():
             PRECIO_2           = :precio2,
             IVA                = :iva,
             TIPO_IVA           = :tipoIva,
-            INCLUIDO_IVA       = :incluidoIva 
+            INCLUIDO_IVA       = :incluidoIva,
+            PARTE              = :parte  
 
             WHERE oid = :val1""",
               {
@@ -2080,6 +2085,7 @@ def ProformaSalvaCorrecc    ():
                 'iva': v11,
                 'tipoIva': v12,
                 'incluidoIva': v13,
+                'parte': v15,
                 'val1': val1
                   })
     
@@ -3818,7 +3824,7 @@ def PDFProforma             ():
         PDF.rect(125*mm,160*mm,50*mm,50*mm,fill = False)
         PDF.rect(145*mm,160*mm,30*mm,50*mm,fill = False)
         PDF.rect(145*mm,160*mm,30*mm,10*mm,fill = True)
-
+    
         # Color de letra a blanco
         PDF.setFillColorRGB(1,1,1)
         
@@ -3835,6 +3841,12 @@ def PDFProforma             ():
         # Tercera columna de la quinta fila escribe: Total
         PDF.setFont('Helvetica',9)
         PDF.drawCentredString(138*mm,164*mm,"Total:")
+        # Si lo que hay en la label LRR142 es distinto de  "100"
+        if LRR142.get() != "100":
+            PDF.setFillColorRGB(0.6,0.2,0.4)
+            PDF.rect(115*mm,150*mm,30*mm,10*mm,fill = False)    
+            PDF.rect(145*mm,150*mm,30*mm,10*mm,fill = True)
+            PDF.drawString(120*mm,154*mm,"A pagar el "+LRR142.get()+"%:")
         
         # Debajo de todo y centrado escribe: "S'ha d'efectuar l'ingrès una setmana abans de l'acte ES97 2100 0010 3202 0238 4644"
         PDF.setFont('Helvetica',7)
@@ -3896,7 +3908,12 @@ def PDFProforma             ():
         PDF.setFillColorRGB(1,1,1)
         PDF.setFont('Helvetica-Bold',10)
         PDF.drawString(155*mm,163*mm,str(valor4)+" €")
-                        
+
+        # Si lo que hay en la label LRR142 es distinto de  "100"
+        if LRR142.get() != "100":
+            valor5 = valor4*(float(LRR142.get())/100)
+            PDF.drawString(155*mm,154*mm,str(valor5)+" €")
+                                    
         # Salva el PDF CON el nombre que le hemos dado
         PDF.save()
         
@@ -7607,6 +7624,7 @@ def menuIncidenciasFacturaProformaIntroducirCrear       ():
         v11 = LRR111.get()
         v12 = LRR122.get()
         v13 = LRR131.get()
+        v15 = LRR142.get()
         # Guardamos en v14 el valor de ID de incedències/grups si existe
         global v14
         v14 = VieneDeIncGrups
@@ -7636,7 +7654,7 @@ def menuIncidenciasFacturaProformaIntroducirCrear       ():
         
         # Si en v2 hay el símbolo "/" avisamos que no es válido
         if "/" in v2:
-            LRR23.config(text = "No es pot posar '/' al nom de proforma")
+            LR23.config(text = "No es pot posar '/' al nom de proforma")
             LRR22.focus()
             return
         # Miramos si ha puesto un cliente
@@ -7645,6 +7663,13 @@ def menuIncidenciasFacturaProformaIntroducirCrear       ():
             LRR31.focus()
             return
         
+        # Miramos si el va15 es un número
+        try:
+            v15 = float(v15)
+        except:
+            LR23.config(text = "El tant % a pagar no és un número")
+            LRR142.focus()
+            return
         # Miramos si el cliente existe
         # Abrimos la tabla de clientes
         conn = sqlite3.connect('databases/basesDeDatosClientes.db')
@@ -7763,7 +7788,7 @@ def menuIncidenciasFacturaProformaIntroducirCrear       ():
         # Inserta en la base de tados
         cursor.execute("""INSERT INTO bd_Proforma VALUES (:fecha,:fechaPro,:numPro,:cliente,:cant1,
                        :concept1,:precio1,:cant2,:concept2,:precio2,:iva,:tipoIva,:incluidoIva,
-                       :idIncidencias)""",
+                       :idIncidencias,:parte)""",
                 {
                     'fecha':           v4,
                     'fechaPro':        anyoGlobaltk.get() + "/" + mesGlobaltk.get() + "/" + diaGlobaltk.get(),
@@ -7778,7 +7803,8 @@ def menuIncidenciasFacturaProformaIntroducirCrear       ():
                     'iva':             v11,
                     'tipoIva':         v12,
                     'incluidoIva':     v13,
-                    'idIncidencias':   v14
+                    'idIncidencias':   v14,
+                    'parte':           v15
                     })
 
 
@@ -7907,7 +7933,14 @@ def menuIncidenciasFacturaProformaIntroducirCrear       ():
     LRR122.grid(row=11, column=1)
     LR13.config(text = "INCLÒS:")
     LRR131.grid(row=12, column=1)
-    LRR131['values'] = (["Si","No"])  
+    LRR131['values'] = (["Si","No"])
+    LR14.config(text = "TANT % A PAGAR:")
+    LRR142.grid(row=13, column=1)
+    # Si la label LRR142 está vacía:
+    if LRR142.get() == "":
+        # Le ponemos valor 100
+        LRR142.insert(0,"100")
+      
     # Si en cualquier momento se pulsan las teclas CTRL + P se fuerza la impresión de PDF
     raiz.bind("<Control-p>", lambda event: BotonImprimirForzado())
     raiz.bind("<Control-P>", lambda event: BotonImprimirForzado())     
@@ -9388,7 +9421,8 @@ try:
         IVA             text,
         TIPO_IVA        text,
         INCLUIDO_IVA    text,
-        ID_INCIDENCIA   text)""")
+        ID_INCIDENCIA   text,
+        PARTE           text,)""")
     
     # Ejecutar (commit) instrucción o consulta
     base_datos_datos.commit()
