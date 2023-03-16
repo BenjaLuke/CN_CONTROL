@@ -1853,8 +1853,11 @@ def ProformaCorrigeUno      ():
         LRR131.config(state = "readandwrite")
         LRR131.insert(0,record[12])
         LRR131.config(state = "readonly")
-        LRR142.delete(0,END)        
-        LRR142.insert(0,record[14])
+        LRR142.delete(0,END)
+        try:        
+            LRR142.insert(0,record[14])
+        except:
+            pass
         val6 =record[0]
         val7 = []
         for t in val6.split("/"):
