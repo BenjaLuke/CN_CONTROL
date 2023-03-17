@@ -7047,7 +7047,7 @@ def menuIncidencias                             ():
     # Campor LRR11 sólo permite que se introduzca algo de la lsita de selección
         LRR11.config(state = "readonly")
             
-    ajusta_espacios_info(10,22,7,12,7,5,20,8,17,16,7,1)
+    ajusta_espacios_info(10,22,7,12,7,5,5,8,17,31,7,1)
 def menuIncidenciasIntroducirPre                    ():
     global usuarioNivel
     if int(usuarioNivel) >= 3:
@@ -7058,7 +7058,7 @@ def menuIncidenciasIntroducir                       ():
     global EstamosEnIntroducir
     EstamosEnIntroducir = True
     EstamosEnIncidencias = True
-    ajusta_espacios_info(10,22,7,12,7,5,20,8,17,16,7,1)
+    ajusta_espacios_info(10,22,7,12,7,5,5,8,17,31,7,1)
     textMenu.config(text = "MENU INCIDÈNC./GRUPS")   
     
     def menuIncidenciasIntroducirIntroduce ():
@@ -7457,7 +7457,7 @@ def menuIncidenciasIntroducir                       ():
     LRR213.grid(row=20, column=1)
           
     Boton4activado(menuIncidenciasIntroducirIntroduce)
-    query_todos('databases/basesDeDatosIncidencias.db',"SELECT *, oid FROM bd_incidencias ORDER BY FECHA_CREA DESC, HORA DESC",8,"EstamosEnIncidencias","ID","DATA","HORA","PAX","PRODUCTE","IDIOMA","ESTAT","CLIENT","PAGAT")        
+    query_todos('databases/basesDeDatosIncidencias.db',"SELECT *, oid FROM bd_incidencias ORDER BY FECHA_CREA DESC, HORA DESC",8,"EstamosEnIncidencias","ID","DATA","HORA","PAX","PAX","IDIOMA","ESTAT","CLIENT","PAGAT")        
     
     # Si el usuario tiene un nivel de 3 o más...
     if int(usuarioNivel) >= 3:
@@ -7474,7 +7474,7 @@ def menuIncidenciasConsultar                        ():
     EstamosEnIntroducir = False
 
     textMenu.config(text = "MENU INCIDÈNC./GRUPS")   
-    ajusta_espacios_info(10,22,7,12,7,5,20,8,17,16,7,1)
+    ajusta_espacios_info(10,22,7,12,7,5,5,8,17,31,7,1)
     LimpiaLabelsRellena()
     menusBotones("Tornar",menuIncidencias,"",regresaSinNada,"Consultar (O)")    
 
