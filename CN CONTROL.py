@@ -1395,17 +1395,27 @@ def IncidenciasSalvaCorrecc ():
     v21 = LRR192.get()   
     v22 = anyoGlobaltk.get() + "/" + mesGlobaltk.get() + "/" + diaGlobaltk.get()
     
-    if v2!= "":        
+    if v2!= "":
+        
         # Si el principio de v2 no es 2 dígitos y "/"
+        if v2[1] == "/":
+            # Añade 0 delante
+            v2 = "0" + v2
         if v2[0:2].isdigit() == False or v2[2] != "/":
             LR23.config(text = "Dia incorrecte")
             LRR22.focus()
             return
         # Si v2 no contiene "/" dos digitos y "/"
+        if v2[4] == "/":
+            v2 = v2[0:3] + "0" + v2[3:] 
         if v2[3:5].isdigit() == False or v2[5] != "/":
             LR23.config(text = "Mes incorrecte")
             LRR22.focus()
             return
+        # Si v2 no tiene 10 caracteres
+        if len(v2) < 10:
+            # Añade después del seguno "/" el número 20
+            v2 = v2[0:6] + "20" + v2[6:]
         # Si v2 no acaba en "/" y 4 dígitos
         if v2[6:10].isdigit() == False or len(v2) != 10:
             LR23.config(text = "Any incorrecte")
