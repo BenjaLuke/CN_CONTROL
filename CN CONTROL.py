@@ -179,23 +179,22 @@ def Saliendo                ():
     raiz.destroy()                              # Cerramos tkinter
 
 def pulsaTeclaCombobox      (event):
-    global stringBusqueda                       # Creamos global la variable de lo escrito
-    # Si el foco no está sobre LRR31...
-    if raiz.focus_get() != LRR31:
-        return
-    # Si la tecla pulsada es una letra o un espacio
-    letter = event.char                          # Obtener la tecla presionada
+    
+    global stringBusqueda                                           # Creamos global la variable de lo escrito
+    if raiz.focus_get() != LRR31:                                   # Si el foco no está sobre LRR31..
+        return                                                      # No hace nada
+    letter = event.char                                             # Obtener la tecla presionada
 
-    if  event.char.isalpha() or event.char == " " or event.char in "`,´,',À,È,Ì,Ò,Ù,Á,É,Í,Ú,Ó":
+    if  event.char.isalpha() or event.char == " " or event.char in "`,´,',À,È,Ì,Ò,Ù,Á,É,Í,Ú,Ó": # Si la tecla pulsada es espacio o vocal con tilde o letra o número...
     
         try:
-            letter = letter.upper()                     # Convertir la letra a mayúsculas
+            letter = letter.upper()                                 # Convertir la letra a mayúsculas
         except:
             pass
         
-        stringBusqueda += letter                    # Añadir la letra a la cadena de búsqueda
-        values = LRR31.cget('values')               # Obtener las opciones del combobox
-        for value in values:                        # Buscar la primera opción que comience con la cadena de búsqueda
+        stringBusqueda += letter                                    # Añadir la letra a la cadena de búsqueda
+        values = LRR31.cget('values')                               # Obtener las opciones del combobox
+        for value in values:                                        # Buscar la primera opción que comience con la cadena de búsqueda
 
                 if value.startswith(stringBusqueda):
                     
@@ -318,17 +317,20 @@ def FechaActualIncrustada   ():
 def FechaActualIncrustadaInc():
     
     # Introducimos el valor de la fecha actual en los campos de fecha
+    LimpiaElegibles()
     LRR22.insert(0,diaGlobal)
     LRR32.insert(0,mesGlobal)
     LRR42.insert(0,anyoGlobal)
 def FechaActualIncrustadaPax():
     
     # Introducimos el valor de la fecha actual en los campos de fecha
+    LimpiaElegibles()
     LRR12.insert(0,anyoGlobal)
     LRR22.insert(0,mesGlobal)
 def FechaActualIncrustadaGru():
     
     # Introducimos el valor de la fecha actual en los campos de fecha
+    LimpiaElegibles()
     LRR12.insert(0,"1")
     LRR22.insert(0,mesGlobal)
     LRR32.insert(0,anyoGlobal)
@@ -730,6 +732,9 @@ def cargaUsuario            ():
 
     rUsuario.mainloop()
 def regresaSinNada          ():
+    
+    return 
+def regresaSinNada1          (val):
     
     return 
 def cambioUsuario           ():
@@ -4013,28 +4018,30 @@ def MenuInicial                             ():
             # Si la fecha de revisión de la incidencia es igual a la fecha actual...
             if incident[17] == fechi:
                 inciRev += 1
-        global ventana2
-        ventana2 = Tk()                         # Creamos la ventana
-        ventana2.title(" ")                     # Damos titulo a la ventana
-        ventana2.geometry("400x50")             # Damos tamaño a la ventana
-        ventana2.configure(bg='blue')           # Damos color de fondo a la ventana
-        ventana2.iconbitmap("image/icono.ico")  # Damos icono a la ventana
-        ventana2.deiconify()                    # Mostramos la ventana
-        ventana2label = Label(ventana2, text = "Hi ha "+str(inciHoy)+" incidències o grups per atendre avui", bg = "blue", fg = "white", font = ("Helvetica", 12))   
-        ventana2label.pack()                    # Coloca el label en la ventana
-        if int(usuarioNivel) <= 2:
-            ventana2label2 = Label(ventana2, text = "Hi ha "+str(inciRev)+" incidències o grups per revisar avui", bg = "blue", fg = "white", font = ("Helvetica", 12))
-            ventana2label2.pack()               # Coloca el label en la ventana    
-        ventana2.overrideredirect(True)         # Quitamos el marco de la ventana
-        ventana2.update()                       # Actualiza la ventana           
-        # Hacemos una pausa de 4 segundos
-        time.sleep(3)                       # 2 segundos de pausa
-        # Cerramos la ventana
-        ventana2.destroy()                  # Destruye la ventana     
-        # Bloqueamos que vuelva a aparecer la ventana
-        avisoint = False
-        # Cerramos la base de datos
-        conexion.close()
+        if inciHoy !=0 or (inciRev != 0 and int(usuarioNivel) < 3):
+           
+            global ventana2
+            ventana2 = Tk()                         # Creamos la ventana
+            ventana2.title(" ")                     # Damos titulo a la ventana
+            ventana2.geometry("400x50")             # Damos tamaño a la ventana
+            ventana2.configure(bg='blue')           # Damos color de fondo a la ventana
+            ventana2.iconbitmap("image/icono.ico")  # Damos icono a la ventana
+            ventana2.deiconify()                    # Mostramos la ventana
+            ventana2label = Label(ventana2, text = "Hi ha "+str(inciHoy)+" incidències o grups per atendre avui", bg = "blue", fg = "white", font = ("Helvetica", 12))   
+            ventana2label.pack()                    # Coloca el label en la ventana
+            if int(usuarioNivel) <= 2:
+                ventana2label2 = Label(ventana2, text = "Hi ha "+str(inciRev)+" incidències o grups per revisar avui", bg = "blue", fg = "white", font = ("Helvetica", 12))
+                ventana2label2.pack()               # Coloca el label en la ventana    
+            ventana2.overrideredirect(True)         # Quitamos el marco de la ventana
+            ventana2.update()                       # Actualiza la ventana           
+            # Hacemos una pausa de 4 segundos
+            time.sleep(3)                       # 2 segundos de pausa
+            # Cerramos la ventana
+            ventana2.destroy()                  # Destruye la ventana     
+            # Bloqueamos que vuelva a aparecer la ventana
+            avisoint = False
+            # Cerramos la base de datos
+            conexion.close()
              
     LimpiaLabelsRellena()
     if int(usuarioNivel) == 0:
@@ -4271,6 +4278,7 @@ def menuRegistrosIntroducir                         ():
     LR3.config(text = "ORIGEN:")  
     LRR31.grid(row=2, column=1)
     LRR31['values'] = (origenes)  
+    LRR31.bind('<Key>', pulsaTeclaCombobox)                 # Para que se actualice el combobox cuando se pulsa una tecla   
     LR4.config(text = "HORA:")  
     LRR41.grid(row=3, column=1)  
     LRR41['values'] = (horas)  
@@ -7039,7 +7047,7 @@ def menuIncidenciasIntroducir                       ():
 
     global EstamosEnIntroducir
     EstamosEnIntroducir = True
-    
+    EstamosEnIncidencias = True
     ajusta_espacios_info(10,22,7,12,7,5,20,8,17,16,7,1)
     textMenu.config(text = "MENU INCIDÈNC./GRUPS")   
     
@@ -7392,8 +7400,9 @@ def menuIncidenciasIntroducir                       ():
     LRR22.grid(row=1, column=1) 
     LR3.config(text = "CLIENT:")
     LRR31.grid(row=2, column=1)
-    LRR31['values'] = (clientes)  
+    LRR31['values'] = (clientes)
     LRR31.config(state = "readandwrite")
+    LRR31.bind('<Key>', regresaSinNada1 )                 # Para que no se actualice el combobx al escribir
     LR4.config(text = "TELF. EXTRA:")
     LRR42.grid(row=3, column=1)
     LR5.config(text = "MAIL EXTRA:")
