@@ -1577,7 +1577,7 @@ def incidenciasBorraUno     ():
     busqueda = "SELECT *, oid FROM bd_incidencias WHERE (oid = '" + LRR12.get() + "')"
     columnas = 8
     global puntero
-    query(base_datos,busqueda,columnas,"ID","DATA","HORA","PAX","PRODUCTE","IDIOMA","ESTAT","CLIENT","PAGAT")
+    query(base_datos,busqueda,columnas,"ID","DATA","HORA","PAX","PAX","IDIOMA","ESTAT","CLIENT","PAGAT")
     
     val1 = LRR12.get()
 
@@ -1632,7 +1632,7 @@ def del_incidence_yes       ():
     ventana2.destroy()
 
     # Borramos los datos del listado de registros
-    query_todos('databases/basesDeDatosIncidencias.db',"SELECT *, oid FROM bd_incidencias ORDER BY oid DESC",8,"EstamosEnIncidencias","ID","DATA","HORA","PAX","PRODUCTE","IDIOMA","ESTAT","CLIENT","PAGAT")        
+    query_todos('databases/basesDeDatosIncidencias.db',"SELECT *, oid FROM bd_incidencias ORDER BY oid DESC",8,"EstamosEnIncidencias","ID","DATA","HORA","PAX","PAX","IDIOMA","ESTAT","CLIENT","PAGAT")        
 
     
     # Foco
