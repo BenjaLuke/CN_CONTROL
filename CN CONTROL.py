@@ -286,7 +286,7 @@ def notasAmpliacion         ():
         # aMPLIAMOS EL ANCHO DE LRR213
         LRR213.config(width=100)
     else:
-        LRR213.config(width=17)
+        LRR213.config(width=30)
 
 def MiraFecha               (uno):
 
@@ -1227,7 +1227,7 @@ def query_incidencias_busca ():
     if len(v10) == 2:
         v10 = "20" + v10
     # Creamos la base de datos o conectamos con una
-    query_todos('databases/basesDeDatosIncidencias.db',"SELECT *, oid FROM bd_incidencias WHERE ((CLIENTE = '" + v1 + "' or '" + v1 + "' = '') AND (FECHA LIKE '" + v2 + "/%' or '" + v2 + "' = '') AND (FECHA LIKE '%/" + v3 + "/%' or '" + v3 + "' = '') AND (FECHA LIKE '%/" + v4 + "' or '" + v4 + "' = '') AND (PRODUCTO = '" + v5 + "' or '" + v5 + "' = '') AND (IDIOMA = '" + v6 + "' or '" + v6 + "' = '') AND (AGENDADO = '" + v7 + "' or '" + v7 + "' = '') AND (FECHA_REV LIKE '" + v8 + "/%' or '" + v8 + "' = '') AND (FECHA_REV LIKE '%/" + v9 + "/%' or '" + v9 + "' = '')  AND (FECHA_REV LIKE '%/" + v10 + "' or '" + v10 + "' = '') AND (ESTADO = '" + v12 + "' or '" + v12 + "' = '') AND (NOTAS = '" + v11 + "' or '" + v11 + "' = '') AND (PAGAT = '" + v13 + "' OR '" + v13 + "' = '') AND (MAIL_EXTRA = '" + v14 + "' OR '" + v14 + "' = '')) ORDER BY FECHA, HORA",8,"EstamosEnIncidencias","ID","DATA","HORA","PAX","PAX","IDIOMA","ESTAT","CLIENT","PAGAT")
+    query_todos('databases/basesDeDatosIncidencias.db',"SELECT *, oid FROM bd_incidencias WHERE ((CLIENTE = '" + v1 + "' or '" + v1 + "' = '') AND (FECHA LIKE '" + v2 + "/%' or '" + v2 + "' = '') AND (FECHA LIKE '%/" + v3 + "/%' or '" + v3 + "' = '') AND (FECHA LIKE '%/" + v4 + "' or '" + v4 + "' = '') AND (PRODUCTO = '" + v5 + "' or '" + v5 + "' = '') AND (IDIOMA = '" + v6 + "' or '" + v6 + "' = '') AND (AGENDADO = '" + v7 + "' or '" + v7 + "' = '') AND (FECHA_REV LIKE '" + v8 + "/%' or '" + v8 + "' = '') AND (FECHA_REV LIKE '%/" + v9 + "/%' or '" + v9 + "' = '')  AND (FECHA_REV LIKE '%/" + v10 + "' or '" + v10 + "' = '') AND (ESTADO = '" + v12 + "' or '" + v12 + "' = '') AND (NOTAS = '" + v11 + "' or '" + v11 + "' = '') AND (PAGAT = '" + v13 + "' OR '" + v13 + "' = '') AND (MAIL_EXTRA = '" + v14 + "' OR '" + v14 + "' = '')) ORDER BY FECHA, HORA",8,"EstamosEnIncidencias","ID","DATA","HORA","PAX","PRODUCTE","IDIOMA","ESTAT","CLIENT","PAGAT")
 def incidenciasCorrigeUno   ():
 
     global val1
@@ -1577,7 +1577,7 @@ def incidenciasBorraUno     ():
     busqueda = "SELECT *, oid FROM bd_incidencias WHERE (oid = '" + LRR12.get() + "')"
     columnas = 8
     global puntero
-    query(base_datos,busqueda,columnas,"ID","DATA","HORA","PAX","PAX","IDIOMA","ESTAT","CLIENT","PAGAT")
+    query(base_datos,busqueda,columnas,"ID","DATA","HORA","PAX","PRODUCTE","IDIOMA","ESTAT","CLIENT","PAGAT")
     
     val1 = LRR12.get()
 
@@ -1632,7 +1632,7 @@ def del_incidence_yes       ():
     ventana2.destroy()
 
     # Borramos los datos del listado de registros
-    query_todos('databases/basesDeDatosIncidencias.db',"SELECT *, oid FROM bd_incidencias ORDER BY oid DESC",8,"EstamosEnIncidencias","ID","DATA","HORA","PAX","PAX","IDIOMA","ESTAT","CLIENT","PAGAT")        
+    query_todos('databases/basesDeDatosIncidencias.db',"SELECT *, oid FROM bd_incidencias ORDER BY oid DESC",8,"EstamosEnIncidencias","ID","DATA","HORA","PAX","PRODUCTE","IDIOMA","ESTAT","CLIENT","PAGAT")        
 
     
     # Foco
@@ -7047,7 +7047,7 @@ def menuIncidencias                             ():
     # Campor LRR11 sólo permite que se introduzca algo de la lsita de selección
         LRR11.config(state = "readonly")
             
-    ajusta_espacios_info(10,22,7,12,7,5,5,8,17,31,7,1)
+    ajusta_espacios_info(10,22,7,12,7,5,20,8,17,16,7,1)
 def menuIncidenciasIntroducirPre                    ():
     global usuarioNivel
     if int(usuarioNivel) >= 3:
@@ -7058,7 +7058,7 @@ def menuIncidenciasIntroducir                       ():
     global EstamosEnIntroducir
     EstamosEnIntroducir = True
     EstamosEnIncidencias = True
-    ajusta_espacios_info(10,22,7,12,7,5,5,8,17,31,7,1)
+    ajusta_espacios_info(10,22,7,12,7,5,20,8,17,16,7,1)
     textMenu.config(text = "MENU INCIDÈNC./GRUPS")   
     
     def menuIncidenciasIntroducirIntroduce ():
@@ -7457,7 +7457,7 @@ def menuIncidenciasIntroducir                       ():
     LRR213.grid(row=20, column=1)
           
     Boton4activado(menuIncidenciasIntroducirIntroduce)
-    query_todos('databases/basesDeDatosIncidencias.db',"SELECT *, oid FROM bd_incidencias ORDER BY FECHA_CREA DESC, HORA DESC",8,"EstamosEnIncidencias","ID","DATA","HORA","PAX","PAX","IDIOMA","ESTAT","CLIENT","PAGAT")        
+    query_todos('databases/basesDeDatosIncidencias.db',"SELECT *, oid FROM bd_incidencias ORDER BY FECHA_CREA DESC, HORA DESC",8,"EstamosEnIncidencias","ID","DATA","HORA","PAX","PRODUCTE","IDIOMA","ESTAT","CLIENT","PAGAT")        
     
     # Si el usuario tiene un nivel de 3 o más...
     if int(usuarioNivel) >= 3:
@@ -7474,7 +7474,7 @@ def menuIncidenciasConsultar                        ():
     EstamosEnIntroducir = False
 
     textMenu.config(text = "MENU INCIDÈNC./GRUPS")   
-    ajusta_espacios_info(10,22,7,12,7,5,5,8,17,31,7,1)
+    ajusta_espacios_info(10,22,7,12,7,5,20,8,17,16,7,1)
     LimpiaLabelsRellena()
     menusBotones("Tornar",menuIncidencias,"",regresaSinNada,"Consultar (O)")    
 
@@ -9201,7 +9201,7 @@ tamanyoFont = TamanyoLetra+10
 
 mantieneDistancia = Label(frameRellena,text="")
 mantieneDistancia.grid(row=0, column=1,rowspan=1,columnspan=1)
-mantieneDistancia.config(padx = 5,bg="#b7b493",fg="#FFFFFF", anchor = E, font=("Helvetica", tamanyoFont,"bold"),width = 15)
+mantieneDistancia.config(padx = 5,bg="#b7b493",fg="#FFFFFF", anchor = E, font=("Helvetica", tamanyoFont,"bold"),width = 30)
 
 # LRx = título; LRRx = texto; LRRx1 = Combobox; LRRx2 = Entry; LRRx3 = Text (multilinea)
 
@@ -9212,35 +9212,35 @@ for i in range (1,24):
 
     globals()['LRR%s' % (i) + '1'] = Combobox(frameRellena,state="readonly")                                                                                  
     globals()['LRR%s' % (i) + '1'].grid(rowspan=1,columnspan=1)
-    globals()['LRR%s' % (i) + '1'].config(font=("Helvetica", tamanyoFont),width = 15)
+    globals()['LRR%s' % (i) + '1'].config(font=("Helvetica", tamanyoFont),width = 30)
     globals()['LRR%s' % (i) + '1'].grid(padx=10, pady=10)
     
     globals()['LRR%s' % (i) + '2'] = Entry(frameRellena)                                                                                                    
     globals()['LRR%s' % (i) + '2'].grid(rowspan=1,columnspan=1)
-    globals()['LRR%s' % (i) + '2'].config(font=("Helvetica", tamanyoFont),width = 18)
+    globals()['LRR%s' % (i) + '2'].config(font=("Helvetica", tamanyoFont),width = 33)
     globals()['LRR%s' % (i) + '2'].grid(padx=10, pady=10)
 
 LRR31.bind('<Key>', pulsaTeclaCombobox)                 # Para que se actualice el combobox cuando se pulsa una tecla
 
 LRR1 = Label(frameRellena,text="PENDIENTE")                                                                                      
 LRR1.grid(rowspan=1,columnspan=1)
-LRR1.config(padx = 5,bg="#b7b493",fg="#FFFFFF", anchor = W, font=("Helvetica", tamanyoFont),width = 15)
+LRR1.config(padx = 5,bg="#b7b493",fg="#FFFFFF", anchor = W, font=("Helvetica", tamanyoFont),width = 30)
 
 LRR5 = Label(frameRellena,text="")                                                                                      
 LRR5.grid(rowspan=1,columnspan=1)
-LRR5.config(padx = 5,bg="#b7b493",fg="#FFFFFF", anchor = W, font=("Helvetica", tamanyoFont),width = 15)
+LRR5.config(padx = 5,bg="#b7b493",fg="#FFFFFF", anchor = W, font=("Helvetica", tamanyoFont),width = 30)
 
 LRR6 = Label(frameRellena,text="")                                                                                      
 LRR6.grid(rowspan=1,columnspan=1)
-LRR6.config(padx = 5,bg="#b7b493",fg="#FFFFFF", anchor = W, font=("Helvetica", tamanyoFont),width = 15)
+LRR6.config(padx = 5,bg="#b7b493",fg="#FFFFFF", anchor = W, font=("Helvetica", tamanyoFont),width = 30)
 
 LRR73 = Text(frameRellena)
 LRR73.grid(rowspan=1,columnspan=1)
-LRR73.config(font=("Helvetica", tamanyoFont),width = 17,height = 5,state = NORMAL)
+LRR73.config(font=("Helvetica", tamanyoFont),width = 32,height = 5,state = NORMAL)
 
 LRR213 = Text(frameRellena)
 LRR213.grid(rowspan=1,columnspan=1)
-LRR213.config(font=("Helvetica", tamanyoFont),width = 17,height = 5,state = NORMAL)
+LRR213.config(font=("Helvetica", tamanyoFont),width = 32,height = 5,state = NORMAL)
 bindNotasEvento(LRR213)
 
 LR22.grid(columnspan=3)
