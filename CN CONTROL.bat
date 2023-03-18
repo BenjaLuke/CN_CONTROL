@@ -1,3 +1,4 @@
+mode con: lines=35
 echo off
 echo CN CONTROL V.3.16.08
 echo by: Benjamin Miguel Miralpeix
