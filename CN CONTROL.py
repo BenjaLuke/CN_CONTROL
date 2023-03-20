@@ -788,12 +788,15 @@ def crea_espacios_info      (frame,a,b):
         
         for data in range(b):
             num = "0" + str(dato) + "0" + str(data)
-        
+            listalistados = ["0001","0002","0003","0004","0005","0006","0007","0008","0009","00010","00011","00012","00013","00014","00015","00016","00017","00018","00019","00020","00021"]
             if dato == 0 and data != 0:
 
                 globals()['VIEW%s' % num] = Button(frame, text="",bg="#b7b493", fg="#293337",width = 10, height = 1)
                 globals()['VIEW%s' % num].grid(row=data+1,column=dato)
-                                
+                if data>1: 
+                    globals()['VIEW%s' % num].bind("<Up>", lambda event, data=data: globals()['VIEW%s' % (listalistados[data-2])].focus_set())
+                if data<21:
+                    globals()['VIEW%s' % num].bind("<Down>", lambda event, data=data: globals()['VIEW%s' % (listalistados[data])].focus_set())                      
             else:
         
                 globals()['VIEW%s' % num] = Label(frame, text="",bg="#b7b493", fg="#293337",width = 10, height = 1)
@@ -806,7 +809,7 @@ def crea_espacios_info      (frame,a,b):
         
         num = "0" + str(columna) + "00"
         globals()['VIEW%s' % num].config(text = "                    ",bg = "#5d5b45",fg = "#FFFFFF")
-        columna += 1
+        columna += 1  
     ConfiguraColumnas(frameLista,1,1,1,1,1,1,1,1,1,1)  
 def destruye_espacios_info  (a,b):
                  

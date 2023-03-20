@@ -21,8 +21,8 @@ echo CTRL + D			POSA LA DATA ACTUAL A CONSULTES
 echo					POSA LA DATA EXERCICI ACTUAL A TAULES
 echo CTRL + P			CREA PDF
 echo ------------------------------------------------------------
-echo CTRL + M           POSA EL CURSOR AL MENU
-echo CTRL + L           POSA EL CURSOR AL LLISTAT
+echo CTRL + M               	POSA EL CURSOR AL MENU
+echo CTRL + L               	POSA EL CURSOR AL LLISTAT
 echo CTRL + AMUNT			PLANA ANTERIOR DEL LLISTAT
 echo CTRL + ABAIX			PLANA POSTERIOR DEL LLISTAT
 echo CTRL + ESQUERRA	 		TORNA ENRERA SOBRE EL MENU
