@@ -1,9 +1,9 @@
-mode con: lines=35
+mode con: lines=45
 echo off
-echo CN CONTROL V.3.16.09
+echo CN CONTROL V.3.16.10
 echo by: Benjamin Miguel Miralpeix
 echo 2021/2023
-echo ultima actualizacion: 2023/03/20
+echo ultima actualizacion: 2023/03/22
 echo -
 echo -
 echo ------------------------------------------------------------
@@ -23,6 +23,8 @@ echo CTRL + P			CREA PDF
 echo ------------------------------------------------------------
 echo CTRL + M               	POSA EL CURSOR AL MENU
 echo CTRL + L               	POSA EL CURSOR AL LLISTAT
+echo CTRL + Q               	POSA EL CURSOR AL FORMULARI
+echo ------------------------------------------------------------
 echo CTRL + AMUNT			PLANA ANTERIOR DEL LLISTAT
 echo CTRL + ABAIX			PLANA POSTERIOR DEL LLISTAT
 echo CTRL + ESQUERRA	 		TORNA ENRERA SOBRE EL MENU

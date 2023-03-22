@@ -5,8 +5,7 @@ Created on Mon Oct  3 01:03:21 2022
 @author: BENJAMIN MIGUEL
 """
 
-import sqlite3
-# librerias necesarias
+import sqlite3                                          # Para trabajar con la base de datos
 from ast import Break, Return                           # Para salir de un bucle
 from datetime import *                                  # Para trabajar con fechas
 from tkinter import *                                   # Para crear la interfaz gráfica
@@ -39,74 +38,55 @@ logo = PhotoImage(file="image/logo.png")                # Carga laimagen del log
 logo = logo.subsample(8, 8)                             # Lo colocamos en raiz utilizando la transparencia
 Label(raiz, image=logo, bg="#b7b493").place(x=30, y=20) # Lo colocamos en raiz utilizando la transparencia
         
-# Si en cualquier momento se pulsan las teclas CTRL + R se va al menu de registro
-raiz.bind("<Control-r>", lambda event: menuRegistrosIntroducir())
+raiz.bind("<Control-r>", lambda event: menuRegistrosIntroducir())       # Si en cualquier momento se pulsan las teclas CTRL + R se va al menu de registro
 raiz.bind("<Control-R>", lambda event: menuRegistrosIntroducir())
-# Si en cualquier momento se pulsa las teclas CTRL + C intenta copiar al portapapeles
-raiz.bind("<Control-c>", lambda event: copia())
+raiz.bind("<Control-c>", lambda event: copia())                         # Si en cualquier momento se pulsa las teclas CTRL + C intenta copiar al portapapeles
 raiz.bind("<Control-C>", lambda event: copia())
-# Si en cualquier momento se pulsan las teclas CTRL + V intenta copiar lo del portapapeles
-raiz.bind("<Control-v>", lambda event: paste())
+raiz.bind("<Control-v>", lambda event: paste())                         # Si en cualquier momento se pulsan las teclas CTRL + V intenta copiar lo del portapapeles
 raiz.bind("<Control-V>", lambda event: paste())
-# Si en cualquier momento se pulsan las teclas CTRL + V se va al menu de ventas
-raiz.bind("<Control-e>", lambda event: paste())
+raiz.bind("<Control-e>", lambda event: paste())                         # Si en cualquier momento se pulsan las teclas CTRL + V se va al menu de ventas
 raiz.bind("<Control-E>", lambda event: paste())
-# Si en cualquier momento se pulsan las teclas CTRL + I se va al menu de incidencias
-raiz.bind("<Control-i>", lambda event: menuIncidenciasIntroducir())
+raiz.bind("<Control-i>", lambda event: menuIncidenciasIntroducir())     # Si en cualquier momento se pulsan las teclas CTRL + I se va al menu de incidencias
 raiz.bind("<Control-I>", lambda event: menuIncidenciasIntroducir()) 
-# Si en cualquier momento se pulsan las teclas CTRL + O se va al menu de consultar incidencias
-raiz.bind("<Control-o>", lambda event: menuIncidenciasConsultar())
+raiz.bind("<Control-o>", lambda event: menuIncidenciasConsultar())      # Si en cualquier momento se pulsan las teclas CTRL + O se va al menu de consultar incidencias
 raiz.bind("<Control-O>", lambda event: menuIncidenciasConsultar())
-# Si en cualquier momento se pulsan las teclas CTRL + U se va al menu de cambio de usuario
-raiz.bind("<Control-u>", lambda event: cambioUsuario1())
+raiz.bind("<Control-u>", lambda event: cambioUsuario1())                # Si en cualquier momento se pulsan las teclas CTRL + U se va al menu de cambio de usuario
 raiz.bind("<Control-U>", lambda event: cambioUsuario1())
-# Si en cualquier momento se pulsan las teclas CTRL + N se limpian las celdas de texto
-raiz.bind("<Control-n>", lambda event: LimpiaElegibles())
+raiz.bind("<Control-n>", lambda event: LimpiaElegibles())               # Si en cualquier momento se pulsan las teclas CTRL + N se limpian las celdas de texto
 raiz.bind("<Control-N>", lambda event: LimpiaElegibles())
-# Si en cualquier momento se pulsan las teclas CTRL + L se pone el cursor en el primer boton de la lista
-raiz.bind("<Control-l>", lambda event: BotonPrimeroL())
+raiz.bind("<Control-l>", lambda event: BotonPrimeroL())                 # Si en cualquier momento se pulsan las teclas CTRL + L se pone el cursor en el primer boton de la lista
 raiz.bind("<Control-L>", lambda event: BotonPrimeroL())
-# Si en cualquier momento se pulsan las teclas CTRL + M se pone el cursor en el primer boton del menu
-raiz.bind("<Control-m>", lambda event: BotonPrimeroM())
+raiz.bind("<Control-m>", lambda event: BotonPrimeroM())                 # Si en cualquier momento se pulsan las teclas CTRL + M se pone el cursor en el primer boton del menu
 raiz.bind("<Control-M>", lambda event: BotonPrimeroM())
-# Si en cualquier momento se pulsan las teclas CTRL + + se aumenta el tamaño de la letra
-raiz.bind("<Control-plus>", lambda event: TamanyoMas())
-# Si en cualquier momento se pulsan las teclas CTRL + - se disminuye el tamaño de la letra
-raiz.bind("<Control-minus>", lambda event: TamanyoMenos())
-# Si en cualquier momento se pulsan las teclas CTRL + INTRO se fuerza el pulsado del botón VALIDAR
-raiz.bind("<Control-Return>", lambda event: BotonValidarForzado())
-# Si en cualquier momento se pulsan las teclas CTRL + P se fuerza la impresión de PDF
-raiz.bind("<Control-p>", lambda event: BotonImprimirForzado())
+raiz.bind("<Control-plus>", lambda event: TamanyoMas())                 # Si en cualquier momento se pulsan las teclas CTRL + + se aumenta el tamaño de la letra
+raiz.bind("<Control-minus>", lambda event: TamanyoMenos())              # Si en cualquier momento se pulsan las teclas CTRL + - se disminuye el tamaño de la letra
+raiz.bind("<Control-Return>", lambda event: BotonValidarForzado())      # Si en cualquier momento se pulsan las teclas CTRL + INTRO se fuerza el pulsado del botón VALIDAR
+raiz.bind("<Control-p>", lambda event: BotonImprimirForzado())          # Si en cualquier momento se pulsan las teclas CTRL + P se fuerza la impresión de PDF
 raiz.bind("<Control-P>", lambda event: BotonImprimirForzado())
-# Si en cualquier momento se pulsan las teclas CTRL + CURSOR ARRIBA se fuerza el pulsado del botón SUBIR
-raiz.bind("<Control-Up>", lambda event: BotonSubirForzado())
-# Si en cualquier momento se pulsan las teclas CTRL + CURSOR ABAJO se fuerza el pulsado del botón BAJAR
-raiz.bind("<Control-Down>", lambda event: BotonBajarForzado())
-# Si en cualquier momento se pulsan las teclas CTRL + CURSOR IZQUIERDA se fuerza el pulsado del botón REGRESAR
-raiz.bind("<Control-Left>", lambda event: BotonRegresarForzado())
-# Si en cualquier momento se pulsan las teclas FIN se fuerza el pulsado del botón SALIR
-raiz.bind("<End>", lambda event: Saliendo())
-# Si aquí se pulsan las teclas CTRL + D no pasa nada
-raiz.bind("<Control-d>", lambda event: regresaSinNada())
+raiz.bind("<Control-Up>", lambda event: BotonSubirForzado())            # Si en cualquier momento se pulsan las teclas CTRL + CURSOR ARRIBA se fuerza el pulsado del botón SUBIR
+raiz.bind("<Control-Down>", lambda event: BotonBajarForzado())          # Si en cualquier momento se pulsan las teclas CTRL + CURSOR ABAJO se fuerza el pulsado del botón BAJAR
+raiz.bind("<Control-Left>", lambda event: BotonRegresarForzado())       # Si en cualquier momento se pulsan las teclas CTRL + CURSOR IZQUIERDA se fuerza el pulsado del botón REGRESAR
+raiz.bind("<End>", lambda event: Saliendo())                            # Si en cualquier momento se pulsan las teclas FIN se fuerza el pulsado del botón SALIR
+raiz.bind("<Control-d>", lambda event: regresaSinNada())                # Si aquí se pulsan las teclas CTRL + D no pasa nada
 raiz.bind("<Control-D>", lambda event: regresaSinNada())
 #  ---------------------- Definiendo variables necesarias ---------------------
 
 global  DatosUsuario, usuarioReal, usuarioNivel                             # Definimos las variables que vamos a usar   
 DatosUsuario, usuarioReal, usuarioNivel = (), "No s'ha identificat", "0"    # Inicializamos las variables
 
-global avisoint, EstamosEnIncidencias, EstamosEnRegistros, EstamosEnProforma, EstamosEnBloqueos, EstamosEnProductos, EstamosEnClientes, EstamosEnUsuarios, EstamosEnIntroducir                                                   # Definimos las variables que vamos a usar
-avisoint, EstamosEnIncidencias, EstamosEnRegistros, EstamosEnProforma, EstamosEnBloqueos, EstamosEnProductos, EstamosEnClientes, EstamosEnUsuarios, EstamosEnIntroducir = True, False, False, False, False, False, False, False, False               # Inicializamos las variables
+global avisoint, EstamosEnIncidencias, EstamosEnRegistros, EstamosEnProforma, EstamosEnBloqueos, EstamosEnProductos, EstamosEnClientes, EstamosEnUsuarios, EstamosEnIntroducir                                                                      # Definimos las variables que vamos a usar
+avisoint, EstamosEnIncidencias, EstamosEnRegistros, EstamosEnProforma, EstamosEnBloqueos, EstamosEnProductos, EstamosEnClientes, EstamosEnUsuarios, EstamosEnIntroducir = True, False, False, False, False, False, False, False, False              # Inicializamos las variables
 
 global TamanyoLetra                                                         # Definimos las variables que vamos a usar
 TamanyoLetra = 0                                                            # Inicializamos las variables
 
-global origenes, idiomas, horas, fuentes, descripciones, tiposPago, estados, usoUsuarios, productos, productosR, productosS                             # Definimos las variables que vamos a usar      
-origenes, idiomas, horas, fuentes, descripciones, tiposPago, estados, usoUsuarios, productos, productosR, productosS = "","","","","","","","","","","" # Inicializamos las variables
+global origenes, idiomas, horas, fuentes, descripciones, tiposPago, estados, usoUsuarios, productos, productosR, productosS                                                                                                                         # Definimos las variables que vamos a usar      
+origenes, idiomas, horas, fuentes, descripciones, tiposPago, estados, usoUsuarios, productos, productosR, productosS = "","","","","","","","","","",""                                                                                             # Inicializamos las variables
 
-global vr1,vr2,vr3,vr4,vr5,vr6,vr7,vr8,vr9,vr10,vr11,vr12,vr13,vr14                                         # Definimos las variables que vamos a usar
-vr1,vr2,vr3,vr4,vr5,vr6,vr7,vr8,vr9,vr10,vr11,vr12,vr13,vr14 = "","","","","","",False,"","","","","","",False                       # Inicializamos las variables
+global vr1,vr2,vr3,vr4,vr5,vr6,vr7,vr8,vr9,vr10,vr11,vr12,vr13,vr14                                                                                                                                                                                 # Definimos las variables que vamos a usar
+vr1,vr2,vr3,vr4,vr5,vr6,vr7,vr8,vr9,vr10,vr11,vr12,vr13,vr14 = "","","","","","",False,"","","","","","",False                                                                                                                                      # Inicializamos las variables
     
-global fecha, diaGlobal, diaGlobaltk, mesGlobal, mesGlobaltk, anyoGlobal, anyoGlobaltk, diaFecha, mesFecha, anyoFecha
+global fecha, diaGlobal, diaGlobaltk, mesGlobal, mesGlobaltk, anyoGlobal, anyoGlobaltk, diaFecha, mesFecha, anyoFecha                                                                                                                               # Definimos las variables que vamos a usar
 
 fecha = datetime.now()              # Obtenemos la fecha actual
 diaGlobal = str(fecha.day)          # Obtenemos el día actual
@@ -121,8 +101,7 @@ anyoGlobaltk.set(anyoGlobal)        # Asignamos el valor de la variable anyoGlob
 
 stringBusqueda = ""                 # Definimos la variable que vamos a usar para escribir la búsqueda en un combobox
 
-# Variables del sector 3
-global puntero                      # Definimos las variables que vamos a usar
+global puntero                      # Definimos las variables que vamos a usar en el sector 3
 puntero = 0                         # Definimos el valor del puntero para cuando los listados som más largos que el espacio en pantalla
            
 # ------------------------------ Funciones globales ----------------------
@@ -344,6 +323,19 @@ def BotonPrimeroM           ():
 def BotonPrimeroL           ():
     # Colocamos el foco en la primera label de FrameRellena
     VIEW0001.focus()             
+def BotonPrimeroQ11         ():
+    # Colocamos el foco en la primera label de FrameRellena
+    LRR11.focus()             
+def BotonPrimeroQ12         ():
+    # Colocamos el foco en la primera label de FrameRellena
+    LRR12.focus()             
+def BotonPrimeroQ21         ():
+    # Colocamos el foco en la primera label de FrameRellena
+    LRR21.focus()             
+def BotonPrimeroQ22         ():
+    # Colocamos el foco en la primera label de FrameRellena
+    LRR22.focus()             
+
 def LimpiaElegibles         ():
     
     for i in range(1,24):
@@ -3991,7 +3983,8 @@ def MenuInicial                             ():
     
     global usuarioNivel
     global avisoint
-    
+    raiz.bind("<Control-q>", lambda event: regresaSinNada()) 
+    raiz.bind("<Control-Q>", lambda event: regresaSinNada())    
     # Si el valor de nivelUsuario es mayor que 0...
     if int(usuarioNivel) != 0 and avisoint == True:  
         # si diaGlobal tiene 1 dígito, le añadimos un 0 delante
@@ -4087,6 +4080,8 @@ def menuRegistros                               ():
     # Si aquí se pulsan las teclas CTRL + D no pasa nada
     raiz.bind("<Control-d>", lambda event: regresaSinNada())
     raiz.bind("<Control-D>", lambda event: regresaSinNada())
+    raiz.bind("<Control-q>", lambda event: regresaSinNada()) 
+    raiz.bind("<Control-Q>", lambda event: regresaSinNada())    
     
     if  nomUsuario.cget("text") == "":
 
@@ -4287,7 +4282,9 @@ def menuRegistrosIntroducir                         ():
     LRR1.config(text = idCorrecto)            
     LR2.config(text = "DESCRIPCIÓ:")
     LRR21.grid(row=1, column=1)  
-    LRR21['values'] = (descripciones)  
+    LRR21['values'] = (descripciones)
+    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ21())                
+    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ21())          
     LR3.config(text = "ORIGEN:")  
     LRR31.grid(row=2, column=1)
     LRR31['values'] = (origenes)  
@@ -4328,6 +4325,8 @@ def menuRegistrosConsultar                          ():
 
     LR1.config(text = "DIA:")
     LRR12.grid(row=0, column=1)
+    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ12())                
+    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ12())       
     LR2.config(text = "MES:")
     LRR22.grid(row=1, column=1)
     LR3.config(text = "ANY:")  
@@ -4379,7 +4378,8 @@ def menuRegistroCorregir                            ():
     
     LR1.config(text = "ID:")
     LRR12.grid(row=0, column=1)
-    
+    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ12())                
+    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ12())      
     Boton4activado(registroCorrigeUno)
     LRR12.focus() 
 def menuRegistroEliminar                            ():
@@ -4392,7 +4392,8 @@ def menuRegistroEliminar                            ():
     
     LR1.config(text = "ID:")
     LRR12.grid(row=0, column=1)
-    
+    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ12())                
+    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ12())      
     Boton4activado(registroBorraUno)
     LRR12.focus()       
 
@@ -4405,6 +4406,8 @@ def menuVentas                                  ():
     global usuarioNivel
     if int(usuarioNivel) == 5:
         return
+    raiz.bind("<Control-q>", lambda event: regresaSinNada())                
+    raiz.bind("<Control-Q>", lambda event: regresaSinNada())    
     
     LimpiaLabelsRellena()
     textMenu.config(text = "MENU VENDES")   
@@ -4420,6 +4423,8 @@ def menuVentasIntroducir                            ():
     LRR1.grid(row=0, column=1)  
     LR2.config(text = "CUANTITAT:")
     LRR22.grid(row=1, column=1)  
+    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ22())                
+    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ22())      
     LR3.config(text = "PRODUCTE:")  
     LRR31.grid(row=2, column=1) 
     LRR31['values'] = (productos)  
@@ -4444,6 +4449,8 @@ def menuVentasConsultar                             ():
 
     LR1.config(text = "inici DIA:")
     LRR12.grid(row=0, column=1)
+    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ12())                
+    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ12())          
     LR2.config(text = "MES:")
     LRR22.grid(row=1, column=1)
     LR3.config(text = "ANY:")  
@@ -4473,6 +4480,8 @@ def menuVentasCorregir                              ():
     
     LR1.config(text = "ID:")
     LRR12.grid(row=0, column=1)
+    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ12())                
+    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ12())      
     
     BB4.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 10)
     cambiaPasaEncima(BB4,"green","#27779d")     
@@ -4484,6 +4493,8 @@ def menuVentasEliminar                              ():
     
     LR1.config(text = "ID:")
     LRR12.grid(row=0, column=1)
+    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ12())                
+    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ12())      
     
     BB4.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 10)
     cambiaPasaEncima(BB4,"green","#27779d")     
@@ -4494,6 +4505,8 @@ def menuTablas                                  ():
     # Si aquí se pulsan las teclas CTRL + D no pasa nada
     raiz.bind("<Control-d>", lambda event: regresaSinNada())
     raiz.bind("<Control-D>", lambda event: regresaSinNada())
+    raiz.bind("<Control-q>", lambda event: regresaSinNada())                
+    raiz.bind("<Control-Q>", lambda event: regresaSinNada())    
     
     if  nomUsuario.cget("text") == "":
 
@@ -4724,6 +4737,8 @@ def menuTablasPax                                   ():
     # Datos a rellenar
     LR1.config(text = "ANY:")
     LRR12.grid(row=0, column=1)  
+    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ12())                
+    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ12())      
     LR2.config(text = "MES:")  
     LRR22.grid(row=1, column=1)     
 
@@ -5043,6 +5058,8 @@ def menuTablasVGrupo                                ():
     # Datos a rellenar
     LR1.config(text = "desde DIA:")
     LRR12.grid(row=0, column=1)  
+    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ12())                
+    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ12())      
     LR2.config(text = "MES:")
     LRR22.grid(row=1, column=1)  
     LR3.config(text = "ANY:")
@@ -5337,6 +5354,8 @@ def menuTablasVProvincia                            ():
     # Datos a rellenar
     LR1.config(text = "desde DIA:")
     LRR12.grid(row=0, column=1)  
+    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ12())                
+    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ12())      
     LR2.config(text = "MES:")
     LRR22.grid(row=1, column=1)  
     LR3.config(text = "ANY:")
@@ -5621,6 +5640,8 @@ def menuTablasVComarca                              ():
     # Datos a rellenar
     LR1.config(text = "desde DIA:")
     LRR12.grid(row=0, column=1)  
+    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ12())                
+    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ12())      
     LR2.config(text = "MES:")
     LRR22.grid(row=1, column=1)  
     LR3.config(text = "ANY:")
@@ -5875,6 +5896,8 @@ def menuTablasVPerfil                               ():
     # Datos a rellenar
     LR1.config(text = "desde DIA:")
     LRR12.grid(row=0, column=1)  
+    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ12())                
+    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ12())      
     LR2.config(text = "MES:")
     LRR22.grid(row=1, column=1)  
     LR3.config(text = "ANY:")
@@ -6129,6 +6152,8 @@ def menuTablasVFuente                               ():
     # Datos a rellenar
     LR1.config(text = "desde DIA:")
     LRR12.grid(row=0, column=1)  
+    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ12())                
+    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ12())      
     LR2.config(text = "MES:")
     LRR22.grid(row=1, column=1)  
     LR3.config(text = "ANY:")
@@ -6383,6 +6408,8 @@ def menuTablasVHora                                 ():
     # Datos a rellenar
     LR1.config(text = "desde DIA:")
     LRR12.grid(row=0, column=1)  
+    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ12())                
+    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ12())      
     LR2.config(text = "MES:")
     LRR22.grid(row=1, column=1)  
     LR3.config(text = "ANY:")
@@ -6653,6 +6680,8 @@ def menuTablasVDia                                  ():
     # Datos a rellenar
     LR1.config(text = "desde DIA:")
     LRR12.grid(row=0, column=1)  
+    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ12())                
+    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ12())      
     LR2.config(text = "MES:")
     LRR22.grid(row=1, column=1)  
     LR3.config(text = "ANY:")
@@ -6911,6 +6940,8 @@ def menuTablasVOrigen                               ():
     # Datos a rellenar
     LR1.config(text = "desde DIA:")
     LRR12.grid(row=0, column=1)  
+    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ12())                
+    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ12())      
     LR2.config(text = "MES:")
     LRR22.grid(row=1, column=1)  
     LR3.config(text = "ANY:")
@@ -6942,6 +6973,8 @@ def menuArqueos                                 ():
     global usuarioNivel
     if int(usuarioNivel) >= 4:
         return
+    raiz.bind("<Control-q>", lambda event: regresaSinNada())                
+    raiz.bind("<Control-Q>", lambda event: regresaSinNada())    
     LimpiaLabelsRellena()
     textMenu.config(text = "MENU ARQUEIJOS")   
     menusBotones("Tornar",MenuInicial,"Arqueig diari",menuArqueoDiario,"Arqueig global",regresaSinNada,"Resum econòmic parcial")         
@@ -6970,6 +7003,8 @@ def menuStocks                                  ():
     global usuarioNivel
     if int(usuarioNivel) >= 3:
         return
+    raiz.bind("<Control-q>", lambda event: regresaSinNada())                
+    raiz.bind("<Control-Q>", lambda event: regresaSinNada())    
       
     LimpiaLabelsRellena()
     textMenu.config(text = "MENU STOCKS")   
@@ -7022,6 +7057,8 @@ def menuIncidencias                             ():
     # Si aquí se pulsan las teclas CTRL + D no pasa nada
     raiz.bind("<Control-d>", lambda event: regresaSinNada())
     raiz.bind("<Control-D>", lambda event: regresaSinNada())
+    raiz.bind("<Control-q>", lambda event: regresaSinNada())                
+    raiz.bind("<Control-Q>", lambda event: regresaSinNada())    
     
     if  nomUsuario.cget("text") == "":
 
@@ -7411,6 +7448,8 @@ def menuIncidenciasIntroducir                       ():
     LRR1.config(text = idCorrecto)            
     LR2.config(text = "DIA/MES/ANY:")
     LRR22.grid(row=1, column=1) 
+    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ22())                
+    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ22())      
     LR3.config(text = "CLIENT:")
     LRR31.grid(row=2, column=1)
     LRR31['values'] = (clientes)
@@ -7486,7 +7525,8 @@ def menuIncidenciasConsultar                        ():
     LRR11['values'] = (clientes)
     # Permite introducir cualquier dato en el campo
     LRR11.config(state = "readandwrite")
-     
+    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ11())                
+    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ11())           
     LR2.config(text = "esdeveniment DIA:")
     LRR22.grid(row=1, column=1)
     LR3.config(text = "MES:")
@@ -7561,6 +7601,8 @@ def menuIncidenciasCorregir                         ():
 
     LR1.config(text = "ID:")
     LRR12.grid(row=0, column=1)
+    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ12())                
+    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ12())           
         
     Boton4activado(incidenciasCorrigeUno)
     LRR12.focus()     
@@ -7574,6 +7616,8 @@ def menuIncidenciasEliminar                         ():
 
     LR1.config(text = "ID:")
     LRR12.grid(row=0, column=1)
+    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ12())                
+    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ12())           
         
     Boton4activado(incidenciasBorraUno)
     LRR12.focus()
@@ -7583,6 +7627,8 @@ def menuIncidenciasFacturaProforma               ():
     global usuarioNivel
     if int(usuarioNivel) >= 3:
         return
+    raiz.bind("<Control-q>", lambda event: regresaSinNada())                
+    raiz.bind("<Control-Q>", lambda event: regresaSinNada())    
     
     global VieneDeIncGrups
     VieneDeIncGrups = "None"
@@ -7613,6 +7659,8 @@ def menuIncidenciasFacturaProformaIntroducirProducir    ():
 
     LR1.config(text = "ID Incidència/grup:")
     LRR12.grid(row=0, column=1)
+    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ12())                
+    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ12())           
         
     Boton4activado(ProformaProduceUno)
     LRR12.focus()
@@ -7623,6 +7671,8 @@ def menuIncidenciasFacturaProformaIntroducirClonar      ():
 
     LR1.config(text = "ID Proforma:")
     LRR12.grid(row=0, column=1)
+    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ12())                
+    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ12())           
         
     Boton4activado(ProformaClonaUno)
     LRR12.focus()
@@ -7927,6 +7977,8 @@ def menuIncidenciasFacturaProformaIntroducirCrear       ():
     LRR1.config(text = idCorrecto)            
     LR2.config(text = "PROFORMA:")
     LRR22.grid(row=1, column=1) 
+    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ22())                
+    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ22())           
     LR3.config(text = "CLIENT:")
     LRR31.grid(row=2, column=1)
     LRR31['values'] = (clientes)  
@@ -7984,6 +8036,8 @@ def menuIncidenciasFacturaProformaConsultar         ():
 
     LR1.config(text = "PROFORMA:")
     LRR12.grid(row=0, column=1)
+    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ12())                
+    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ12())           
     LR2.config(text = "CLIENT:")
     LRR21.grid(row=1, column=1)
     LRR21['values'] = (clientes)     
@@ -8020,6 +8074,8 @@ def menuIncidenciasFacturaProformaCorregir          ():
 
     LR1.config(text = "ID:")
     LRR12.grid(row=0, column=1)
+    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ12())                
+    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ12())           
         
     Boton4activado(ProformaCorrigeUno)
     LRR12.focus()   
@@ -8033,6 +8089,8 @@ def menuIncidenciasFacturaProformaEliminar          ():
 
     LR1.config(text = "ID:")
     LRR12.grid(row=0, column=1)
+    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ12())                
+    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ12())           
         
     Boton4activado(ProformaBorraUno)
     LRR12.focus() 
@@ -8188,6 +8246,8 @@ def menuIncidenciasBloqueosBloquear                 ():
             
     LR1.config(text = "DIA/MES/ANY:")
     LRR12.grid(row=0, column=1) 
+    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ12())                
+    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ12())           
     LR2.config(text = "HORA INICI:")  
     LRR21.grid(row=1, column=1)  
     LRR21['values'] = (horas)
@@ -8207,6 +8267,8 @@ def menuIncidenciasBloqueosDesbloquear              ():
 
     LR1.config(text = "DIA/MES/ANY:")
     LRR12.grid(row=0, column=1)
+    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ12())                
+    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ12())           
         
     Boton4activado(bloqueoBorraUno)
     query_todos('databases/basesDeDatosIncidencias.db',"SELECT *, oid FROM bd_bloqueos ORDER BY FECHA",8,"EstamosEnBloqueos","ID","DATA","DESDE","FINS","","","","","")
@@ -8217,6 +8279,8 @@ def menuIncidenciasBloqueosDesbloquear              ():
 def menuCalendarios                             ():
     
     return # Desactivado por el momento
+    raiz.bind("<Control-q>", lambda event: regresaSinNada())                
+    raiz.bind("<Control-Q>", lambda event: regresaSinNada())    
     
     if  nomUsuario.cget("text") == "":
 
@@ -8331,6 +8395,8 @@ def menuDatos                                   ():
     global usuarioNivel
     if int(usuarioNivel) >= 3:
         return  
+    raiz.bind("<Control-q>", lambda event: regresaSinNada())                
+    raiz.bind("<Control-Q>", lambda event: regresaSinNada())    
     LimpiaLabelsRellena()
     borra_datos()   
     textMenu.config(text = "MENU DADES")   
@@ -8341,6 +8407,8 @@ def MenuDatosProducto                               ():
     ajusta_espacios_info(10,22,7,52,13,13,10,1,1,1,1,1)
     global puntero
     puntero = 0
+    raiz.bind("<Control-q>", lambda event: regresaSinNada())                
+    raiz.bind("<Control-Q>", lambda event: regresaSinNada())    
 
     textMenu.config(text = "MENU PRODUCTE")   
     LimpiaLabelsRellena()
@@ -8476,6 +8544,8 @@ def MenuDatosProductoIntroducir                         ():
     LRR1.config(text = idCorrecto)            
     LR2.config(text = "PRODUCTE:")  
     LRR22.grid(row=1, column=1)
+    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ22())                
+    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ22())           
     LR3.config(text = "PREU REAL:")  
     LRR32.grid(row=2, column=1)
     LR4.config(text = "PREU ACTUAL:")  
@@ -8498,6 +8568,8 @@ def MenuDatosProductoConsultar                          ():
     LR1.config(text = "PRODUCTE:")
     LRR11.grid(row=0, column=1)             
     LRR11['values'] = (productos)
+    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ11())                
+    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ11())           
     LR2.config(text = "PREU REAL:")  
     LRR22.grid(row=1, column=1)
     LR3.config(text = "PREU ACTUAL:")  
@@ -8521,6 +8593,8 @@ def MenuDatosProductoCorregir                           ():
     
     LR1.config(text = "ID:")
     LRR12.grid(row=0, column=1)
+    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ12())                
+    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ12())           
     
     BB4.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 10,  command = productoCorrigeUno)
     cambiaPasaEncima(BB4,"green","#27779d")     
@@ -8535,6 +8609,8 @@ def menuDatosProductoEliminar                           ():
     
     LR1.config(text = "ID:")
     LRR12.grid(row=0, column=1)
+    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ12())                
+    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ12())           
     
     Boton4activado(productoBorraUno)
     LRR12.focus() 
@@ -8543,6 +8619,8 @@ def MenuDatosCliente                                ():
     ajusta_espacios_info(10,22,5,30,1,1,17,13,19,12,1,1)
     global puntero
     puntero = 0
+    raiz.bind("<Control-q>", lambda event: regresaSinNada())                
+    raiz.bind("<Control-Q>", lambda event: regresaSinNada())    
     
     textMenu.config(text = "MENU CLIENT")   
     LimpiaLabelsRellena()
@@ -8680,6 +8758,8 @@ def MenuDatosClienteIntroducir                          ():
     LRR1.config(text = idCorrecto)            
     LR2.config(text = "NOM:")  
     LRR22.grid(row=1, column=1)
+    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ22())                
+    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ22())           
     LR3.config(text = "ADREÇA:")  
     LRR32.grid(row=2, column=1)
     LR4.config(text = "C.P.:")  
@@ -8716,6 +8796,8 @@ def MenuDatosClienteConsultar                           ():
     LR1.config(text = "NOM:")  
     LRR11.grid(row=0, column=1)
     LRR11['values'] = (clientes)
+    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ11())                
+    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ11())           
     LR2.config(text = "TELÈFON:")  
     LRR22.grid(row=1,column=1)
     LR3.config(text = "E-MAIL:")  
@@ -8737,6 +8819,8 @@ def MenuDatosClienteCorregir                            ():
     
     LR1.config(text = "ID:")
     LRR12.grid(row=0, column=1)
+    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ11())                
+    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ11())           
     
     Boton4activado(clienteCorrigeUno)
     LRR12.focus()
@@ -8750,6 +8834,8 @@ def menuDatosClienteEliminar                            ():
     
     LR1.config(text = "ID:")
     LRR12.grid(row=0, column=1)
+    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ12())                
+    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ12())           
     
     Boton4activado(clienteBorraUno)
     LRR12.focus() 
@@ -8759,6 +8845,9 @@ def menuDatosUsuario                                ():
     global puntero
     puntero = 0
     global usuarioNivel
+    raiz.bind("<Control-q>", lambda event: regresaSinNada())                
+    raiz.bind("<Control-Q>", lambda event: regresaSinNada())    
+
     if int(usuarioNivel) >= 3:
         return
     
@@ -8840,6 +8929,8 @@ def menuDatosUsuarioIntroducir                          ():
     
     LR1.config(text = "NOM:")
     LRR12.grid(row=0, column=1)             
+    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ12())                
+    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ12())           
     LR2.config(text = "CLAU:")  
     LRR22.grid(row=1, column=1)
     LRR22.config(show="*")
@@ -8890,6 +8981,8 @@ def menuDatosUsuarioConsultar                           ():
     LR1.config(text = "NOM:")
     LRR11.grid(row=0, column=1)
     LRR11['values'] = (usuariosO)
+    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ11())                
+    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ11())           
     LR2.config(text = "NIVELL D'ACCÉS:")  
     LRR21.grid(row=1,column=1)
     LRR21['values'] = (["1","2","3","4","5"])
@@ -8920,6 +9013,8 @@ def menuDatosUsuarioCorregir                            ():
     
     LR1.config(text = "ID:")
     LRR12.grid(row=0, column=1)
+    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ12())                
+    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ12())           
     
     Boton4activado(usuariosCorrigeUno)
     LRR12.focus()   
@@ -8933,6 +9028,8 @@ def menuDatosUsuarioEliminar                            ():
 
     LR1.config(text = "ID:")
     LRR12.grid(row=0, column=1)
+    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ12())                
+    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ12())           
         
     Boton4activado(usuariosBorraUno)
     LRR12.focus()   
@@ -8955,6 +9052,8 @@ def menuDatosEmpresa                                ():
 
     LR1.config(text = "NOM:")
     LRR12.grid(row=0, column=1) 
+    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ12())                
+    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ12())           
     LR2.config(text = "ADREÇA 1:")  
     LRR22.grid(row=1, column=1)
     LR3.config(text = "ADREÇA 2:")  
@@ -8986,6 +9085,8 @@ def menuSeguridad                               ():
     global usuarioNivel
     if int(usuarioNivel) >= 2:
         return
+    raiz.bind("<Control-q>", lambda event: regresaSinNada())                
+    raiz.bind("<Control-Q>", lambda event: regresaSinNada())    
     LimpiaLabelsRellena()
     textMenu.config(text = "MENU SEGURETAT")   
     menusBotones("Tornar",MenuInicial,"Còpia de seguretat",menuSeguridadCopiaDeSeguridad,"Carregar",menuSeguridadCargar,"Fussionar",menuSeguridadFusionar,"Esborrar",menuSeguridadBorrar,"Netejar I/G",menuSeguridadLimpiarIncidenciasGrupos)
@@ -9020,7 +9121,7 @@ def cambioUsuario1          ():
     cambioUsuario()   
 #  ------------------------------- Frames ----------------------------------
 
-def frames(nombreFrame,fila,columna,expansioncolumnas,largo,alto,color):
+def frames(nombreFrame,fila,columna,expansioncolumnas,largo,alto,color):    # Función para crear frames
     
     nombreFrame.grid(row=fila, column=columna, columnspan=expansioncolumnas)
     nombreFrame.config(width=largo, height=alto)
@@ -9028,34 +9129,34 @@ def frames(nombreFrame,fila,columna,expansioncolumnas,largo,alto,color):
     nombreFrame.config(bd=5)
     nombreFrame.config(relief="groove")
 
-frameUsuario = Frame(raiz)
+frameUsuario = Frame(raiz)                      # Frame de usuario
 frames(frameUsuario,0,0,3,300,50,"#b7b493")
 frameUsuario.grid(padx=10, pady=10)
 
-frameFecha = Frame(raiz)
+frameFecha = Frame(raiz)                        # Frame de fecha
 frames(frameFecha,0,3,4,400,50,"#b7b493")
 frameFecha.grid(padx=10, pady=10)
 
-frameBotones = Frame(raiz)
+frameBotones = Frame(raiz)                      # Frame de botones
 frames(frameBotones,0,7,4,400,50,"#b7b493")
 frameBotones.grid(padx=10, pady=10)
 
-frameMenu = Frame(raiz)
+frameMenu = Frame(raiz)                         # Frame de menú  
 frames(frameMenu,1,0,2,200,500,"#b7b493")
 frameMenu.grid(padx=10, pady=10)
 
-frameRellena = Frame(raiz)
+frameRellena = Frame(raiz)                      # Frame de casillas a rellenar
 frames(frameRellena,1,2,3,300,500,"#b7b493")
 frameRellena.grid(padx=10, pady=10)
 
-frameLista = Frame(raiz)
+frameLista = Frame(raiz)                        # Frame de listas
 frames(frameLista,1,5,6,600,500,"#b7b493")
 frameLista.grid(padx=10, pady=10)
-frameLista._last_clicked = None                               # Para definir el atributo _last_clicked
+frameLista._last_clicked = None                 # Para definir el atributo _last_clicked
 
 # ------------------------------- Crea Listas -----------------------------------
 
-abreLasListas()
+abreLasListas()                                 # Abre las listas
 
 # ------------------------------- Crea Usuario ----------------------------------
 
