@@ -317,6 +317,11 @@ def FechaActualIncrustadaGru():
     LRR52.insert(0,mesGlobal)
     LRR62.insert(0,anyoGlobal)
 
+def ActivaBotonPyFocus      (valor,lineaQ):
+    valor.focus()
+        
+    raiz.bind("<Control-q>", lambda event:  lineaQ())                
+    raiz.bind("<Control-Q>", lambda event: lineaQ())        
 def BotonPrimeroM           ():
     # Colocamos el foco en la primera label de FrameMenu
     BM1.focus()
@@ -335,7 +340,11 @@ def BotonPrimeroQ21         ():
 def BotonPrimeroQ22         ():
     # Colocamos el foco en la primera label de FrameRellena
     LRR22.focus()             
-
+def BotonPrimeroQNada       ():
+    # Si pulsamos la tecla Q  no hace nada
+    raiz.bind("<Control-q>", lambda event: regresaSinNada())
+    raiz.bind("<Control-Q>", lambda event: regresaSinNada())
+    
 def LimpiaElegibles         ():
     
     for i in range(1,24):
@@ -726,7 +735,7 @@ def cargaUsuario            ():
 def regresaSinNada          ():
     
     return 
-def regresaSinNada1          (val):
+def regresaSinNada1         (val):
     
     return 
 def cambioUsuario           ():
@@ -883,6 +892,30 @@ def menusBotones            (texto11="",enlace11=regresaSinNada,
         BM0.config(text = " ",bg = "#b7b493",command = regresaSinNada,relief='flat')
         cambiaPasaEncima(BM0,"#b7b493","#b7b493")
 
+def OpcionesQuestionario    (*opciones):
+    
+    linea = 0
+    # Revisamos todas las opciones
+    for opcion in opciones:
+        opcion[1].config(text = opcion[2])
+        opcion[3].grid(row=linea,column=1)
+        
+        if opcion[0] == "1":    
+            opcion[3].config(text = opcion[4])
+        
+        elif opcion[0] == "X1":
+            opcion[3]['values'] = opcion[4]
+            try:
+                if opcion[5] != False:
+                    opcion[3].bind('<Key>', opcion[5])
+            except:
+                pass
+            try:
+                opcion[3].config(state = opcion[6])
+            except:
+                pass
+        
+        linea += 1
 def query_todos             (archivo,seleccion,column,variableTrue,*datosAlQuery):
     
 
@@ -3983,7 +4016,7 @@ def MenuInicial                             ():
     
     global usuarioNivel
     global avisoint
-    raiz.bind("<Control-q>", lambda event: regresaSinNada()) 
+    BotonPrimeroQNada() 
     raiz.bind("<Control-Q>", lambda event: regresaSinNada())    
     # Si el valor de nivelUsuario es mayor que 0...
     if int(usuarioNivel) != 0 and avisoint == True:  
@@ -4080,7 +4113,7 @@ def menuRegistros                               ():
     # Si aquí se pulsan las teclas CTRL + D no pasa nada
     raiz.bind("<Control-d>", lambda event: regresaSinNada())
     raiz.bind("<Control-D>", lambda event: regresaSinNada())
-    raiz.bind("<Control-q>", lambda event: regresaSinNada()) 
+    BotonPrimeroQNada() 
     raiz.bind("<Control-Q>", lambda event: regresaSinNada())    
     
     if  nomUsuario.cget("text") == "":
@@ -4277,29 +4310,13 @@ def menuRegistrosIntroducir                         ():
     menusBotones("Tornar",menuRegistros,"Introduir (R)")
     LimpiaLabelsRellena()
     
-    LR1.config(text = "ID:")
-    LRR1.grid(row=0, column=1)  
-    LRR1.config(text = idCorrecto)            
-    LR2.config(text = "DESCRIPCIÓ:")
-    LRR21.grid(row=1, column=1)  
-    LRR21['values'] = (descripciones)
-    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ21())                
-    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ21())          
-    LR3.config(text = "ORIGEN:")  
-    LRR31.grid(row=2, column=1)
-    LRR31['values'] = (origenes)  
-    LRR31.bind('<Key>', pulsaTeclaCombobox)                 # Para que se actualice el combobox cuando se pulsa una tecla   
-    LR4.config(text = "HORA:")  
-    LRR41.grid(row=3, column=1)  
-    LRR41['values'] = (horas)  
-    LR5.config(text = "PRODUCTE:")  
-    LRR51.grid(row=4, column=1)  
-    LRR51['values'] = (productosR)  
-    LR6.config(text = "FONT:")  
-    LRR61.grid(row=5, column=1)  
-    LRR61['values'] = (fuentes)  
-    LR7.config(text = "NOTES:")  
-    LRR73.grid(row=6, column=1)
+    OpcionesQuestionario(["1",LR1,"ID:",LRR1,idCorrecto],
+                         ["X1",LR2,"DESCRIPCIÓ:",LRR21,descripciones],
+                         ["X1",LR3,"ORIGEN:",LRR31,origenes,pulsaTeclaCombobox],
+                         ["X1",LR4,"HORA:",LRR41,horas],
+                         ["X1",LR5,"PRODUCTE:",LRR51,productosR],
+                         ["X1",LR6,"FONT:",LRR61,fuentes],
+                         ["X3",LR7,"NOTES:",LRR73,""])
 
     # Hacemos globales las variables que vamos a usar
     global vr1,vr2,vr3,vr4,vr5,vr6,vr7
@@ -4314,7 +4331,7 @@ def menuRegistrosIntroducir                         ():
         vr7 = False
     Boton4activado(menuRegistrosIntroducirIntroduce)
     query_todos('databases/basesDeDatosRegistros.db',"SELECT *, oid FROM bd_registros ORDER BY FECHA DESC, oid DESC",8,"EstamosEnRegistros","ID","","DATA","DESCRIPCIÓ","ORIGEN","HORA","PRODUCTE","FONT","")        
-    LRR21.focus() 
+    ActivaBotonPyFocus(LRR21,BotonPrimeroQ21) 
 def menuRegistrosConsultar                          ():
 
     global EstamosEnIntroducir
@@ -4323,37 +4340,17 @@ def menuRegistrosConsultar                          ():
     LimpiaLabelsRellena()    
     menusBotones("Tornar",menuRegistros,"",regresaSinNada,"Consultar")
 
-    LR1.config(text = "DIA:")
-    LRR12.grid(row=0, column=1)
-    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ12())                
-    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ12())       
-    LR2.config(text = "MES:")
-    LRR22.grid(row=1, column=1)
-    LR3.config(text = "ANY:")  
-    LRR32.grid(row=2, column=1)
-    LR4.config(text = "DESCRIPCIO:")  
-    LRR41.grid(row=3, column=1)
-    LRR41['values'] = (descripciones)      
-    LR5.config(text = "ORIGEN:")  
-    LRR51.grid(row=4, column=1)
-    LRR51.config(state = "readandwrite")    
-    LRR51['values'] = (origenes)      
-    LR6.config(text = "desde HORA:")  
-    LRR61.grid(row=5, column=1)
-    LRR61['values'] = (horas)
-    LR7.config(text = "fins HORA:")
-    LRR71.grid(row=6, column=1)
-    LRR71['values'] = (horas)  
-    LR8.config(text = "PRODUCTE:")  
-    LRR81.grid(row=7, column=1)
-    LRR81['values'] = (productosR)  
-    LR9.config(text = "FONT:")
-    LRR91.grid(row=8, column=1)
-    LRR91['values'] = (fuentes)  
-    LR10.config(text = "USUARI:")
-    LRR101.grid(row=9, column=1)
-    LRR101['values'] = (usuariosO)
-
+    OpcionesQuestionario(["X2",LR1,"DIA:",LRR12],
+                         ["X2",LR2,"MES:",LRR22],
+                         ["X2",LR3,"ANY:",LRR32],
+                         ["X1",LR4,"DESCRIPCIÓ:",LRR41,descripciones],
+                         ["X1",LR5,"ORIGEN:",LRR51,origenes,False,"readandwrite"],
+                         ["X1",LR6,"desde HORA:",LRR61,horas],
+                         ["X1",LR7,"fins a HORA:",LRR71,horas],
+                         ["X1",LR8,"PRODUCTE:",LRR81,productosR],
+                         ["X1",LR9,"FONT:",LRR91,fuentes],
+                         ["X1",LR10,"USUARI:",LRR101,usuariosO])
+    
     # Si aquí se pulsan las teclas CTRL + D se pone la fecha actual
     raiz.bind("<Control-d>", lambda event: FechaActualIncrustada())
     raiz.bind("<Control-D>", lambda event: FechaActualIncrustada())
@@ -4361,7 +4358,7 @@ def menuRegistrosConsultar                          ():
     Boton4activado(query_registros_busca0)
     Boton5activado(prequery_registros)
     Boton6activado(query_registros_busca)
-    LRR12.focus()      
+    ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
 def menuRegistroCorregir                            ():
 
     global EstamosEnIntroducir
@@ -4376,12 +4373,9 @@ def menuRegistroCorregir                            ():
     LimpiaLabelsRellena()
     menusBotones("Tornar",menuRegistros,"",regresaSinNada,"",regresaSinNada,"Mirar/Corregir")
     
-    LR1.config(text = "ID:")
-    LRR12.grid(row=0, column=1)
-    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ12())                
-    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ12())      
+    OpcionesQuestionario(["X2",LR1,"ID:",LRR12])
     Boton4activado(registroCorrigeUno)
-    LRR12.focus() 
+    ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
 def menuRegistroEliminar                            ():
 
     global EstamosEnIntroducir
@@ -4389,13 +4383,9 @@ def menuRegistroEliminar                            ():
         
     LimpiaLabelsRellena()
     menusBotones("Tornar",menuRegistros,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Eliminar")
-    
-    LR1.config(text = "ID:")
-    LRR12.grid(row=0, column=1)
-    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ12())                
-    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ12())      
+    OpcionesQuestionario(["X2",LR1,"ID:",LRR12])
     Boton4activado(registroBorraUno)
-    LRR12.focus()       
+    ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
 
 def menuVentas                                  ():
     
@@ -4406,7 +4396,7 @@ def menuVentas                                  ():
     global usuarioNivel
     if int(usuarioNivel) == 5:
         return
-    raiz.bind("<Control-q>", lambda event: regresaSinNada())                
+    BotonPrimeroQNada()                
     raiz.bind("<Control-Q>", lambda event: regresaSinNada())    
     
     LimpiaLabelsRellena()
@@ -4423,8 +4413,6 @@ def menuVentasIntroducir                            ():
     LRR1.grid(row=0, column=1)  
     LR2.config(text = "CUANTITAT:")
     LRR22.grid(row=1, column=1)  
-    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ22())                
-    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ22())      
     LR3.config(text = "PRODUCTE:")  
     LRR31.grid(row=2, column=1) 
     LRR31['values'] = (productos)  
@@ -4441,7 +4429,7 @@ def menuVentasIntroducir                            ():
     LRR73.grid(row=6, column=1)
     BB4.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 10)
     cambiaPasaEncima(BB4,"green","#27779d")    
-    LRR22.focus()
+    ActivaBotonPyFocus(LRR12,BotonPrimeroQ22)
 def menuVentasConsultar                             ():
     
     LimpiaLabelsRellena()    
@@ -4449,8 +4437,6 @@ def menuVentasConsultar                             ():
 
     LR1.config(text = "inici DIA:")
     LRR12.grid(row=0, column=1)
-    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ12())                
-    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ12())          
     LR2.config(text = "MES:")
     LRR22.grid(row=1, column=1)
     LR3.config(text = "ANY:")  
@@ -4472,7 +4458,7 @@ def menuVentasConsultar                             ():
 
     BB4.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 10)
     cambiaPasaEncima(BB4,"green","#27779d")    
-    LRR12.focus()    
+    ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
 def menuVentasCorregir                              ():
 
     LimpiaLabelsRellena()
@@ -4480,12 +4466,10 @@ def menuVentasCorregir                              ():
     
     LR1.config(text = "ID:")
     LRR12.grid(row=0, column=1)
-    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ12())                
-    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ12())      
     
     BB4.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 10)
     cambiaPasaEncima(BB4,"green","#27779d")     
-    LRR12.focus()
+    ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
 def menuVentasEliminar                              ():
 
     LimpiaLabelsRellena()
@@ -4493,19 +4477,17 @@ def menuVentasEliminar                              ():
     
     LR1.config(text = "ID:")
     LRR12.grid(row=0, column=1)
-    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ12())                
-    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ12())      
     
     BB4.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 10)
     cambiaPasaEncima(BB4,"green","#27779d")     
-    LRR12.focus()       
+    ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
 
 def menuTablas                                  ():
 
     # Si aquí se pulsan las teclas CTRL + D no pasa nada
     raiz.bind("<Control-d>", lambda event: regresaSinNada())
     raiz.bind("<Control-D>", lambda event: regresaSinNada())
-    raiz.bind("<Control-q>", lambda event: regresaSinNada())                
+    BotonPrimeroQNada()                
     raiz.bind("<Control-Q>", lambda event: regresaSinNada())    
     
     if  nomUsuario.cget("text") == "":
@@ -4735,18 +4717,14 @@ def menuTablasPax                                   ():
     menusBotones("Tornar",preMenuTablas,"Pax")
 
     # Datos a rellenar
-    LR1.config(text = "ANY:")
-    LRR12.grid(row=0, column=1)  
-    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ12())                
-    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ12())      
-    LR2.config(text = "MES:")  
-    LRR22.grid(row=1, column=1)     
+    OpcionesQuestionario(["X2",LR1,"ANY:",LRR12],
+                         ["X2",LR2,"MES:",LRR22])
 
     # Si aquí se pulsan las teclas CTRL + D se pone la fecha actual
     raiz.bind("<Control-d>", lambda event: FechaActualIncrustadaPax())
     raiz.bind("<Control-D>", lambda event: FechaActualIncrustadaPax())
     # Foco en el año
-    LRR12.focus()
+    ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
 
     # Activa la tabla
     Boton4activado(menuTablasPaxMuestra)
@@ -5056,27 +5034,19 @@ def menuTablasVGrupo                                ():
     menusBotones("Tornar",preMenuTablas,"",regresaSinNada,"Visitants per zona")
 
     # Datos a rellenar
-    LR1.config(text = "desde DIA:")
-    LRR12.grid(row=0, column=1)  
-    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ12())                
-    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ12())      
-    LR2.config(text = "MES:")
-    LRR22.grid(row=1, column=1)  
-    LR3.config(text = "ANY:")
-    LRR32.grid(row=2, column=1)  
-    LR4.config(text = "fins DIA:")
-    LRR42.grid(row=3, column=1)  
-    LR5.config(text = "MES:")
-    LRR52.grid(row=4, column=1)  
-    LR6.config(text = "ANY:")
-    LRR62.grid(row=5, column=1)  
-
+    OpcionesQuestionario(["X2",LR1,"desde DIA:",LRR12],
+                         ["X2",LR2,"MES:",LRR22],
+                         ["X2",LR3,"ANY:",LRR32],
+                         ["X2",LR4,"fins DIA:",LRR42],
+                         ["X2",LR5,"MES:",LRR52],
+                         ["X2",LR6,"ANY:",LRR62])
+ 
     # Si aquí se pulsan las teclas CTRL + D se pone la fecha actual
     raiz.bind("<Control-d>", lambda event: FechaActualIncrustadaGru())
     raiz.bind("<Control-D>", lambda event: FechaActualIncrustadaGru())
     
     # Foco en el año
-    LRR12.focus()
+    ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
 
     # Activa la tabla
     Boton4activado(menuTablasVGrupoMuestra)
@@ -5352,27 +5322,19 @@ def menuTablasVProvincia                            ():
     menusBotones("Tornar",preMenuTablas,"",regresaSinNada,"",regresaSinNada,"Visitants per províncies")
 
     # Datos a rellenar
-    LR1.config(text = "desde DIA:")
-    LRR12.grid(row=0, column=1)  
-    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ12())                
-    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ12())      
-    LR2.config(text = "MES:")
-    LRR22.grid(row=1, column=1)  
-    LR3.config(text = "ANY:")
-    LRR32.grid(row=2, column=1)  
-    LR4.config(text = "fins DIA:")
-    LRR42.grid(row=3, column=1)  
-    LR5.config(text = "MES:")
-    LRR52.grid(row=4, column=1)  
-    LR6.config(text = "ANY:")
-    LRR62.grid(row=5, column=1)  
+    OpcionesQuestionario(["X2",LR1,"desde DIA:",LRR12],
+                         ["X2",LR2,"MES:",LRR22],
+                         ["X2",LR3,"ANY:",LRR32],
+                         ["X2",LR4,"fins DIA:",LRR42],
+                         ["X2",LR5,"MES:",LRR52],
+                         ["X2",LR6,"ANY:",LRR62])
 
     # Si aquí se pulsan las teclas CTRL + D se pone la fecha actual
     raiz.bind("<Control-d>", lambda event: FechaActualIncrustadaGru())
     raiz.bind("<Control-D>", lambda event: FechaActualIncrustadaGru())
     
     # Foco en el año
-    LRR12.focus()
+    ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
 
     # Activa la tabla
     Boton4activado(menuTablasVProvinciasMuestra)
@@ -5638,27 +5600,19 @@ def menuTablasVComarca                              ():
     menusBotones("Tornar",preMenuTablas,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Visitants per comarca")
 
     # Datos a rellenar
-    LR1.config(text = "desde DIA:")
-    LRR12.grid(row=0, column=1)  
-    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ12())                
-    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ12())      
-    LR2.config(text = "MES:")
-    LRR22.grid(row=1, column=1)  
-    LR3.config(text = "ANY:")
-    LRR32.grid(row=2, column=1)  
-    LR4.config(text = "fins DIA:")
-    LRR42.grid(row=3, column=1)  
-    LR5.config(text = "MES:")
-    LRR52.grid(row=4, column=1)  
-    LR6.config(text = "ANY:")
-    LRR62.grid(row=5, column=1)  
+    OpcionesQuestionario(["X2",LR1,"desde DIA:",LRR12],
+                         ["X2",LR2,"MES:",LRR22],
+                         ["X2",LR3,"ANY:",LRR32],
+                         ["X2",LR4,"fins DIA:",LRR42],
+                         ["X2",LR5,"MES:",LRR52],
+                         ["X2",LR6,"ANY:",LRR62])
 
     # Si aquí se pulsan las teclas CTRL + D se pone la fecha actual
     raiz.bind("<Control-d>", lambda event: FechaActualIncrustadaGru())
     raiz.bind("<Control-D>", lambda event: FechaActualIncrustadaGru())
     
     # Foco en el año
-    LRR12.focus()
+    ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
 
     # Activa la tabla
     Boton4activado(menuTablasVComarcasMuestra)
@@ -5894,27 +5848,19 @@ def menuTablasVPerfil                               ():
     menusBotones("Tornar",preMenuTablas,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Visitants per perfil")
 
     # Datos a rellenar
-    LR1.config(text = "desde DIA:")
-    LRR12.grid(row=0, column=1)  
-    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ12())                
-    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ12())      
-    LR2.config(text = "MES:")
-    LRR22.grid(row=1, column=1)  
-    LR3.config(text = "ANY:")
-    LRR32.grid(row=2, column=1)  
-    LR4.config(text = "fins DIA:")
-    LRR42.grid(row=3, column=1)  
-    LR5.config(text = "MES:")
-    LRR52.grid(row=4, column=1)  
-    LR6.config(text = "ANY:")
-    LRR62.grid(row=5, column=1)  
+    OpcionesQuestionario(["X2",LR1,"desde DIA:",LRR12],
+                         ["X2",LR2,"MES:",LRR22],
+                         ["X2",LR3,"ANY:",LRR32],
+                         ["X2",LR4,"fins DIA:",LRR42],
+                         ["X2",LR5,"MES:",LRR52],
+                         ["X2",LR6,"ANY:",LRR62])
 
     # Si aquí se pulsan las teclas CTRL + D se pone la fecha actual
     raiz.bind("<Control-d>", lambda event: FechaActualIncrustadaGru())
     raiz.bind("<Control-D>", lambda event: FechaActualIncrustadaGru())
     
     # Foco en el año
-    LRR12.focus()
+    ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
 
     # Activa la tabla
     Boton4activado(menuTablasVPerfilesMuestra)
@@ -6150,27 +6096,19 @@ def menuTablasVFuente                               ():
     menusBotones("Tornar",preMenuTablas,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Visitants per font")
 
     # Datos a rellenar
-    LR1.config(text = "desde DIA:")
-    LRR12.grid(row=0, column=1)  
-    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ12())                
-    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ12())      
-    LR2.config(text = "MES:")
-    LRR22.grid(row=1, column=1)  
-    LR3.config(text = "ANY:")
-    LRR32.grid(row=2, column=1)  
-    LR4.config(text = "fins DIA:")
-    LRR42.grid(row=3, column=1)  
-    LR5.config(text = "MES:")
-    LRR52.grid(row=4, column=1)  
-    LR6.config(text = "ANY:")
-    LRR62.grid(row=5, column=1)  
+    OpcionesQuestionario(["X2",LR1,"desde DIA:",LRR12],
+                         ["X2",LR2,"MES:",LRR22],
+                         ["X2",LR3,"ANY:",LRR32],
+                         ["X2",LR4,"fins DIA:",LRR42],
+                         ["X2",LR5,"MES:",LRR52],
+                         ["X2",LR6,"ANY:",LRR62])
 
     # Si aquí se pulsan las teclas CTRL + D se pone la fecha actual
     raiz.bind("<Control-d>", lambda event: FechaActualIncrustadaGru())
     raiz.bind("<Control-D>", lambda event: FechaActualIncrustadaGru())
     
     # Foco en el año
-    LRR12.focus()
+    ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
 
     # Activa la tabla
     Boton4activado(menuTablasVFuentesMuestra)
@@ -6406,27 +6344,19 @@ def menuTablasVHora                                 ():
     menusBotones("Tornar",preMenuTablas,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Visitants per hora")
 
     # Datos a rellenar
-    LR1.config(text = "desde DIA:")
-    LRR12.grid(row=0, column=1)  
-    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ12())                
-    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ12())      
-    LR2.config(text = "MES:")
-    LRR22.grid(row=1, column=1)  
-    LR3.config(text = "ANY:")
-    LRR32.grid(row=2, column=1)  
-    LR4.config(text = "fins DIA:")
-    LRR42.grid(row=3, column=1)  
-    LR5.config(text = "MES:")
-    LRR52.grid(row=4, column=1)  
-    LR6.config(text = "ANY:")
-    LRR62.grid(row=5, column=1)  
+    OpcionesQuestionario(["X2",LR1,"desde DIA:",LRR12],
+                         ["X2",LR2,"MES:",LRR22],
+                         ["X2",LR3,"ANY:",LRR32],
+                         ["X2",LR4,"fins DIA:",LRR42],
+                         ["X2",LR5,"MES:",LRR52],
+                         ["X2",LR6,"ANY:",LRR62])
 
     # Si aquí se pulsan las teclas CTRL + D se pone la fecha actual
     raiz.bind("<Control-d>", lambda event: FechaActualIncrustadaGru())
     raiz.bind("<Control-D>", lambda event: FechaActualIncrustadaGru())
     
     # Foco en el año
-    LRR12.focus()
+    ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
 
     # Activa la tabla
     Boton4activado(menuTablasVHorasMuestra)
@@ -6678,27 +6608,19 @@ def menuTablasVDia                                  ():
     menusBotones("Tornar",preMenuTablas,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Visitants per dia")
 
     # Datos a rellenar
-    LR1.config(text = "desde DIA:")
-    LRR12.grid(row=0, column=1)  
-    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ12())                
-    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ12())      
-    LR2.config(text = "MES:")
-    LRR22.grid(row=1, column=1)  
-    LR3.config(text = "ANY:")
-    LRR32.grid(row=2, column=1)  
-    LR4.config(text = "fins DIA:")
-    LRR42.grid(row=3, column=1)  
-    LR5.config(text = "MES:")
-    LRR52.grid(row=4, column=1)  
-    LR6.config(text = "ANY:")
-    LRR62.grid(row=5, column=1)  
+    OpcionesQuestionario(["X2",LR1,"desde DIA:",LRR12],
+                         ["X2",LR2,"MES:",LRR22],
+                         ["X2",LR3,"ANY:",LRR32],
+                         ["X2",LR4,"fins DIA:",LRR42],
+                         ["X2",LR5,"MES:",LRR52],
+                         ["X2",LR6,"ANY:",LRR62])
 
     # Si aquí se pulsan las teclas CTRL + D se pone la fecha actual
     raiz.bind("<Control-d>", lambda event: FechaActualIncrustadaGru())
     raiz.bind("<Control-D>", lambda event: FechaActualIncrustadaGru())
     
     # Foco en el año
-    LRR12.focus()
+    ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
 
     # Activa la tabla
     Boton4activado(menuTablasVDiasMuestra)
@@ -6938,27 +6860,19 @@ def menuTablasVOrigen                               ():
     menusBotones("Tornar",preMenuTablas,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Visitants per origen")
 
     # Datos a rellenar
-    LR1.config(text = "desde DIA:")
-    LRR12.grid(row=0, column=1)  
-    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ12())                
-    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ12())      
-    LR2.config(text = "MES:")
-    LRR22.grid(row=1, column=1)  
-    LR3.config(text = "ANY:")
-    LRR32.grid(row=2, column=1)  
-    LR4.config(text = "fins DIA:")
-    LRR42.grid(row=3, column=1)  
-    LR5.config(text = "MES:")
-    LRR52.grid(row=4, column=1)  
-    LR6.config(text = "ANY:")
-    LRR62.grid(row=5, column=1)  
+    OpcionesQuestionario(["X2",LR1,"desde DIA:",LRR12],
+                         ["X2",LR2,"MES:",LRR22],
+                         ["X2",LR3,"ANY:",LRR32],
+                         ["X2",LR4,"fins DIA:",LRR42],
+                         ["X2",LR5,"MES:",LRR52],
+                         ["X2",LR6,"ANY:",LRR62])
 
     # Si aquí se pulsan las teclas CTRL + D se pone la fecha actual
     raiz.bind("<Control-d>", lambda event: FechaActualIncrustadaGru())
     raiz.bind("<Control-D>", lambda event: FechaActualIncrustadaGru())
     
     # Foco en el año
-    LRR12.focus()
+    ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
 
     # Activa la tabla
     Boton4activado(menuTablasVOrigenesMuestra)
@@ -6973,7 +6887,7 @@ def menuArqueos                                 ():
     global usuarioNivel
     if int(usuarioNivel) >= 4:
         return
-    raiz.bind("<Control-q>", lambda event: regresaSinNada())                
+    BotonPrimeroQNada()                
     raiz.bind("<Control-Q>", lambda event: regresaSinNada())    
     LimpiaLabelsRellena()
     textMenu.config(text = "MENU ARQUEIJOS")   
@@ -7003,7 +6917,7 @@ def menuStocks                                  ():
     global usuarioNivel
     if int(usuarioNivel) >= 3:
         return
-    raiz.bind("<Control-q>", lambda event: regresaSinNada())                
+    BotonPrimeroQNada()                
     raiz.bind("<Control-Q>", lambda event: regresaSinNada())    
       
     LimpiaLabelsRellena()
@@ -7057,7 +6971,7 @@ def menuIncidencias                             ():
     # Si aquí se pulsan las teclas CTRL + D no pasa nada
     raiz.bind("<Control-d>", lambda event: regresaSinNada())
     raiz.bind("<Control-D>", lambda event: regresaSinNada())
-    raiz.bind("<Control-q>", lambda event: regresaSinNada())                
+    BotonPrimeroQNada()                
     raiz.bind("<Control-Q>", lambda event: regresaSinNada())    
     
     if  nomUsuario.cget("text") == "":
@@ -7443,61 +7357,28 @@ def menuIncidenciasIntroducir                       ():
     LimpiaLabelsRellena()
     menusBotones("Tornar",menuIncidencias,"Introduir (I)") 
     
-    LR1.config(text = "ID:")
-    LRR1.grid(row=0, column=1)  
-    LRR1.config(text = idCorrecto)            
-    LR2.config(text = "DIA/MES/ANY:")
-    LRR22.grid(row=1, column=1) 
-    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ22())                
-    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ22())      
-    LR3.config(text = "CLIENT:")
-    LRR31.grid(row=2, column=1)
-    LRR31['values'] = (clientes)
-    LRR31.config(state = "readandwrite")
-    LRR31.bind('<Key>', regresaSinNada1 )                 # Para que no se actualice el combobx al escribir
-    LR4.config(text = "TELF. EXTRA:")
-    LRR42.grid(row=3, column=1)
-    LR5.config(text = "MAIL EXTRA:")
-    LRR52.grid(row=4, column=1)
-    LR6.config(text = "HORA:")
-    LRR61.grid(row=5, column=1)
-    LRR61['values'] = (horas)  
-    LR7.config(text = "PAX:")
-    LRR72.grid(row=6, column=1)
-    LR8.config(text = "PREU:")
-    LRR82.grid(row=7, column=1)
-    LR9.config(text = "TIPUS:")
-    LRR92.grid(row=8, column=1)
-    LR10.config(text = "PAX:")
-    LRR102.grid(row=9, column=1)
-    LR11.config(text = "PREU:")
-    LRR112.grid(row=10, column=1)
-    LR12.config(text = "TIPUS:")
-    LRR122.grid(row=11, column=1)
-    LR13.config(text = "PRODUCTE:")
-    LRR131.grid(row=12, column=1)
-    LRR131['values'] = (productosR)  
-    LR14.config(text = "IDIOMA:")
-    LRR141.grid(row=13, column=1) 
-    LRR141['values'] = (idiomas)  
-    LR15.config(text = "CONTACTE:")
-    LRR152.grid(row=14, column=1)
-    LR16.config(text = "AGENDAT:")
-    LRR161.grid(row=15, column=1) 
-    LRR161['values'] = (["Si","No"])
-    LR17.config(text = "revis DIA/MES/ANY:")
-    LRR172.grid(row=16, column=1)
-    LR18.config(text = "PAGAT:")
-    LRR181.grid(row=17, column=1) 
-    LRR181['values'] = (["Si","No"])
-    LR19.config(text = "FACTURA:")
-    LRR192.grid(row=18, column=1)
-    LR20.config(text = "ESTAT:")
-    LRR201.grid(row=19, column=1)
-    LRR201['values'] = (estados)
-    LR21.config(text = "NOTES:")
-    LRR213.grid(row=20, column=1)
-          
+    OpcionesQuestionario(["1",LR1,"ID:",LRR1,idCorrecto],
+                         ["X2",LR2,"DIA/MES/ANY:",LRR22],
+                         ["X1",LR3,"CLIENT:",LRR31,clientes,regresaSinNada1,"readandwrite"],
+                         ["X2",LR4,"TELF. EXTRA:",LRR42],
+                         ["X2",LR5,"MAIL EXTRA:",LRR52],
+                         ["X1",LR6,"HORA:",LRR61,horas],
+                         ["X2",LR7,"PAX:",LRR72],
+                         ["X2",LR8,"PREU:",LRR82],
+                         ["X2",LR9,"TIPUS:",LRR92],
+                         ["X2",LR10,"PAX:",LRR102],
+                         ["X2",LR11,"PREU:",LRR112],
+                         ["X2",LR12,"TIPUS:",LRR122],
+                         ["X1",LR13,"PRODUCTE:",LRR131,productosR],
+                         ["X1",LR14,"IDIOMA:",LRR141,idiomas],
+                         ["X2",LR15,"CONTACTE:",LRR152],
+                         ["X1",LR16,"AGENDAT:",LRR161,["Si","No"]],
+                         ["X2",LR17,"DATA REV.:",LRR172],
+                         ["X1",LR18,"PAGAT:",LRR181,["Si","No"]],
+                         ["X2",LR19,"FACTURA:",LRR192],
+                         ["X1",LR20,"ESTAT:",LRR201,estados],
+                         ["X3",LR21,"NOTES:",LRR213])
+   
     Boton4activado(menuIncidenciasIntroducirIntroduce)
     query_todos('databases/basesDeDatosIncidencias.db',"SELECT *, oid FROM bd_incidencias ORDER BY FECHA_CREA DESC, HORA DESC",8,"EstamosEnIncidencias","ID","DATA","HORA","PAX","PRODUCTE","IDIOMA","ESTAT","CLIENT","PAGAT")        
     
@@ -7509,7 +7390,7 @@ def menuIncidenciasIntroducir                       ():
         
     notasAmpliacion()
       
-    LRR22.focus()
+    ActivaBotonPyFocus(LRR22,BotonPrimeroQ22)
 def menuIncidenciasConsultar                        ():
 
     global EstamosEnIntroducir
@@ -7520,44 +7401,20 @@ def menuIncidenciasConsultar                        ():
     LimpiaLabelsRellena()
     menusBotones("Tornar",menuIncidencias,"",regresaSinNada,"Consultar (O)")    
 
-    LR1.config(text = "CLIENT:")
-    LRR11.grid(row=0, column=1)  
-    LRR11['values'] = (clientes)
-    # Permite introducir cualquier dato en el campo
-    LRR11.config(state = "readandwrite")
-    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ11())                
-    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ11())           
-    LR2.config(text = "esdeveniment DIA:")
-    LRR22.grid(row=1, column=1)
-    LR3.config(text = "MES:")
-    LRR32.grid(row=2, column=1)
-    LR4.config(text = "ANY:")
-    LRR42.grid(row=3, column=1)
-    LR5.config(text = "PRODUCTE:")
-    LRR51.grid(row=4, column=1) 
-    LRR51['values'] = (productosR)  
-    LR6.config(text = "IDIOMA:")
-    LRR61.grid(row=5, column=1) 
-    LRR61['values'] = (idiomas)
-    LR7.config(text = "AGENDAT:")
-    LRR71.grid(row=6, column=1) 
-    LRR71['values'] = (["Si","No"])
-    LR8.config(text = "revisió DIA:")
-    LRR82.grid(row=7, column=1)
-    LR9.config(text = "MES:")
-    LRR92.grid(row=8, column=1)
-    LR10.config(text = "ANY:")
-    LRR102.grid(row=9, column=1)
-    LR11.config(text = "FACTURA:")
-    LRR112.grid(row=10, column=1)
-    LR12.config(text = "ESTAT:")
-    LRR121.grid(row=11, column=1) 
-    LRR121['values'] = (estados)
-    LR13.config(text = "PAGAT:")
-    LRR131.grid(row=12, column=1) 
-    LRR131['values'] = (["Si","No"])
-    LR14.config(text = "MAIL:")
-    LRR142.grid(row=13, column=1)
+    OpcionesQuestionario(["X1",LR1,"CLIENT:",LRR11,clientes,regresaSinNada1,"readandwrite"],
+                         ["X2",LR2,"esdeveniment DIA:",LRR22],
+                         ["X2",LR3,"MES:",LRR32],
+                         ["X2",LR4,"ANY:",LRR42],
+                         ["X1",LR5,"PRODUCTE:",LRR51,productosR],
+                         ["X1",LR6,"IDIOMA:",LRR61,idiomas],
+                         ["X1",LR7,"AGENDAT:",LRR71,["Si","No"]],
+                         ["X2",LR8,"revisió DIA:",LRR82],
+                         ["X2",LR9,"MES:",LRR92],
+                         ["X2",LR10,"ANY:",LRR102],
+                         ["X2",LR11,"FACTURA:",LRR112],
+                         ["X1",LR12,"ESTAT:",LRR121,estados],
+                         ["X1",LR13,"PAGAT:",LRR131,["Si","No"]],
+                         ["X2",LR14,"MAIL:",LRR142])
 
     # Hacemos globales las variables que vamos a usar
     global vr1,vr2,vr3,vr4,vr5,vr6,vr7,vr8,vr9,vr10,vr11,vr12,vr13,vr14
@@ -7584,7 +7441,7 @@ def menuIncidenciasConsultar                        ():
     Boton4activado(query_incidencias_busca0)
     Boton5activado(prequery_incidencias)
     Boton6activado(query_incidencias_busca)
-    LRR11.focus()     
+    ActivaBotonPyFocus(LRR11,BotonPrimeroQ11)
 def menuIncidenciasCorregir                         ():
 
     global EstamosEnIntroducir
@@ -7599,13 +7456,10 @@ def menuIncidenciasCorregir                         ():
     LimpiaLabelsRellena()
     menusBotones("Tornar",menuIncidencias,"",regresaSinNada,"",regresaSinNada,"Mirar/Corregir")
 
-    LR1.config(text = "ID:")
-    LRR12.grid(row=0, column=1)
-    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ12())                
-    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ12())           
+    OpcionesQuestionario(["X2",LR1,"ID:",LRR12])
         
     Boton4activado(incidenciasCorrigeUno)
-    LRR12.focus()     
+    ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
 def menuIncidenciasEliminar                         ():
 
     global EstamosEnIntroducir
@@ -7614,20 +7468,17 @@ def menuIncidenciasEliminar                         ():
     LimpiaLabelsRellena()
     menusBotones("Tornar",menuIncidencias,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Eliminar")
 
-    LR1.config(text = "ID:")
-    LRR12.grid(row=0, column=1)
-    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ12())                
-    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ12())           
-        
+    OpcionesQuestionario(["X2",LR1,"ID:",LRR12])
+ 
     Boton4activado(incidenciasBorraUno)
-    LRR12.focus()
+    ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
      
 def menuIncidenciasFacturaProforma               ():
  
     global usuarioNivel
     if int(usuarioNivel) >= 3:
         return
-    raiz.bind("<Control-q>", lambda event: regresaSinNada())                
+    BotonPrimeroQNada()                
     raiz.bind("<Control-Q>", lambda event: regresaSinNada())    
     
     global VieneDeIncGrups
@@ -7659,11 +7510,9 @@ def menuIncidenciasFacturaProformaIntroducirProducir    ():
 
     LR1.config(text = "ID Incidència/grup:")
     LRR12.grid(row=0, column=1)
-    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ12())                
-    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ12())           
         
     Boton4activado(ProformaProduceUno)
-    LRR12.focus()
+    ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
 def menuIncidenciasFacturaProformaIntroducirClonar      ():
 
     LimpiaLabelsRellena()
@@ -7671,11 +7520,9 @@ def menuIncidenciasFacturaProformaIntroducirClonar      ():
 
     LR1.config(text = "ID Proforma:")
     LRR12.grid(row=0, column=1)
-    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ12())                
-    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ12())           
         
     Boton4activado(ProformaClonaUno)
-    LRR12.focus()
+    ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
 def menuIncidenciasFacturaProformaIntroducirCrear       ():
     
     global EstamosEnIntroducir
@@ -7972,47 +7819,26 @@ def menuIncidenciasFacturaProformaIntroducirCrear       ():
     LimpiaLabelsRellena()
     menusBotones("Tornar",menuIncidenciasFacturaProforma,"",regresaSinNada,"",regresaSinNada,"Crear") 
     
-    LR1.config(text = "ID:")
-    LRR1.grid(row=0, column=1)  
-    LRR1.config(text = idCorrecto)            
-    LR2.config(text = "PROFORMA:")
-    LRR22.grid(row=1, column=1) 
-    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ22())                
-    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ22())           
-    LR3.config(text = "CLIENT:")
-    LRR31.grid(row=2, column=1)
-    LRR31['values'] = (clientes)  
-    LRR31.config(state = "readandwrite")
-    LR4.config(text = "DATA ACTE D/M/A:")
-    LRR42.grid(row=3, column=1)
-    LR5.config(text = "QUANTITAT 1:")
-    LRR52.grid(row=4, column=1)
-    LR6.config(text = "CONCEPTE 1:")
-    LRR62.grid(row=5, column=1)
-    LR7.config(text = "PREU 1:")
-    LRR72.grid(row=6, column=1)
-    LR8.config(text = "QUATITAT 2:")
-    LRR82.grid(row=7, column=1)
-    LR9.config(text = "CONCEPTE 2:")
-    LRR92.grid(row=8, column=1)
-    LR10.config(text = "PREU 2:")
-    LRR102.grid(row=9, column=1)
-    LR11.config(text = "REPERCUTEIX IVA:")
-    LRR111.grid(row=10, column=1)
-    LRR111['values'] = (["Si","No"])
-    
+    OpcionesQuestionario(["1",LR1,"ID:",LRR1,idCorrecto],
+                         ["X2",LR2,"PROFORMA:",LRR22],
+                         ["X1",LR3,"CLIENT:",LRR31,clientes,regresaSinNada1,"readandwrite"],
+                         ["X2",LR4,"DATA ACTE D/M/A:",LRR42],
+                         ["X2",LR5,"QUANTITAT 1:",LRR52],
+                         ["X2",LR6,"CONCEPTE 1:",LRR62],
+                         ["X2",LR7,"PREU 1:",LRR72],
+                         ["X2",LR8,"QUANTITAT 2:",LRR82],
+                         ["X2",LR9,"CONCEPTE 2:",LRR92],
+                         ["X2",LR10,"PREU 2:",LRR102],
+                         ["X1",LR11,"REPERCUTEIX IVA:",LRR111,["Si","No"]],
+                         ["x2",LR12,"% IVA:",LRR122],
+                         ["X1",LR13,"INCLÒS:",LRR131,["Si","No"]],
+                         ["X2",LR14,"TANT % A PAGAR:",LRR142])
+
     # Si la casilla REPERCUTEIX IVA está vacía:
     if LRR111.get() == "":
         # Por defecto no se repercutirá IVA
         LRR111.current(1)
-    
-    LR12.config(text = "% IVA:")
-    LRR122.grid(row=11, column=1)
-    LR13.config(text = "INCLÒS:")
-    LRR131.grid(row=12, column=1)
-    LRR131['values'] = (["Si","No"])
-    LR14.config(text = "TANT % A PAGAR:")
-    LRR142.grid(row=13, column=1)
+
     # Si la label LRR142 está vacía:
     if LRR142.get() == "":
         # Le ponemos valor 100
@@ -8025,7 +7851,7 @@ def menuIncidenciasFacturaProformaIntroducirCrear       ():
     Boton4activado(menuProformaIntroducirIntroduce)
     query_todos('databases/basesDeDatosProforma.db',"SELECT *, oid FROM bd_proforma ORDER BY NUM_PRO DESC",8,"EstamosEnProformas","ID","DATA","","PROFORMA","CLIENT","QUANTITAT","CONCEPTE","PREU","")        
     
-    LRR22.focus()  
+    ActivaBotonPyFocus(LRR22,BotonPrimeroQ22)
 def menuIncidenciasFacturaProformaConsultar         ():
     
     global EstamosEnIntroducir
@@ -8034,23 +7860,13 @@ def menuIncidenciasFacturaProformaConsultar         ():
     LimpiaLabelsRellena()    
     menusBotones("Tornar",menuIncidenciasFacturaProforma,"",regresaSinNada,"Consultar")
 
-    LR1.config(text = "PROFORMA:")
-    LRR12.grid(row=0, column=1)
-    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ12())                
-    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ12())           
-    LR2.config(text = "CLIENT:")
-    LRR21.grid(row=1, column=1)
-    LRR21['values'] = (clientes)     
-    LR3.config(text = "Acte: DIA:")  
-    LRR32.grid(row=2, column=1)
-    LR4.config(text = "MES:")  
-    LRR42.grid(row=3, column=1)
-    LR5.config(text = "ANY:")  
-    LRR52.grid(row=4, column=1)
-    LR6.config(text = "QUANTITAT PAX:")  
-    LRR62.grid(row=5, column=1)
-    LR7.config(text = "PREU PAX:")
-    LRR72.grid(row=6, column=1)
+    OpcionesQuestionario(["X2",LR1,"PROFORMA:",LRR12],
+                         ["X1",LR2,"CLIENT:",LRR21,clientes],
+                         ["X2",LR3,"Acte: DIA:",LRR32],
+                         ["X2",LR4,"MES:",LRR42],
+                         ["X2",LR5,"ANY:",LRR52],
+                         ["X2",LR6,"QUANTITAT PAX:",LRR62],
+                         ["X2",LR7,"PREU PAX:",LRR72])
 
     # Si aquí se pulsan las teclas CTRL + D se pone la fecha actual
     raiz.bind("<Control-d>", lambda event: FechaActualIncrustada())
@@ -8059,7 +7875,7 @@ def menuIncidenciasFacturaProformaConsultar         ():
     Boton4activado(query_proforma_busca0)
     Boton5activado(prequery_proforma)
     Boton6activado(query_proforma_busca)
-    LRR12.focus()   
+    ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
 def menuIncidenciasFacturaProformaCorregir          ():
 
     global EstamosEnIntroducir
@@ -8072,13 +7888,10 @@ def menuIncidenciasFacturaProformaCorregir          ():
     LimpiaLabelsRellena()
     menusBotones("Tornar",menuIncidenciasFacturaProforma,"",regresaSinNada,"",regresaSinNada,"Mirar/Corregir")
 
-    LR1.config(text = "ID:")
-    LRR12.grid(row=0, column=1)
-    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ12())                
-    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ12())           
-        
+    OpcionesQuestionario(["X2",LR1,"ID:",LRR12])
+       
     Boton4activado(ProformaCorrigeUno)
-    LRR12.focus()   
+    ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
 def menuIncidenciasFacturaProformaEliminar          ():
 
     global EstamosEnIntroducir
@@ -8087,13 +7900,10 @@ def menuIncidenciasFacturaProformaEliminar          ():
     LimpiaLabelsRellena()
     menusBotones("Tornar",menuIncidenciasFacturaProforma,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Eliminar")
 
-    LR1.config(text = "ID:")
-    LRR12.grid(row=0, column=1)
-    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ12())                
-    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ12())           
-        
+    OpcionesQuestionario(["X2",LR1,"ID:",LRR12])
+   
     Boton4activado(ProformaBorraUno)
-    LRR12.focus() 
+    ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
 
 def menuIncidenciasBloqueos                      ():
  
@@ -8244,20 +8054,15 @@ def menuIncidenciasBloqueosBloquear                 ():
     LimpiaLabelsRellena()
     menusBotones("Tornar",menuIncidenciasBloqueos ,"Bloquejar") 
             
-    LR1.config(text = "DIA/MES/ANY:")
-    LRR12.grid(row=0, column=1) 
-    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ12())                
-    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ12())           
-    LR2.config(text = "HORA INICI:")  
-    LRR21.grid(row=1, column=1)  
-    LRR21['values'] = (horas)
-    LR3.config(text = "HORA FINAL:")  
-    LRR31.grid(row=2, column=1)  
-    LRR31['values'] = (horas)            
+    OpcionesQuestionario(["X2",LR1,"DIA/MES/ANY:",LRR12],
+                         ["X1",LR2,"HORA INICI:",LRR21,horas],
+                         ["X1",LR3,"HORA FINAL:",LRR31,horas])
+          
     Boton4activado(menuIncidenciasBloqueosBloquea)
-    query_todos('databases/basesDeDatosIncidencias.db',"SELECT *, oid FROM bd_bloqueos ORDER BY FECHA",8,"EstamosEnBloqueos","ID","DATA","DESDE","FINS","","","","","")
+    query_todos('databases/basesDeDatosIncidencias.db',"SELECT *, oid FROM bd_bloqueos ORDER BY FECHA",8,"EstamosEnBloqueos",
+                "ID","DATA","DESDE","FINS","","","","","")
               
-    LRR12.focus()
+    ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
 def menuIncidenciasBloqueosDesbloquear              ():
 
     global EstamosEnIntroducir
@@ -8265,21 +8070,18 @@ def menuIncidenciasBloqueosDesbloquear              ():
     LimpiaLabelsRellena()
     menusBotones("Tornar",menuIncidenciasBloqueos,"",regresaSinNada,"Desbloqueja")
 
-    LR1.config(text = "DIA/MES/ANY:")
-    LRR12.grid(row=0, column=1)
-    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ12())                
-    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ12())           
-        
+    OpcionesQuestionario(["X2",LR1,"DIA/MES/ANY:",LRR12])       
     Boton4activado(bloqueoBorraUno)
-    query_todos('databases/basesDeDatosIncidencias.db',"SELECT *, oid FROM bd_bloqueos ORDER BY FECHA",8,"EstamosEnBloqueos","ID","DATA","DESDE","FINS","","","","","")
+    query_todos('databases/basesDeDatosIncidencias.db',"SELECT *, oid FROM bd_bloqueos ORDER BY FECHA",8,"EstamosEnBloqueos",
+                "ID","DATA","DESDE","FINS","","","","","")
 
 
-    LRR12.focus()
+    ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
 
 def menuCalendarios                             ():
     
     return # Desactivado por el momento
-    raiz.bind("<Control-q>", lambda event: regresaSinNada())                
+    BotonPrimeroQNada()                
     raiz.bind("<Control-Q>", lambda event: regresaSinNada())    
     
     if  nomUsuario.cget("text") == "":
@@ -8395,7 +8197,7 @@ def menuDatos                                   ():
     global usuarioNivel
     if int(usuarioNivel) >= 3:
         return  
-    raiz.bind("<Control-q>", lambda event: regresaSinNada())                
+    BotonPrimeroQNada()                
     raiz.bind("<Control-Q>", lambda event: regresaSinNada())    
     LimpiaLabelsRellena()
     borra_datos()   
@@ -8407,7 +8209,7 @@ def MenuDatosProducto                               ():
     ajusta_espacios_info(10,22,7,52,13,13,10,1,1,1,1,1)
     global puntero
     puntero = 0
-    raiz.bind("<Control-q>", lambda event: regresaSinNada())                
+    BotonPrimeroQNada()                
     raiz.bind("<Control-Q>", lambda event: regresaSinNada())    
 
     textMenu.config(text = "MENU PRODUCTE")   
@@ -8539,24 +8341,15 @@ def MenuDatosProductoIntroducir                         ():
     LimpiaLabelsRellena()
     menusBotones("Tornar",MenuDatosProducto,"Introduir")
 
-    LR1.config(text = "ID:")
-    LRR1.grid(row=0, column=1) 
-    LRR1.config(text = idCorrecto)            
-    LR2.config(text = "PRODUCTE:")  
-    LRR22.grid(row=1, column=1)
-    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ22())                
-    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ22())           
-    LR3.config(text = "PREU REAL:")  
-    LRR32.grid(row=2, column=1)
-    LR4.config(text = "PREU ACTUAL:")  
-    LRR42.grid(row=3, column=1)
-    LR5.config(text = "REGISTRE/STOCK:")  
-    LRR51.grid(row=4,column=1)
-    LRR51['values'] = (["Registre","Stock"])
+    OpcionesQuestionario(["1",LR1,"ID:",LRR1,idCorrecto],
+                         ["X2",LR2,"PRODUCTE:",LRR22],
+                         ["X2",LR3,"PREU REAL:",LRR32],
+                         ["X2",LR4,"PREU ACTUAL:",LRR42],
+                         ["X1",LR5,"REGISTRE/STOCK:",LRR51,["Registre","Stock"]])
     
     Boton4activado(MenuDatosProductoIntroducirIntroduce)
     query_todos('databases/basesDeDatosDatos.db',"SELECT *, oid FROM bd_productos ORDER BY oid DESC",4,"EstamosEnProductos","ID","NOM","PREU REAL","PREU ACTUAL","TIPUS")
-    LRR22.focus()
+    ActivaBotonPyFocus(LRR22,BotonPrimeroQ22)
 def MenuDatosProductoConsultar                          ():
  
     global EstamosEnIntroducir
@@ -8565,24 +8358,16 @@ def MenuDatosProductoConsultar                          ():
     LimpiaLabelsRellena()
     menusBotones("Tornar",MenuDatosProducto,"",regresaSinNada,"Consultar")
 
-    LR1.config(text = "PRODUCTE:")
-    LRR11.grid(row=0, column=1)             
-    LRR11['values'] = (productos)
-    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ11())                
-    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ11())           
-    LR2.config(text = "PREU REAL:")  
-    LRR22.grid(row=1, column=1)
-    LR3.config(text = "PREU ACTUAL:")  
-    LRR32.grid(row=2, column=1)
-    LR4.config(text = "REGISTRE/STOCK:")  
-    LRR41.grid(row=3, column=1)
-    LRR41['values'] = (["Registre","Stock"])
+    OpcionesQuestionario(["X1",LR1,"PRODUCTE:",LRR11,productos],
+                         ["X2",LR2,"PREU REAL:",LRR22],
+                         ["X2",LR3,"PREU ACTUAL:",LRR32],
+                         ["X1",LR4,"REGISTRE/STOCK:",LRR41,["Registre","Stock"]])
     
     Boton4activado(query_productos_busca0)
     Boton5activado(prequery_productos)
     Boton6activado(query_productos_busca)
  
-    LRR11.focus() 
+    ActivaBotonPyFocus(LRR11,BotonPrimeroQ11)
 def MenuDatosProductoCorregir                           ():
     
     global EstamosEnIntroducir
@@ -8591,14 +8376,11 @@ def MenuDatosProductoCorregir                           ():
     LimpiaLabelsRellena()
     menusBotones("Tornar",MenuDatosProducto,"",regresaSinNada,"",regresaSinNada,"Mirar/Corregir")
     
-    LR1.config(text = "ID:")
-    LRR12.grid(row=0, column=1)
-    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ12())                
-    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ12())           
+    OpcionesQuestionario(["X2",LR1,"ID:",LRR12])     
     
     BB4.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 10,  command = productoCorrigeUno)
     cambiaPasaEncima(BB4,"green","#27779d")     
-    LRR12.focus()
+    ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
 def menuDatosProductoEliminar                           ():
     
     global EstamosEnIntroducir
@@ -8607,19 +8389,16 @@ def menuDatosProductoEliminar                           ():
     LimpiaLabelsRellena()
     menusBotones("Tornar",MenuDatosProducto,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Eliminar")
     
-    LR1.config(text = "ID:")
-    LRR12.grid(row=0, column=1)
-    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ12())                
-    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ12())           
-    
+    OpcionesQuestionario(["X2",LR1,"ID:",LRR12])     
+   
     Boton4activado(productoBorraUno)
-    LRR12.focus() 
+    ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
 def MenuDatosCliente                                ():
     
     ajusta_espacios_info(10,22,5,30,1,1,17,13,19,12,1,1)
     global puntero
     puntero = 0
-    raiz.bind("<Control-q>", lambda event: regresaSinNada())                
+    BotonPrimeroQNada()                
     raiz.bind("<Control-Q>", lambda event: regresaSinNada())    
     
     textMenu.config(text = "MENU CLIENT")   
@@ -8753,38 +8532,25 @@ def MenuDatosClienteIntroducir                          ():
     LimpiaLabelsRellena()
     menusBotones("Tornar",MenuDatosCliente,"Introduir")
 
-    LR1.config(text = "ID:")
-    LRR1.grid(row=0, column=1)             
-    LRR1.config(text = idCorrecto)            
-    LR2.config(text = "NOM:")  
-    LRR22.grid(row=1, column=1)
-    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ22())                
-    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ22())           
-    LR3.config(text = "ADREÇA:")  
-    LRR32.grid(row=2, column=1)
-    LR4.config(text = "C.P.:")  
-    LRR42.grid(row=3, column=1)
-    LR5.config(text = "CIUTAT/PAIS:")  
-    LRR52.grid(row=4, column=1)
-    LR6.config(text = "TELÈFON:")  
-    LRR62.grid(row=5,column=1)
-    LR7.config(text = "E-MAIL:")  
-    LRR72.grid(row=6,column=1)
-    LR8.config(text = "NIF/CIF:")  
-    LRR82.grid(row=7,column=1)
-    LR9.config(text = "CONTACTE:")
-    LRR92.grid(row=8,column=1)
-    LR10.config(text = "TELF. CONTACTE:")
-    LRR102.grid(row=9,column=1)
-    LR11.config(text = "MAIL CONTACTE:")
-    LRR112.grid(row=10,column=1)
+    OpcionesQuestionario(["1",LR1,"ID:",LRR1,idCorrecto],
+                         ["X2",LR2,"NOM:",LRR22],
+                         ["X2",LR3,"ADREÇA:",LRR32],
+                         ["X2",LR4,"C.P.:",LRR42],
+                         ["X2",LR5,"CIUTAT/PAIS:",LRR52],
+                         ["X2",LR6,"TELÈFON:",LRR62],
+                         ["X2",LR7,"E-MAIL:",LRR72],
+                         ["X2",LR8,"NIF/CIF:",LRR82],
+                         ["X2",LR9,"CONTACTE:",LRR92],
+                         ["X2",LR10,"TELÈFON CONTACTE:",LRR102],
+                         ["X2",LR11,"MAIL CONTACTE:",LRR112])
         
     BB4.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 10, command =MenuDatosClienteIntroducirIntroduce)
     cambiaPasaEncima(BB4,"green","#27779d") 
     
-    query_todos('databases/basesDeDatosClientes.db',"SELECT *, oid FROM bd_clientes ORDER BY oid DESC",7,"EstamosEnClientes","ID","NOM","","","CIUTAT/PAIS","TELÈFON","MAIL","NIF/CIF")
+    query_todos('databases/basesDeDatosClientes.db',"SELECT *, oid FROM bd_clientes ORDER BY oid DESC",7,"EstamosEnClientes",
+                "ID","NOM","","","CIUTAT/PAIS","TELÈFON","MAIL","NIF/CIF")
        
-    LRR22.focus()    
+    ActivaBotonPyFocus(LRR22,BotonPrimeroQ22)
 def MenuDatosClienteConsultar                           ():
  
     global EstamosEnIntroducir
@@ -8793,22 +8559,15 @@ def MenuDatosClienteConsultar                           ():
     LimpiaLabelsRellena()
     menusBotones("Tornar",MenuDatosCliente,"",regresaSinNada,"Consultar")
     
-    LR1.config(text = "NOM:")  
-    LRR11.grid(row=0, column=1)
-    LRR11['values'] = (clientes)
-    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ11())                
-    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ11())           
-    LR2.config(text = "TELÈFON:")  
-    LRR22.grid(row=1,column=1)
-    LR3.config(text = "E-MAIL:")  
-    LRR32.grid(row=2,column=1)
-    LR4.config(text = "NIF/CIF:")  
-    LRR42.grid(row=3,column=1)
+    OpcionesQuestionario(["X1",LR1,"NOM:",LRR11,clientes],
+                         ["X2",LR2,"TELÈFON:",LRR22],
+                         ["X2",LR3,"E-MAIL:",LRR32],
+                         ["X2",LR4,"NIF/CIF:",LRR42])
 
     Boton4activado(query_clientes_busca0)
     Boton5activado(prequery_clientes)
     Boton6activado(query_clientes_busca)
-    LRR11.focus()
+    ActivaBotonPyFocus(LRR11,BotonPrimeroQ11)
 def MenuDatosClienteCorregir                            ():
     
     global EstamosEnIntroducir
@@ -8817,13 +8576,10 @@ def MenuDatosClienteCorregir                            ():
     LimpiaLabelsRellena()
     menusBotones("Tornar",MenuDatosCliente,"",regresaSinNada,"",regresaSinNada,"Mirar/Corregir")
     
-    LR1.config(text = "ID:")
-    LRR12.grid(row=0, column=1)
-    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ11())                
-    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ11())           
-    
+    OpcionesQuestionario(["X2",LR1,"ID:",LRR12])     
+
     Boton4activado(clienteCorrigeUno)
-    LRR12.focus()
+    ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
 def menuDatosClienteEliminar                            ():
     
     global EstamosEnIntroducir
@@ -8832,20 +8588,17 @@ def menuDatosClienteEliminar                            ():
     LimpiaLabelsRellena()
     menusBotones("Tornar",MenuDatosCliente,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Eliminar")
     
-    LR1.config(text = "ID:")
-    LRR12.grid(row=0, column=1)
-    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ12())                
-    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ12())           
-    
+    OpcionesQuestionario(["X2",LR1,"ID:",LRR12])     
+  
     Boton4activado(clienteBorraUno)
-    LRR12.focus() 
+    ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
 def menuDatosUsuario                                ():
     
     ajusta_espacios_info(10,22,7,41,6,8,9,9,9,9,1,1)
     global puntero
     puntero = 0
     global usuarioNivel
-    raiz.bind("<Control-q>", lambda event: regresaSinNada())                
+    BotonPrimeroQNada()                
     raiz.bind("<Control-Q>", lambda event: regresaSinNada())    
 
     if int(usuarioNivel) >= 3:
@@ -8927,48 +8680,18 @@ def menuDatosUsuarioIntroducir                          ():
     LimpiaLabelsRellena()
     menusBotones("Tornar",menuDatosUsuario,"Introduir")
     
-    LR1.config(text = "NOM:")
-    LRR12.grid(row=0, column=1)             
-    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ12())                
-    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ12())           
-    LR2.config(text = "CLAU:")  
-    LRR22.grid(row=1, column=1)
-    LRR22.config(show="*")
-    LR3.config(text = "REPETEIX CLAU:")  
-    LRR32.grid(row=2, column=1)
-    LRR32.config(show="*")
-    """
-    Nivel de acceso:    1 - todo
-	    				2 - resta 	seguridad
-						3 - resta 	datos 
-						    		calendario/crear
-									calendario/mostrar/horas
-									incidencias/introducir menos estado y notas
-                                    incidencias/eliminar
-									incidencias/factura proforma
-                                    stock
-						4 - resta	arqueo
-						5 - resta 	ventas
-    """
-    LR4.config(text = "NIVELL D'ACCÉS:")  
-    LRR41.grid(row=3,column=1)
-    LRR41['values'] = (["1","2","3","4","5"])
-    LR5.config(text = "ANGLÈS:")  
-    LRR51.grid(row=4,column=1)
-    LRR51['values'] = (["Sí","No"])
-    LR6.config(text = "CASTELLÀ:")  
-    LRR61.grid(row=5,column=1)
-    LRR61['values'] = (["Sí","No"])
-    LR7.config(text = "CATALÀ:")  
-    LRR71.grid(row=6,column=1)
-    LRR71['values'] = (["Sí","No"])
-    LR8.config(text = "FRANCÈS:")  
-    LRR81.grid(row=7,column=1)
-    LRR81['values'] = (["Sí","No"])
-    
+    OpcionesQuestionario(["X2",LR1,"NOM:",LRR12],
+                         ["X2",LR2,"CLAU:",LRR22],
+                         ["X2",LR3,"REPETEIX CLAU:",LRR32],
+                         ["X1",LR4,"NIVELL D'ACCÉS:",LRR41,["1","2","3","4","5"]],
+                         ["X1",LR5,"ANGLÈS:",LRR51,["Si","No"]],
+                         ["X1",LR6,"CASTELLÀ:",LRR61,["Si","No"]],
+                         ["X1",LR7,"CATALÀ:",LRR71,["Si","No"]],
+                         ["X1",LR8,"FRANCÈS:",LRR81,["Si","No"]])
+        
     Boton4activado(MenuDatosUsuarioIntroducirIntroduce)
     query_todos('databases/basesDeDatosDatos.db',"SELECT *, oid FROM bd_usuarios ORDER BY oid DESC",7,"EstamosEnUsuarios","ID","NOM","CLAU","NIVELL","ANGLÈS","CASTELLÀ"," CATALÀ","FRANCÈS")
-    LRR12.focus()       
+    ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
 def menuDatosUsuarioConsultar                           ():
       
     global EstamosEnIntroducir
@@ -8977,32 +8700,18 @@ def menuDatosUsuarioConsultar                           ():
     global usuariosO
     LimpiaLabelsRellena()
     menusBotones("Tornar",menuDatosUsuario,"",regresaSinNada,"Consultar")
-    
-    LR1.config(text = "NOM:")
-    LRR11.grid(row=0, column=1)
-    LRR11['values'] = (usuariosO)
-    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ11())                
-    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ11())           
-    LR2.config(text = "NIVELL D'ACCÉS:")  
-    LRR21.grid(row=1,column=1)
-    LRR21['values'] = (["1","2","3","4","5"])
-    LR3.config(text = "ANGLÈS:")  
-    LRR31.grid(row=2,column=1)
-    LRR31['values'] = (["Sí","No"])
-    LR4.config(text = "CASTELLÀ:")  
-    LRR41.grid(row=3,column=1)
-    LRR41['values'] = (["Sí","No"])
-    LR5.config(text = "CATALÀ:")  
-    LRR51.grid(row=4,column=1)
-    LRR51['values'] = (["Sí","No"])
-    LR6.config(text = "FRANCÈS:")  
-    LRR61.grid(row=5,column=1)
-    LRR61['values'] = (["Sí","No"])
+
+    OpcionesQuestionario(["X2",LR1,"NOM:",LRR12],
+                         ["X1",LR2,"NIVELL D'ACCÉS:",LRR21,["1","2","3","4","5"]],
+                         ["X1",LR3,"ANGLÈS:",LRR31,["Si","No"]],
+                         ["X1",LR4,"CASTELLÀ:",LRR41,["Si","No"]],
+                         ["X1",LR5,"CATALÀ:",LRR51,["Si","No"]],
+                         ["X1",LR6,"FRANCÈS:",LRR61,["Si","No"]])    
         
     Boton4activado(query_usuarios_busca0)
     Boton5activado(prequery_usuarios)
     Boton6activado(query_usuarios_busca)
-    LRR11.focus() 
+    ActivaBotonPyFocus(LRR11,BotonPrimeroQ11)
 def menuDatosUsuarioCorregir                            ():
     
     global EstamosEnIntroducir
@@ -9011,13 +8720,10 @@ def menuDatosUsuarioCorregir                            ():
     LimpiaLabelsRellena()
     menusBotones("Tornar",menuDatosUsuario,"",regresaSinNada,"",regresaSinNada,"Mirar/Corregir")
     
-    LR1.config(text = "ID:")
-    LRR12.grid(row=0, column=1)
-    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ12())                
-    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ12())           
-    
+    OpcionesQuestionario(["X2",LR1,"ID:",LRR12])     
+   
     Boton4activado(usuariosCorrigeUno)
-    LRR12.focus()   
+    ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
 def menuDatosUsuarioEliminar                            ():
     
     global EstamosEnIntroducir
@@ -9026,13 +8732,10 @@ def menuDatosUsuarioEliminar                            ():
     LimpiaLabelsRellena()
     menusBotones("Tornar",menuDatosUsuario,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Eliminar")
 
-    LR1.config(text = "ID:")
-    LRR12.grid(row=0, column=1)
-    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ12())                
-    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ12())           
-        
+    OpcionesQuestionario(["X2",LR1,"ID:",LRR12])     
+       
     Boton4activado(usuariosBorraUno)
-    LRR12.focus()   
+    ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
 def menuDatosEmpresa                                ():
 
     def MenuDatosEmpresaSalva():
@@ -9052,8 +8755,6 @@ def menuDatosEmpresa                                ():
 
     LR1.config(text = "NOM:")
     LRR12.grid(row=0, column=1) 
-    raiz.bind("<Control-q>", lambda event:  BotonPrimeroQ12())                
-    raiz.bind("<Control-Q>", lambda event: BotonPrimeroQ12())           
     LR2.config(text = "ADREÇA 1:")  
     LRR22.grid(row=1, column=1)
     LR3.config(text = "ADREÇA 2:")  
@@ -9076,7 +8777,7 @@ def menuDatosEmpresa                                ():
     except:
         pass        
     Boton4activado(MenuDatosEmpresaSalva)
-    LRR12.focus()
+    ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
     
 def menuSeguridad                               ():
     if  nomUsuario.cget("text") == "":
@@ -9085,7 +8786,7 @@ def menuSeguridad                               ():
     global usuarioNivel
     if int(usuarioNivel) >= 2:
         return
-    raiz.bind("<Control-q>", lambda event: regresaSinNada())                
+    BotonPrimeroQNada()                
     raiz.bind("<Control-Q>", lambda event: regresaSinNada())    
     LimpiaLabelsRellena()
     textMenu.config(text = "MENU SEGURETAT")   
