@@ -103,7 +103,193 @@ stringBusqueda = ""                 # Definimos la variable que vamos a usar par
 
 global puntero                      # Definimos las variables que vamos a usar en el sector 3
 puntero = 0                         # Definimos el valor del puntero para cuando los listados som más largos que el espacio en pantalla
+
+# ---------------------- Funciones sobre errores en los questionarios ---------------------      
+def cotejaFecha             (muralla,dia,dialabel,mes,meslabel,anyo,anyolabel):     # Función que comprueba si la fecha introducida es correcta
+
+    LR23.config(text = "")          # Borramos el mensaje de error que hubiera en la parte inferior derecha de la pantalla
+    LR23.config(fg = "red")         # Pintamos LR23 en rojo para que se vea que hay un error y que hay que corregirlo
+    
+    
+    if len(dia) == 1:               # Si el día tiene un solo dígito le añadimos un 0 delante
+        dia = "0" + dia    
+    if len(mes) == 1:               # Si el mes tiene un solo dígito le añadimos un 0 delante
+        mes = "0" + mes
+    if len(anyo) == 2:              # Si el año tiene dos dígitos le añadimos un 20 delante
+        anyo = "20" + anyo
+    if anyo == "" or len(anyo) > 4: # Si el año no tiene 4 dígitos o está vacío
+            
+        LR23.config(text = "Any inexistent")
+        anyolabel.focus()
+        muralla = True
+        
+    if len(anyo) != 4:              # Si el año no tiene 4 dígitos
+            
+        LR23.config(text = "Any no vàlid")
+        anyolabel.focus()
+        muralla = True
+        
+    if mes == "":                   # Si el mes está vacío
+            
+        LR23.config(text = "Mes inexistent")
+        meslabel.focus()
+        muralla = True
+
+    if int(mes) > 12 or int(mes) < 1 or len(mes) != 2:
+            
+        LR23.config(text = "Mes no vàlid")
+        meslabel.focus()
+        muralla = True
+    if dia == "":
            
+        LR23.config(text = "Dia inexistent")
+        dialabel.focus()
+        muralla = True
+    if int(dia) > 31 or int(dia) < 1:
+            
+        LR23.config(text = "Dia no vàlid")
+        dialabel.focus()
+        muralla = True
+    return muralla,dia,mes,anyo
+def cotejaFechaBlock        (muralla,fecha,fechalabel):                             # Función que comprueba si la fecha introducida es correcta
+
+    LR23.config(text = "")          # Borramos el mensaje de error que hubiera en la parte inferior derecha de la pantalla
+    LR23.config(fg = "red")         # Pintamos de rojo el campo LR23
+    
+    if fecha == "": return muralla,fecha     # Si la fecha está vacía devolvemos el valor de la variable muralla y la fecha
+
+    # Si fecha no contiene dos veces "/"
+    if fecha.count("/") != 2:
+        LR23.config(text = "Format de data incorrecte")
+        fechalabel.focus()
+        muralla = True
+        return muralla,fecha
+    # Si antes de la primera "/" hay más de dos dígitos
+    if len(fecha[0:fecha.find("/")]) > 2:
+        LR23.config(text = "Dia incorrecte")
+        fechalabel.focus()
+        muralla = True
+        return muralla,fecha
+    # Si entre la primera "/" y la segunda "/" hay más de dos dígitos
+    if len(fecha[fecha.find("/")+1:fecha.rfind("/")]) > 2:
+        LR23.config(text = "Mes incorrecte")
+        fechalabel.focus()
+        muralla = True
+        return muralla,fecha
+    # Si después de la segunda "/" hay más de cuatro dígitos o hay 3 digitos o no hay nada
+    if len(fecha[fecha.rfind("/")+1:]) > 4 or len(fecha[fecha.rfind("/")+1:]) == 3 or len(fecha[fecha.rfind("/")+1:]) <= 1:
+        LR23.config(text = "Any incorrecte")
+        fechalabel.focus()
+        muralla = True
+        return muralla,fecha
+    # Quitamos las "/" de la fecha y comprobamos que sea un número
+    fecha1 = fecha.replace("/","")
+    if fecha1.isdigit() == False:
+        LR23.config(text = "Format de data incorrecte")
+        fechalabel.focus()
+        muralla = True
+        return muralla,fecha
+    # Si el día es mayor que 31 o menor que 1
+    if int(fecha[0:fecha.find("/")]) > 31 or int(fecha[0:fecha.find("/")]) < 1:
+        LR23.config(text = "Dia incorrecte")
+        fechalabel.focus()
+        muralla = True
+        return muralla,fecha
+    # Si el mes es mayor que 12 o menor que 1
+    if int(fecha[fecha.find("/")+1:fecha.rfind("/")]) > 12 or int(fecha[fecha.find("/")+1:fecha.rfind("/")]) < 1:
+        LR23.config(text = "Mes incorrecte")
+        fechalabel.focus()
+        muralla = True
+        return muralla,fecha
+    # Si el dia es un solo dígitos le añadimos un 0 delante
+    if len(fecha[0:fecha.find("/")]) == 1:
+        fecha = "0" + fecha
+    # Si el mes es un solo dígitos le añadimos un 0 delante
+    if len(fecha[fecha.find("/")+1:fecha.rfind("/")]) == 1:
+        fecha = fecha[0:fecha.find("/")+1] + "0" + fecha[fecha.find("/")+1:]
+    # Si el año es dos dígitos le añadimos un 20 delante
+    if len(fecha[fecha.rfind("/")+1:]) == 2:
+        fecha = fecha[0:fecha.rfind("/")+1] + "20" + fecha[fecha.rfind("/")+1:]
+        
+        
+    '''
+    try:
+
+    if fecha[1] == "/":
+            fecha ="0" + fecha
+    if fecha[0:2].isdigit() == False:
+            LR23.config(text = "Dia incorrecte")
+            fechalabel.focus()
+            muralla = True
+            return muralla,fecha
+    if fecha[4] == "/":
+            fecha = fecha[0:3] + "0" + fecha[3:]
+    if fecha[3:5].isdigit() == False:
+            LR23.config(text = "Mes incorrecte")
+            fechalabel.focus()
+            muralla = True
+            return muralla,fecha
+    if len(fecha) <= 9:
+            fecha = fecha[0:6] + "20" + fecha[6:]
+    if fecha[6:10].isdigit() == False:
+            LR23.config(text = "Any incorrecte")
+            fechalabel.focus()
+            muralla = True
+            return muralla,fecha   
+
+    except:
+        LR23.config(text = "Data incorrecte")
+        fechalabel.focus()
+        muralla = True 
+        return muralla,fecha
+    '''
+    return muralla,fecha
+def cotejaFechaEmptyOk      (muralla,dia,dialabel,mes,meslabel,anyo,anyolabel):     # Función que comprueba si la fecha introducida es correcta
+
+    LR23.config(text = "")          # Borramos el mensaje de error que hubiera en la parte inferior derecha de la pantalla
+    LR23.config(fg = "red")         # Pintamos de rojo el campo LR23
+    
+    if len(dia) == 1:               # Si el día tiene un solo dígito le añadimos un 0 delante
+        dia = "0" + dia
+    if len(mes) == 1:               # Si el mes tiene un solo dígito le añadimos un 0 delante
+        mes = "0" + mes
+    if len(anyo) == 2:              # Si el año tiene dos dígitos le añadimos un 20 delante
+        anyo = "20" + anyo
+    if len(anyo) != 4 and anyo != "":        # Si el año no tiene 4 dígitos y no está vacío
+            
+        LR23.config(text = "Any no vàlid")
+        anyolabel.focus()
+        muralla = True
+    
+    try:    
+        if (int(mes) > 12 or int(mes) < 1 or len(mes) != 2) and mes != "":
+                
+            LR23.config(text = "Mes no vàlid")
+            meslabel.focus()
+            muralla = True
+    except:
+        pass
+    
+    try:
+        if int(dia) > 31 or int(dia) < 1 and dia != "":
+                
+            LR23.config(text = "Dia no vàlid")
+            dialabel.focus()
+            muralla = True
+    except:
+        pass
+    
+    return muralla,dia,mes,anyo
+def cotejaVacio             (muralla,campo,label):                                  # Función que comprueba si el campo está vacío
+
+    LR23.config(text = "")          # Borramos el mensaje de error que hubiera en la parte inferior derecha de la pantalla
+    LR23.config(fg = "red")         # Pintamos de rojo el campo LR23
+    
+    if campo == "":
+        LR23.config(text = "Registre buit")
+        label.focus()
+        muralla = True
+    return muralla
 # ------------------------------ Funciones globales ----------------------
 def copia                   ():
     if raiz.focus_get() == None:                # Comprueba si el foco está en alguna label o entry.
@@ -949,73 +1135,40 @@ def query_registros_busca0  ():
 def query_registros_busca   ():
     
     global EstamosEnRegistros
-    # Si LRR12 mide 1, le añadimos un 0 delante
-    if len(LRR12.get()) == 1:
-        LRR12.insert(0,"0")
-    # Lo mismo con LRR22
-    if len(LRR22.get()) == 1:
-        LRR22.insert(0,"0")
-    # sI LRR32 mide 2, le añadimos 20 delante
-    if len(LRR32.get()) == 2:
-        LRR32.insert(0,"20")
     
-    v1 = LRR12.get()
-    v2 = LRR22.get()
-    v3 = LRR32.get()
-    v4 = LRR12.get()+"/"+LRR22.get()+"/"+LRR32.get()
-    v5 = LRR41.get()
-    v6 = LRR51.get()
-    v7 = LRR61.get()
-    v8 = LRR71.get()
-    v9 = LRR81.get()
-    v10= LRR91.get()
-    v11= LRR101.get()
+    # Rescata valores
+    v1,v2,v3,v4,v5,v6,v7,v8,v9,v10,v11 = LRR12.get(),LRR22.get(),LRR32.get(),LRR12.get()+"/"+LRR22.get()+"/"+LRR32.get(),LRR41.get(),LRR51.get(),LRR61.get(),LRR71.get(),LRR81.get(),LRR91.get(),LRR101.get()
+    
+    # Coteja fallos
+    muralla = False
+    muralla,v1,v2,v3 = cotejaFechaEmptyOk(muralla,v1,LRR12,v2,LRR22,v3,LRR32)
+    if muralla == True: return 
        
+    # Salva datos       
     # Creamos la base de datos o conectamos con una
-    query_todos('databases/basesDeDatosRegistros.db',"SELECT *, oid FROM bd_registros WHERE ((FECHA LIKE '" + v3 + "/%' or '" + v3 + "' = '') AND (FECHA LIKE '%/" + v2 + "/%' or '" + v2 + "' = '') AND (FECHA LIKE '%/" + v1 + "' or '" + v1 + "' = '') AND (USUARIO = '" + v11 + "' or '" + v11 + "' = '') AND (DESCRIPCION = '" + v5 + "' or '" + v5 + "' = '') AND (ORIGEN = '" + v6 + "' or '" + v6 + "' = '') AND (HORA >= '" + v7 + "' or '" + v7 + "' = '')  AND (HORA <= '" + v8 + "' or '" + v8 + "' = '')  AND (PRODUCTO = '" + v9 + "' or '" + v9 + "' = '')   AND (FUENTE = '" + v10 + "' or '" + v10 + "' = '')) ORDER BY FECHA",8,"EstamosEnRegistros","ID","","DATA","DESCRIPCIÓ","ORIGEN","HORA","PRODUCTE","FONT","")
+    query_todos('databases/basesDeDatosRegistros.db',
+                "SELECT *, oid FROM bd_registros WHERE ((FECHA LIKE '" + v3 + "/%' or '" + v3 + "' = '') AND (FECHA LIKE '%/" + v2 + "/%' or '" + v2 + "' = '') AND (FECHA LIKE '%/" + v1 + "' or '" + v1 + "' = '') AND (USUARIO = '" + v11 + "' or '" + v11 + "' = '') AND (DESCRIPCION = '" + v5 + "' or '" + v5 + "' = '') AND (ORIGEN = '" + v6 + "' or '" + v6 + "' = '') AND (HORA >= '" + v7 + "' or '" + v7 + "' = '')  AND (HORA <= '" + v8 + "' or '" + v8 + "' = '')  AND (PRODUCTO = '" + v9 + "' or '" + v9 + "' = '')   AND (FUENTE = '" + v10 + "' or '" + v10 + "' = '')) ORDER BY FECHA",
+                8,
+                "EstamosEnRegistros",
+                "ID","","DATA","DESCRIPCIÓ","ORIGEN","HORA","PRODUCTE","FONT","")
 def registroCorrigeUno      ():
 
-    global val1
-    val1 = LRR12.get()
-    global val2
-    val2 = usuarioReal
-    global diaGlobal
-    diaGlobal = diaGlobaltk.get()
-    global mesGlobal
-    mesGlobal = mesGlobaltk.get()
-    global anyoGlobal
-    anyoGlobal = anyoGlobaltk.get()
+    global val1,val2,diaGlobal,mesGlobal,anyoGlobal
+    val1,val2,diaGlobal,mesGlobal,AnyoGlobal = LRR12.get(),usuarioReal,diaGlobaltk.get(),mesGlobaltk.get(),anyoGlobaltk.get()
 
     if  val1 == "":
         return
                        
-    # Limpia las cajas
-    LimpiaElegibles
-    
-	# Crea una base de datos o se conecta a una
-    base_datos = sqlite3.connect('databases/basesDeDatosRegistros.db')
+    LimpiaElegibles                                                     # Limpia las cajas
+    base_datos = sqlite3.connect('databases/basesDeDatosRegistros.db')	# Crea una base de datos o se conecta a una
+    c = base_datos.cursor()	                                            # Crea cursor   
+    c.execute("SELECT * FROM bd_registros WHERE oid = " + val1)	        # Query the database
+    records = c.fetchall()                                              # Devuelve una lista de tuplas   
+    menuRegistrosIntroducir()                                           # Llama a la función que crea la ventana de introducir registros
+      
+    global descripcion,origen,hora,producto,fuente,notas,val6           # Creando las variables globales
 
-	# Crea cursor
-    c = base_datos.cursor()
-    
-	# Query the database
-    c.execute("SELECT * FROM bd_registros WHERE oid = " + val1)
-    records = c.fetchall()
-    
-    menuRegistrosIntroducir()
-      
-    # Creando las variables globales
-    global descripcion
-    global origen
-    global hora
-    global producto
-    global fuente
-    global notas
-    global val6
-    
-      
     # Loop para volcar los resultados
-    
     for record in records:
         notillas = record[7]
         notillas = notillas.rstrip()
@@ -1050,50 +1203,28 @@ def registroCorrigeUno      ():
         anyoFecha.config(text = anyoGlobaltk)
         MiraFecha(anyoFecha)
         
-    # Centramos el cursor
-    LRR21.focus()
-
-    Boton4activado(RegistroSalvaCorreccion)
+    LRR21.focus()                                                       # Centramos el cursor
+    Boton4activado(RegistroSalvaCorreccion)                            # Activa el botón de guardar
 def RegistroSalvaCorreccion ():
     
-    global origenes
-    global usuarioReal
-    global diaGlobal
-    global mesGlobal
-    global anyoGlobal
+    global origenes,usuarioReal,diaGlobal,mesGlobal,anyoGlobal
     
     # Rescata valores
-    v1 = LRR21.get()
-    v2 = LRR31.get()
-    v3 = LRR41.get()
-    v4 = LRR51.get()
-    v5 = LRR61.get()
-    v6 = LRR73.get(1.0,END)
-    v7 = anyoGlobaltk.get() + "/" + mesGlobaltk.get() + "/" + diaGlobaltk.get()
-    
-    
-        
+    v1,v2,v3,v4,v5,v6,v7,v8,v9 = LRR21.get(),LRR31.get(),LRR41.get(),LRR51.get(),LRR61.get(),LRR73.get(1.0,END),anyoGlobaltk.get(),mesGlobaltk.get(),diaGlobaltk.get()
+                        
     # Coteja fallos
-    if v1 == "" or v2 == "" or v3 == "" or v4 == "" or v5 == "":
-            
-        LR23.config(text = "Registre incomplert")
-        return
-        
-    a = 0
-    for i in origenes:
-        if i == v2:    
-            a = 1
-    if  a == 0:
-        LR23.config(text = "Origen incorrecte")
-        LRR31.focus()
-        return
-        
-    # Crea una base de datos o abre la existente
-    base_datos = sqlite3.connect('databases/basesDeDatosRegistros.db')
-    
-    # Conecta el cursor
-    c = base_datos.cursor()
-    
+    muralla = False
+    muralla = cotejaVacio(muralla,v5,LRR61)
+    muralla = cotejaVacio(muralla,v4,LRR51)
+    muralla = cotejaVacio(muralla,v3,LRR41)
+    muralla = cotejaVacio(muralla,v2,LRR31)
+    muralla = cotejaVacio(muralla,v1,LRR21)
+    muralla,v9,v8,v7 = cotejaFecha(muralla,v9,diaFecha,v8,mesFecha,v7,anyoFecha)
+    if muralla == True: return    
+       
+    base_datos = sqlite3.connect('databases/basesDeDatosRegistros.db')      # Crea una base de datos o abre la existente 
+    c = base_datos.cursor()                                                 # Conecta el cursor
+
     c.execute("""UPDATE bd_registros SET
               USUARIO = :usuario,
               FECHA = :fecha,
@@ -1107,7 +1238,7 @@ def RegistroSalvaCorreccion ():
               WHERE oid = :val1""",
               {
               'usuario': nomUsuario.cget("text"),
-              'fecha': v7,
+              'fecha': v7 + "/" + v8 + "/" + v9,
               'descripcion': LRR21.get(),
               'origen': LRR31.get(),
               'hora': LRR41.get(),
@@ -1117,26 +1248,19 @@ def RegistroSalvaCorreccion ():
               'val1': val1
                   })
     
-    #Asegura los cambios
-    base_datos.commit()
+    base_datos.commit()                 #Asegura los cambios
+    base_datos.close()  	            # Cierra la conexión 
+    nomUsuario.config(text = val2)      # Vuelve a pintar usuario y fecha
 
-	# Cierra la conexión 
-    base_datos.close()  
-
-    # Vuelve a pintar usuario y fecha
-    nomUsuario.config(text = val2)
-    
-    # Recupera en las variables tk los datos de fecha salvados en diaGlobal, mesGlobal y anyoGlobal
-    anyoGlobaltk.set(anyoGlobal)
+    anyoGlobaltk.set(anyoGlobal)        # Recupera en las variables tk los datos de fecha salvados en diaGlobal, mesGlobal y anyoGlobal
     mesGlobaltk.set(mesGlobal)
     diaGlobaltk.set(diaGlobal)
-    # Los vuelca a los labels
-    diaFecha.config(text = diaGlobaltk)
+    diaFecha.config(text = diaGlobaltk) # Los vuelca a los labels
     mesFecha.config(text = mesGlobaltk)
     anyoFecha.config(text = anyoGlobaltk)
     MiraFecha(anyoFecha)
-	# Vuelve hacia atrás
-    menuRegistroCorregir()
+    menuRegistroCorregir()	            # Vuelve hacia atrás
+
 def registroBorraUno        ():
 
     # Creamos la base de datos o conectamos con una
@@ -1200,7 +1324,11 @@ def del_register_yes        ():
     ventana2.destroy()
 
     # Borramos los datos del listado de registros
-    query_todos('databases/basesDeDatosRegistros.db',"SELECT *, oid FROM bd_registros ORDER BY oid DESC",8,"EstamosEnRegistros","ID","","DATA","DESCRIPCIÓ","ORIGEN","HORA","PRODUCTE","FONT","")
+    query_todos('databases/basesDeDatosRegistros.db',
+                "SELECT *, oid FROM bd_registros ORDER BY oid DESC",
+                8,
+                "EstamosEnRegistros",
+                "ID","","DATA","DESCRIPCIÓ","ORIGEN","HORA","PRODUCTE","FONT","")
 
 def prequery_incidencias    ():
     
@@ -1255,7 +1383,11 @@ def query_incidencias_busca ():
     if len(v10) == 2:
         v10 = "20" + v10
     # Creamos la base de datos o conectamos con una
-    query_todos('databases/basesDeDatosIncidencias.db',"SELECT *, oid FROM bd_incidencias WHERE ((CLIENTE = '" + v1 + "' or '" + v1 + "' = '') AND (FECHA LIKE '" + v2 + "/%' or '" + v2 + "' = '') AND (FECHA LIKE '%/" + v3 + "/%' or '" + v3 + "' = '') AND (FECHA LIKE '%/" + v4 + "' or '" + v4 + "' = '') AND (PRODUCTO = '" + v5 + "' or '" + v5 + "' = '') AND (IDIOMA = '" + v6 + "' or '" + v6 + "' = '') AND (AGENDADO = '" + v7 + "' or '" + v7 + "' = '') AND (FECHA_REV LIKE '" + v8 + "/%' or '" + v8 + "' = '') AND (FECHA_REV LIKE '%/" + v9 + "/%' or '" + v9 + "' = '')  AND (FECHA_REV LIKE '%/" + v10 + "' or '" + v10 + "' = '') AND (ESTADO = '" + v12 + "' or '" + v12 + "' = '') AND (NOTAS = '" + v11 + "' or '" + v11 + "' = '') AND (PAGAT = '" + v13 + "' OR '" + v13 + "' = '') AND (MAIL_EXTRA = '" + v14 + "' OR '" + v14 + "' = '')) ORDER BY FECHA, HORA",8,"EstamosEnIncidencias","ID","DATA","HORA","PAX","PRODUCTE","IDIOMA","ESTAT","CLIENT","PAGAT")
+    query_todos('databases/basesDeDatosIncidencias.db',
+                "SELECT *, oid FROM bd_incidencias WHERE ((CLIENTE = '" + v1 + "' or '" + v1 + "' = '') AND (FECHA LIKE '" + v2 + "/%' or '" + v2 + "' = '') AND (FECHA LIKE '%/" + v3 + "/%' or '" + v3 + "' = '') AND (FECHA LIKE '%/" + v4 + "' or '" + v4 + "' = '') AND (PRODUCTO = '" + v5 + "' or '" + v5 + "' = '') AND (IDIOMA = '" + v6 + "' or '" + v6 + "' = '') AND (AGENDADO = '" + v7 + "' or '" + v7 + "' = '') AND (FECHA_REV LIKE '" + v8 + "/%' or '" + v8 + "' = '') AND (FECHA_REV LIKE '%/" + v9 + "/%' or '" + v9 + "' = '')  AND (FECHA_REV LIKE '%/" + v10 + "' or '" + v10 + "' = '') AND (ESTADO = '" + v12 + "' or '" + v12 + "' = '') AND (NOTAS = '" + v11 + "' or '" + v11 + "' = '') AND (PAGAT = '" + v13 + "' OR '" + v13 + "' = '') AND (MAIL_EXTRA = '" + v14 + "' OR '" + v14 + "' = '')) ORDER BY FECHA, HORA",
+                8,
+                "EstamosEnIncidencias",
+                "ID","DATA","HORA","PAX","PRODUCTE","IDIOMA","ESTAT","CLIENT","PAGAT")
 def incidenciasCorrigeUno   ():
 
     global val1
@@ -1660,7 +1792,11 @@ def del_incidence_yes       ():
     ventana2.destroy()
 
     # Borramos los datos del listado de registros
-    query_todos('databases/basesDeDatosIncidencias.db',"SELECT *, oid FROM bd_incidencias ORDER BY oid DESC",8,"EstamosEnIncidencias","ID","DATA","HORA","PAX","PRODUCTE","IDIOMA","ESTAT","CLIENT","PAGAT")        
+    query_todos('databases/basesDeDatosIncidencias.db',
+                "SELECT *, oid FROM bd_incidencias ORDER BY oid DESC",
+                8,
+                "EstamosEnIncidencias",
+                "ID","DATA","HORA","PAX","PRODUCTE","IDIOMA","ESTAT","CLIENT","PAGAT")        
 
     
     # Foco
@@ -1823,7 +1959,11 @@ def query_proforma_busca    ():
         v5 = "20" + v5
         
     # Creamos la base de datos o conectamos con una
-    query_todos('databases/basesDeDatosProforma.db',"SELECT *, oid FROM bd_Proforma WHERE ((NUM_PRO = '" + v1 + "' or '" + v1 + "' = '') AND (CLIENTE ='" + v2 + "' or '" + v2 + "' = '') AND ((PRECIO_1 = '" + v7 + "' or '" + v7 + "' = '') OR (PRECIO_2 = '" + v7 + "' OR '" + v7 + "' = '')) AND  ((CANT_1 = '" + v6 + "' OR '" + v6 + "' = '') OR (CANT_2 = '" + v6 + "' or '" + v6 + "' = '')) AND (FECHA LIKE '" + v3 + "/%' or '" + v3 + "' = '') AND (FECHA LIKE '%/" + v4 + "/%' or '" + v4 + "' = '') AND (FECHA LIKE '%/" + v5 + "' or '" + v5 + "' = '')) ORDER BY NUM_PRO DESC",8,"EstamosEnProforma","ID","DATA","","PROFORMA","CLIENT","QUANTITAT","CONCEPTE","PREU","")
+    query_todos('databases/basesDeDatosProforma.db',
+                "SELECT *, oid FROM bd_Proforma WHERE ((NUM_PRO = '" + v1 + "' or '" + v1 + "' = '') AND (CLIENTE ='" + v2 + "' or '" + v2 + "' = '') AND ((PRECIO_1 = '" + v7 + "' or '" + v7 + "' = '') OR (PRECIO_2 = '" + v7 + "' OR '" + v7 + "' = '')) AND  ((CANT_1 = '" + v6 + "' OR '" + v6 + "' = '') OR (CANT_2 = '" + v6 + "' or '" + v6 + "' = '')) AND (FECHA LIKE '" + v3 + "/%' or '" + v3 + "' = '') AND (FECHA LIKE '%/" + v4 + "/%' or '" + v4 + "' = '') AND (FECHA LIKE '%/" + v5 + "' or '" + v5 + "' = '')) ORDER BY NUM_PRO DESC",
+                8,
+                "EstamosEnProforma",
+                "ID","DATA","","PROFORMA","CLIENT","QUANTITAT","CONCEPTE","PREU","")
 def ProformaCorrigeUno      ():
     
     global val1
@@ -2216,7 +2356,11 @@ def del_proform_yes         ():
     ventana2.destroy()
 
     # Borramos los datos del listado de registros
-    query_todos('databases/basesDeDatosProforma.db',"SELECT *, oid FROM bd_proforma ORDER BY NUM_PRO",8,"EstamosEnProformas","ID","DATA","","PROFORMA","CLIENT","QUANTITAT","CONCEPTE","PREU","")        
+    query_todos('databases/basesDeDatosProforma.db',
+                "SELECT *, oid FROM bd_proforma ORDER BY NUM_PRO",
+                8,
+                "EstamosEnProformas",
+                "ID","DATA","","PROFORMA","CLIENT","QUANTITAT","CONCEPTE","PREU","")        
 
     
     # Foco
@@ -2239,7 +2383,11 @@ def query_bloqueos_busca    ():
     v2 = LRR12.get()
 
     # Creamos la base de datos o conectamos con una
-    query_todos('databases/basesDeDatosIncidencias.db',"SELECT *, oid FROM bd_bloqueos WHERE (FECHA = '" + v2 + "')",8,"EstamosEnBloqueos","ID","DATA","","","","","","","")
+    query_todos('databases/basesDeDatosIncidencias.db',
+                "SELECT *, oid FROM bd_bloqueos WHERE (FECHA = '" + v2 + "')",
+                8,
+                "EstamosEnBloqueos",
+                "ID","DATA","","","","","","","")
 def bloqueoBorraUno         ():
 
     global v2
@@ -2370,7 +2518,11 @@ def query_productos_busca   ():
     v4 = LRR41.get()
        
     # Creamos la base de datos o conectamos con una
-    query_todos('databases/basesDeDatosDatos.db',"SELECT *, oid FROM bd_productos WHERE ((NOM = '" + v1 + "' or '" + v1 + "' = '') AND (PREU_HABITUAL = '" + v2 + "' or '" + v2 + "' = '') AND (PREU_ACTUAL = '" + v3 + "' or '" + v3 + "' = '') AND (REGISTRABLE = '" + v4 + "' or '" + v4 + "' = '')) ORDER BY NOM",4,"EstamosEnProductos","ID","NOM","PREU REAL","PREU ACTUAL","TIPUS")
+    query_todos('databases/basesDeDatosDatos.db',
+                "SELECT *, oid FROM bd_productos WHERE ((NOM = '" + v1 + "' or '" + v1 + "' = '') AND (PREU_HABITUAL = '" + v2 + "' or '" + v2 + "' = '') AND (PREU_ACTUAL = '" + v3 + "' or '" + v3 + "' = '') AND (REGISTRABLE = '" + v4 + "' or '" + v4 + "' = '')) ORDER BY NOM",
+                4,
+                "EstamosEnProductos",
+                "ID","NOM","PREU REAL","PREU ACTUAL","TIPUS")
 def productoCorrigeUno      ():
 
     global val1
@@ -2542,7 +2694,11 @@ def del_product_yes         ():
     ventana2.destroy()
 
     # Borramos los datos del listado de registros
-    query_todos('databases/basesDeDatosDatos.db',"SELECT *, oid FROM bd_productos ORDER BY NOM",4,"EstamosEnProductos","ID","NOM","PREU REAL","PREU ACTUAL","TIPUS")
+    query_todos('databases/basesDeDatosDatos.db',
+                "SELECT *, oid FROM bd_productos ORDER BY NOM",
+                4,
+                "EstamosEnProductos",
+                "ID","NOM","PREU REAL","PREU ACTUAL","TIPUS")
 
 def prequery_clientes       ():
     
@@ -2568,7 +2724,11 @@ def query_clientes_busca    ():
     v4 = LRR42.get()
        
     # Creamos la base de datos o conectamos con una
-    query_todos('databases/basesDeDatosClientes.db',"SELECT *, oid FROM bd_clientes WHERE ((NOM = '" + v1 + "' or '" + v1 + "' = '') AND (TELEFONO = '" + v2 + "' or '" + v2 + "' = '') AND (MAIL = '" + v3 + "' or '" + v3 + "' = '') AND (NIFCIF = '" + v4 + "' or '" + v4 + "' = '')) ORDER BY NOM",7,"EstamosEnClientes","ID","NOM","","","CIUTAT/PAIS","TELÈFON","MAIL","NIF/CIF")
+    query_todos('databases/basesDeDatosClientes.db',
+                "SELECT *, oid FROM bd_clientes WHERE ((NOM = '" + v1 + "' or '" + v1 + "' = '') AND (TELEFONO = '" + v2 + "' or '" + v2 + "' = '') AND (MAIL = '" + v3 + "' or '" + v3 + "' = '') AND (NIFCIF = '" + v4 + "' or '" + v4 + "' = '')) ORDER BY NOM",
+                7,
+                "EstamosEnClientes",
+                "ID","NOM","","","CIUTAT/PAIS","TELÈFON","MAIL","NIF/CIF")
 def clienteCorrigeUno       ():
 
     global val1
@@ -2756,7 +2916,11 @@ def del_client_yes          ():
     ventana2.destroy()
 
     # Borramos los datos del listado de registros
-    query_todos('databases/basesDeDatosClientes.db',"SELECT *, oid FROM bd_clientes ORDER BY NOM",7,"EstamosEnClientes","ID","NOM","","","CIUTAT/PAIS","TELÈFON","MAIL","NIF/CIF")
+    query_todos('databases/basesDeDatosClientes.db',
+                "SELECT *, oid FROM bd_clientes ORDER BY NOM",
+                7,
+                "EstamosEnClientes",
+                "ID","NOM","","","CIUTAT/PAIS","TELÈFON","MAIL","NIF/CIF")
 
 def prequery_usuarios       ():
     
@@ -2784,7 +2948,11 @@ def query_usuarios_busca    ():
     v6 = LRR61.get()
     
     # Creamos la base de datos o conectamos con una
-    query_todos('databases/basesDeDatosDatos.db',"SELECT *, oid FROM bd_usuarios WHERE ((NOM = '" + v1 + "' or '" + v1 + "' = '') AND (NIVEL = '" + v2 + "' or '" + v2 + "' = '') AND (INGLES = '" + v3 + "' or '" + v3 + "' = '') AND (CASTELLANO = '" + v4 + "' or '" + v4 + "' = '') AND (CATALAN = '" + v5 + "' or '" + v5 + "' = '') AND (FRANCES = '" + v6 + "' or '" + v6 + "' = '')) ORDER BY NOM",7,"EstamosEnUsuarios","ID","NOM","CLAU","NIVELL","ANGLÈS","CASTELLÀ"," CATALÀ","FRANCÈS")
+    query_todos('databases/basesDeDatosDatos.db',
+                "SELECT *, oid FROM bd_usuarios WHERE ((NOM = '" + v1 + "' or '" + v1 + "' = '') AND (NIVEL = '" + v2 + "' or '" + v2 + "' = '') AND (INGLES = '" + v3 + "' or '" + v3 + "' = '') AND (CASTELLANO = '" + v4 + "' or '" + v4 + "' = '') AND (CATALAN = '" + v5 + "' or '" + v5 + "' = '') AND (FRANCES = '" + v6 + "' or '" + v6 + "' = '')) ORDER BY NOM",
+                7,
+                "EstamosEnUsuarios",
+                "ID","NOM","CLAU","NIVELL","ANGLÈS","CASTELLÀ"," CATALÀ","FRANCÈS")
 def usuariosCorrigeUno      ():
 
     global val1
@@ -2966,7 +3134,11 @@ def del_user_yes            ():
     ventana2.destroy()
 
     # Borramos los datos del listado de registros
-    query_todos('databases/basesDeDatosDatos.db',"SELECT *, oid FROM bd_usuarios ORDER BY NOM",7,"EstamosEnUsuarios","ID","NOM","CLAU","NIVELL","ANGLÈS","CASTELLÀ"," CATALÀ","FRANCÈS")
+    query_todos('databases/basesDeDatosDatos.db',
+                "SELECT *, oid FROM bd_usuarios ORDER BY NOM",
+                7,
+                "EstamosEnUsuarios",
+                "ID","NOM","CLAU","NIVELL","ANGLÈS","CASTELLÀ"," CATALÀ","FRANCÈS")
 
 def Registros_Todo          (num):
 
@@ -4144,84 +4316,28 @@ def menuRegistrosIntroducir                         ():
     global stringBusqueda
     stringBusqueda = ""
     def menuRegistrosIntroducirIntroduce ():
+        
         global stringBusqueda 
+        global origenes
         stringBusqueda = ""
     
         # Rescata valores
-        v1 = LRR21.get()
-        v2 = LRR31.get()
-        v3 = LRR41.get()
-        v4 = LRR51.get()
-        v5 = LRR61.get()
-        v6 = LRR73.get(1.0,END)
-        v7 = anyoGlobaltk.get()
-        v8 = mesGlobaltk.get()
-        v9 = diaGlobaltk.get()
+        v1,v2,v3,v4,v5,v6,v7,v8,v9 = LRR21.get(),LRR31.get(),LRR41.get(),LRR51.get(),LRR61.get(),LRR73.get(1.0,END),anyoGlobaltk.get(),mesGlobaltk.get(),diaGlobaltk.get()
                         
-        global origenes
-        
         # Coteja fallos
-        
-        # Si v9 mide sólo 1, añadirle un 0 delante
-        if len(v9) == 1:
-            v9 = "0" + v9
-        # Lo mismo para v8
-        if len(v8) == 1:
-            v8 = "0" + v8
-        
-        if v7 == "":
-            
-            LR23.config(text = "Any inexistent")
-            anyoFecha.focus()
-            return
-        if len(v7) != 4:
-            
-            LR23.config(text = "Any no vàlid")
-            anyoFecha.focus()
-            return
-        if v8 == "":
-            
-            LR23.config(text = "Mes inexistent")
-            mesFecha.focus()
-            return
+        muralla = False
+        muralla = cotejaVacio(muralla,v5,LRR61)
+        muralla = cotejaVacio(muralla,v4,LRR51)
+        muralla = cotejaVacio(muralla,v3,LRR41)
+        muralla = cotejaVacio(muralla,v2,LRR31)
+        muralla = cotejaVacio(muralla,v1,LRR21)
+        muralla,v9,v8,v7 = cotejaFecha(muralla,v9,diaFecha,v8,mesFecha,v7,anyoFecha)
+        if muralla == True: return    
 
-        if int(v8) > 12 or int(v8) < 1 or len(v8) != 2:
-            
-            LR23.config(text = "Mes no vàlid")
-            mesFecha.focus()
-            return
-        if v9 == "":
-            
-            LR23.config(text = "Dia inexistent")
-            diaFecha.focus()
-            return        
-        if v9 == "" or int(v9) > 31 or int(v9) < 1:
-            
-            LR23.config(text = "Dia no vàlid")
-            diaFecha.focus()
-            return        
-        if v1 == "" or v2 == "" or v3 == "" or v4 == "" or v5 == "":
-            
-            LR23.config(text = "Registre incomplert")
-            LRR21.focus()
-            return        
-        a = 0
-        for i in origenes:
-            if i == v2:    
-                a = 1
-        if  a == 0:
-            LR23.config(text = "Origen incorrecte")
-            LRR31.focus()
-            return
-            
         # Salva datos
-        # Crea la base de datos o conecta con ella
-        base_datos_datos = sqlite3.connect('databases/basesDeDatosRegistros.db')
-        
-        # Crea el cursor
-        cursor = base_datos_datos.cursor()   
-    
-        # Inserta en la base de tados
+        base_datos_datos = sqlite3.connect('databases/basesDeDatosRegistros.db')        # Crea la base de datos o conecta con ella
+        cursor = base_datos_datos.cursor()                                              # Crea el cursor
+                                                                                        # Inserta en la base de tados
         cursor.execute("""INSERT INTO bd_registros VALUES (:usuario, :fecha,
                 :descripcion, :origen, :hora, :producto, :fuente, :notas)""",
                 {
@@ -4233,58 +4349,44 @@ def menuRegistrosIntroducir                         ():
                     'producto':     LRR51.get(),
                     'fuente':       LRR61.get(),
                     'notas':        LRR73.get(1.0,END)
-                    })
+                    })        
+        base_datos_datos.commit()                                                       # Asegura los cambios
+        base_datos_datos.close()                                                        # Cerrar conexion 
 
-
-        # Asegura los cambios
-        base_datos_datos.commit()
-
-        # Cerrar conexion 
-        base_datos_datos.close() 
                    
         # Pinta datos en zona 3
-        query_todos('databases/basesDeDatosRegistros.db',"SELECT *, oid FROM bd_registros ORDER BY FECHA DESC, oid DESC",8,"EstamosEnRegistros","ID","","DATA","DESCRIPCIÓ","ORIGEN","HORA","PRODUCTE","FONT","")        
+        query_todos('databases/basesDeDatosRegistros.db',
+                    "SELECT *, oid FROM bd_registros ORDER BY FECHA DESC, oid DESC",
+                    8,
+                    "EstamosEnRegistros",
+                    "ID","","DATA","DESCRIPCIÓ","ORIGEN","HORA","PRODUCTE","FONT","")        
         
-        # Limpia posibles mensajes anteriores innecesarios
-        LR23.config(text = "")
-        # Crea la base de datos o conecta con ella
-        base_datos_datos = sqlite3.connect('databases/basesDeDatosRegistros.db')
-        # Crea el cursor
-        cursor = base_datos_datos.cursor()        
-        # Coge el valor del ultimo oid
-        cursor.execute("SELECT *, oid FROM bd_registros WHERE ((FECHA LIKE'" +v7 + "/" + v8 + "/" + v9+"')AND(HORA ='"+ v3+"'))")
-        # Sumatorio = a la cantidad de registros de la fecha y hora introducida
-        sumatorio = cursor.fetchall()
-        # Cerrar conexion 
-        base_datos_datos.close()
-        LR23.config(text = "Recompte parcial: "+str(len(sumatorio)))
-
+        LR23.config(text = "")                                                          # Limpia posibles mensajes anteriores innecesarios
+        base_datos_datos = sqlite3.connect('databases/basesDeDatosRegistros.db')        # Crea la base de datos o conecta con ella
+        cursor = base_datos_datos.cursor()                                              # Crea el cursor 
+        cursor.execute("SELECT *, oid FROM bd_registros WHERE ((FECHA LIKE'" +v7 + "/" + v8 + "/" + v9+"')AND(HORA ='"+ v3+"'))")        # Coge el valor del ultimo oid
+        sumatorio = cursor.fetchall()                                                   # Sumatorio = a la cantidad de registros de la fecha y hora introducida
+        base_datos_datos.close()                                                        # Cerrar conexion 
+        LR23.config(text = "Recompte parcial: "+str(len(sumatorio)))                    # Pinta el sumatorio
+        LR23.config(fg = "green")                                                       # Pinta el sumatorio en verde
         # Pinta la lista actualizada
-        # Crea la base de datos o conecta con ella
-        base_datos_datos = sqlite3.connect('databases/basesDeDatosRegistros.db')
-            
-        # Crea el cursor
-        cursor = base_datos_datos.cursor()
-        
-        # Coge el valor del ultimo oid
-        cursor.execute("SELECT *, oid FROM bd_registros")
-        
+        base_datos_datos = sqlite3.connect('databases/basesDeDatosRegistros.db')        # Crea la base de datos o conecta con ella  
+        cursor = base_datos_datos.cursor()                                              # Crea el cursor
+        cursor.execute("SELECT *, oid FROM bd_registros")                               # Coge el valor del ultimo oid
+
+        # Damos valor a idAdecuado
         try:
             datos = cursor.fetchall()
             dato = datos[-1]
             idAdecuado = dato[8]
         except:
-            idAdecuado = 0
-            
+            idAdecuado = 0         
         idCorrecto = int(idAdecuado)+1
         
-        # Cerrar conexion 
-        base_datos_datos.close() 
-            
-        LRR1.config(text = idCorrecto)
+        base_datos_datos.close()                                                        # Cerrar conexion    
+        LRR1.config(text = idCorrecto)                                                  # Pinta el id adecuado
+        LRR21.focus()                                                                   # Coloca foco
 
-        # Coloca foco
-        LRR21.focus()
         
     # Crea la base de datos o conecta con ella
     base_datos_datos = sqlite3.connect('databases/basesDeDatosRegistros.db')
@@ -4330,7 +4432,11 @@ def menuRegistrosIntroducir                         ():
         LRR73.insert(1.0,vr6)
         vr7 = False
     Boton4activado(menuRegistrosIntroducirIntroduce)
-    query_todos('databases/basesDeDatosRegistros.db',"SELECT *, oid FROM bd_registros ORDER BY FECHA DESC, oid DESC",8,"EstamosEnRegistros","ID","","DATA","DESCRIPCIÓ","ORIGEN","HORA","PRODUCTE","FONT","")        
+    query_todos('databases/basesDeDatosRegistros.db',
+                "SELECT *, oid FROM bd_registros ORDER BY FECHA DESC, oid DESC",
+                8,
+                "EstamosEnRegistros",
+                "ID","","DATA","DESCRIPCIÓ","ORIGEN","HORA","PRODUCTE","FONT","")        
     ActivaBotonPyFocus(LRR21,BotonPrimeroQ21) 
 def menuRegistrosConsultar                          ():
 
@@ -7018,70 +7124,13 @@ def menuIncidenciasIntroducir                       ():
     def menuIncidenciasIntroducirIntroduce ():
         global horas
         # Rescata los valores de los campos
-        v1 = LR1.cget("text")
-        v2 = LRR22.get()
-        v3 = LRR31.get()
-        v4 = LRR42.get()
-        v5 = LRR52.get()
-        v6 = LRR61.get()
-        v7 = LRR72.get()
-        v8 = LRR82.get()
-        v9 = LRR92.get()
-        v10 = LRR102.get()
-        v11 = LRR112.get()
-        v12 = LRR122.get()
-        v13 = LRR131.get()
-        v14 = LRR141.get()
-        v16 = LRR161.get()
-        v17 = LRR172.get()
-        v18 = LRR181.get()
-        v19 = LRR213.get(1.0,END)
-        v20 = LRR201.get()
-        v21 = LRR192.get()
-        v22 = LRR152.get()    
+        v1,v2,v3,v4,v5,v6,v7,v8,v9,v10,v11,v12,v13,v14,v16,v17,v18,v19,v20,v21,v22 = LR1.cget("text"),LRR22.get(),LRR31.get(),LRR42.get(),LRR52.get(),LRR61.get(),LRR72.get(),LRR82.get(),LRR92.get(),LRR102.get(),LRR112.get(),LRR122.get(),LRR131.get(),LRR141.get(),LRR161.get(),LRR172.get(),LRR181.get(),LRR213.get(1.0,END),LRR201.get(),LRR192.get(),LRR152.get()
+              
+        muralla = False
+        muralla,v2 = cotejaFechaBlock(muralla,v2,LRR22)
+        if muralla == True:   return
         
-        # Coteja errores
-        if v2 != "":
-            try:
-                # Si el principio de v2 es 1 dígito y "/"
-                if v2[1] == "/":
-                    #Añadimos un 0 delante
-                    v2 = "0" + v2
-                # Si el principio de v2 no es 2 dígitos y "/"
-                if v2[0:2].isdigit() == False:
-                    LR23.config(text = "Dia incorrecte")
-                    LRR22.focus()
-                    return
-
-                # Si la posición 4 es "/"
-                if v2[4] == "/":
-                    # Añadimos un 0 entre la posición 2 y 3
-                    v2 = v2[0:3] + "0" + v2[3:]
-                # Si v2 no contiene "/" dos digitos y "/"
-                if v2[3:5].isdigit() == False:
-                    LR23.config(text = "Mes incorrecte")
-                    LRR22.focus()
-                    return
-
-                # Si el largo de la cadena v2 es inferior a 10 caracteres
-                if len(v2) <= 9:
-                    # Añadimos 20 entre las posiciones 5 y 6
-                    v2 = v2[0:6] + "20" + v2[6:] 
-                # Si v2 no acaba en 4 dígitos
-                if v2[6:10].isdigit() == False:
-                    LR23.config(text = "Any incorrecte")
-                    LRR22.focus()
-                    return
-                # Si el largo es superior a 10 caracteres
-                if len(v2) > 10:
-                    LR23.config(text = "Data incorrecte")
-                    LRR22.focus()
-                    return
-            except:
-                    LR23.config(text = "Data incorrecte")
-                    LRR22.focus() 
-                    return 
-        elif v2 == "" and v20 != "Pendent gaudir":
+        if v2 == "" and v20 != "Pendent gaudir":
             LR23.config(text = "Manca data")
             LRR22.focus() 
             return
@@ -7293,7 +7342,11 @@ def menuIncidenciasIntroducir                       ():
         base_datos_datos.close() 
                             
         # Pinta datos en zona 3
-        query_todos('databases/basesDeDatosIncidencias.db',"SELECT *, oid FROM bd_incidencias ORDER BY FECHA_CREA DESC, HORA DESC",8,"EstamosEnIncidencias","ID","DATA","HORA","PAX","PRODUCTE","IDIOMA","ESTAT","CLIENT","PAGAT")        
+        query_todos('databases/basesDeDatosIncidencias.db',
+                    "SELECT *, oid FROM bd_incidencias ORDER BY FECHA_CREA DESC, HORA DESC",
+                    8,
+                    "EstamosEnIncidencias",
+                    "ID","DATA","HORA","PAX","PRODUCTE","IDIOMA","ESTAT","CLIENT","PAGAT")        
 
 
         # Limpia posibles mensajes anteriores innecesarios
@@ -7380,7 +7433,11 @@ def menuIncidenciasIntroducir                       ():
                          ["X3",LR21,"NOTES:",LRR213])
    
     Boton4activado(menuIncidenciasIntroducirIntroduce)
-    query_todos('databases/basesDeDatosIncidencias.db',"SELECT *, oid FROM bd_incidencias ORDER BY FECHA_CREA DESC, HORA DESC",8,"EstamosEnIncidencias","ID","DATA","HORA","PAX","PRODUCTE","IDIOMA","ESTAT","CLIENT","PAGAT")        
+    query_todos('databases/basesDeDatosIncidencias.db',
+                "SELECT *, oid FROM bd_incidencias ORDER BY FECHA_CREA DESC, HORA DESC",
+                8,
+                "EstamosEnIncidencias",
+                "ID","DATA","HORA","PAX","PRODUCTE","IDIOMA","ESTAT","CLIENT","PAGAT")        
     
     # Si el usuario tiene un nivel de 3 o más...
     if int(usuarioNivel) >= 3:
@@ -7737,7 +7794,11 @@ def menuIncidenciasFacturaProformaIntroducirCrear       ():
         base_datos_datos.close() 
                             
         # Pinta datos en zona 3
-        query_todos('databases/basesDeDatosProforma.db',"SELECT *, oid FROM bd_proforma ORDER BY NUM_PRO DESC",8,"EstamosEnProformas","ID","DATA","","PROFORMA","CLIENT","QUANTITAT","CONCEPTE","PREU","")        
+        query_todos('databases/basesDeDatosProforma.db',
+                    "SELECT *, oid FROM bd_proforma ORDER BY NUM_PRO DESC",
+                    8,
+                    "EstamosEnProformas",
+                    "ID","DATA","","PROFORMA","CLIENT","QUANTITAT","CONCEPTE","PREU","")        
 
         # Limpia posibles mensajes anteriores innecesarios
         LR23.config(text = "")
@@ -7849,7 +7910,11 @@ def menuIncidenciasFacturaProformaIntroducirCrear       ():
     raiz.bind("<Control-P>", lambda event: BotonImprimirForzado())     
     Boton7activado(PDFProforma)
     Boton4activado(menuProformaIntroducirIntroduce)
-    query_todos('databases/basesDeDatosProforma.db',"SELECT *, oid FROM bd_proforma ORDER BY NUM_PRO DESC",8,"EstamosEnProformas","ID","DATA","","PROFORMA","CLIENT","QUANTITAT","CONCEPTE","PREU","")        
+    query_todos('databases/basesDeDatosProforma.db',
+                "SELECT *, oid FROM bd_proforma ORDER BY NUM_PRO DESC",
+                8,
+                "EstamosEnProformas",
+                "ID","DATA","","PROFORMA","CLIENT","QUANTITAT","CONCEPTE","PREU","")        
     
     ActivaBotonPyFocus(LRR22,BotonPrimeroQ22)
 def menuIncidenciasFacturaProformaConsultar         ():
@@ -8037,7 +8102,11 @@ def menuIncidenciasBloqueosBloquear                 ():
         base_datos_datos.close() 
                             
         # Pinta datos en zona 3
-        query_todos('databases/basesDeDatosIncidencias.db',"SELECT *, oid FROM bd_bloqueos ORDER BY FECHA",8,"EstamosEnBloqueos","ID","DATA","DESDE","FINS","","","","","")
+        query_todos('databases/basesDeDatosIncidencias.db',
+                    "SELECT *, oid FROM bd_bloqueos ORDER BY FECHA",
+                    8,
+                    "EstamosEnBloqueos",
+                    "ID","DATA","DESDE","FINS","","","","","")
 
         # Limpia posibles mensajes anteriores innecesarios
         LR23.config(text = "")
@@ -8059,7 +8128,9 @@ def menuIncidenciasBloqueosBloquear                 ():
                          ["X1",LR3,"HORA FINAL:",LRR31,horas])
           
     Boton4activado(menuIncidenciasBloqueosBloquea)
-    query_todos('databases/basesDeDatosIncidencias.db',"SELECT *, oid FROM bd_bloqueos ORDER BY FECHA",8,"EstamosEnBloqueos",
+    query_todos('databases/basesDeDatosIncidencias.db',
+                "SELECT *, oid FROM bd_bloqueos ORDER BY FECHA",
+                8,"EstamosEnBloqueos",
                 "ID","DATA","DESDE","FINS","","","","","")
               
     ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
@@ -8072,7 +8143,10 @@ def menuIncidenciasBloqueosDesbloquear              ():
 
     OpcionesQuestionario(["X2",LR1,"DIA/MES/ANY:",LRR12])       
     Boton4activado(bloqueoBorraUno)
-    query_todos('databases/basesDeDatosIncidencias.db',"SELECT *, oid FROM bd_bloqueos ORDER BY FECHA",8,"EstamosEnBloqueos",
+    query_todos('databases/basesDeDatosIncidencias.db',
+                "SELECT *, oid FROM bd_bloqueos ORDER BY FECHA",
+                8,
+                "EstamosEnBloqueos",
                 "ID","DATA","DESDE","FINS","","","","","")
 
 
@@ -8280,7 +8354,11 @@ def MenuDatosProductoIntroducir                         ():
         base_datos_datos.close() 
         
         # Pinta datos en zona 3
-        query_todos('databases/basesDeDatosDatos.db',"SELECT *, oid FROM bd_productos ORDER BY oid DESC",4,"EstamosEnProductos","ID","NOM","PREU REAL","PREU ACTUAL","TIPUS")
+        query_todos('databases/basesDeDatosDatos.db',
+                    "SELECT *, oid FROM bd_productos ORDER BY oid DESC",
+                    4,
+                    "EstamosEnProductos",
+                    "ID","NOM","PREU REAL","PREU ACTUAL","TIPUS")
 
 
         # Limpia posibles mensajes anteriores innecesarios
@@ -8348,7 +8426,11 @@ def MenuDatosProductoIntroducir                         ():
                          ["X1",LR5,"REGISTRE/STOCK:",LRR51,["Registre","Stock"]])
     
     Boton4activado(MenuDatosProductoIntroducirIntroduce)
-    query_todos('databases/basesDeDatosDatos.db',"SELECT *, oid FROM bd_productos ORDER BY oid DESC",4,"EstamosEnProductos","ID","NOM","PREU REAL","PREU ACTUAL","TIPUS")
+    query_todos('databases/basesDeDatosDatos.db',
+                "SELECT *, oid FROM bd_productos ORDER BY oid DESC",
+                4,
+                "EstamosEnProductos",
+                "ID","NOM","PREU REAL","PREU ACTUAL","TIPUS")
     ActivaBotonPyFocus(LRR22,BotonPrimeroQ22)
 def MenuDatosProductoConsultar                          ():
  
@@ -8472,7 +8554,11 @@ def MenuDatosClienteIntroducir                          ():
         base_datos_datos.close() 
         
         # Pinta datos en zona 3
-        query_todos('databases/basesDeDatosClientes.db',"SELECT *, oid FROM bd_clientes ORDER BY oid DESC",7,"EstamosEnClientes","ID","NOM","","","CIUTAT/PAIS","TELÈFON","MAIL","NIF/CIF")
+        query_todos('databases/basesDeDatosClientes.db',
+                    "SELECT *, oid FROM bd_clientes ORDER BY oid DESC",
+                    7,
+                    "EstamosEnClientes",
+                    "ID","NOM","","","CIUTAT/PAIS","TELÈFON","MAIL","NIF/CIF")
 
         # Limpia posibles mensajes anteriores innecesarios
         LR23.config(text = "")
@@ -8547,7 +8633,10 @@ def MenuDatosClienteIntroducir                          ():
     BB4.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 10, command =MenuDatosClienteIntroducirIntroduce)
     cambiaPasaEncima(BB4,"green","#27779d") 
     
-    query_todos('databases/basesDeDatosClientes.db',"SELECT *, oid FROM bd_clientes ORDER BY oid DESC",7,"EstamosEnClientes",
+    query_todos('databases/basesDeDatosClientes.db',
+                "SELECT *, oid FROM bd_clientes ORDER BY oid DESC",
+                7,
+                "EstamosEnClientes",
                 "ID","NOM","","","CIUTAT/PAIS","TELÈFON","MAIL","NIF/CIF")
        
     ActivaBotonPyFocus(LRR22,BotonPrimeroQ22)
@@ -8667,7 +8756,11 @@ def menuDatosUsuarioIntroducir                          ():
         base_datos_datos.close() 
         
         # Pinta datos en zona 3
-        query_todos('databases/basesDeDatosDatos.db',"SELECT *, oid FROM bd_usuarios ORDER BY oid DESC",7,"EstamosEnUsuarios","ID","NOM","CLAU","NIVELL","ANGLÈS","CASTELLÀ"," CATALÀ","FRANCÈS")
+        query_todos('databases/basesDeDatosDatos.db',
+                    "SELECT *, oid FROM bd_usuarios ORDER BY oid DESC",
+                    7,
+                    "EstamosEnUsuarios",
+                    "ID","NOM","CLAU","NIVELL","ANGLÈS","CASTELLÀ"," CATALÀ","FRANCÈS")
       
 
         # Limpia posibles mensajes anteriores innecesarios
@@ -8690,7 +8783,11 @@ def menuDatosUsuarioIntroducir                          ():
                          ["X1",LR8,"FRANCÈS:",LRR81,["Si","No"]])
         
     Boton4activado(MenuDatosUsuarioIntroducirIntroduce)
-    query_todos('databases/basesDeDatosDatos.db',"SELECT *, oid FROM bd_usuarios ORDER BY oid DESC",7,"EstamosEnUsuarios","ID","NOM","CLAU","NIVELL","ANGLÈS","CASTELLÀ"," CATALÀ","FRANCÈS")
+    query_todos('databases/basesDeDatosDatos.db',
+                "SELECT *, oid FROM bd_usuarios ORDER BY oid DESC",
+                7,
+                "EstamosEnUsuarios",
+                "ID","NOM","CLAU","NIVELL","ANGLÈS","CASTELLÀ"," CATALÀ","FRANCÈS")
     ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
 def menuDatosUsuarioConsultar                           ():
       
