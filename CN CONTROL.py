@@ -105,11 +105,7 @@ global puntero                      # Definimos las variables que vamos a usar e
 puntero = 0                         # Definimos el valor del puntero para cuando los listados som más largos que el espacio en pantalla
 
 # ---------------------- Funciones sobre errores en los questionarios ---------------------      
-def cotejaFecha             (muralla,dia,dialabel,mes,meslabel,anyo,anyolabel):     # Función que comprueba si la fecha introducida es correcta
-
-    LR23.config(text = "")          # Borramos el mensaje de error que hubiera en la parte inferior derecha de la pantalla
-    LR23.config(fg = "red")         # Pintamos LR23 en rojo para que se vea que hay un error y que hay que corregirlo
-    
+def cotejaFecha             (muralla,dia,dialabel,mes,meslabel,anyo,anyolabel):     # Función que comprueba si la fecha introducida es correcta  
     
     if len(dia) == 1:               # Si el día tiene un solo dígito le añadimos un 0 delante
         dia = "0" + dia    
@@ -152,12 +148,8 @@ def cotejaFecha             (muralla,dia,dialabel,mes,meslabel,anyo,anyolabel): 
         muralla = True
     return muralla,dia,mes,anyo
 def cotejaFechaBlock        (muralla,fecha,fechalabel):                             # Función que comprueba si la fecha introducida es correcta
-
-    LR23.config(text = "")          # Borramos el mensaje de error que hubiera en la parte inferior derecha de la pantalla
-    LR23.config(fg = "red")         # Pintamos de rojo el campo LR23
     
     if fecha == "": return muralla,fecha     # Si la fecha está vacía devolvemos el valor de la variable muralla y la fecha
-
     # Si fecha no contiene dos veces "/"
     if fecha.count("/") != 2:
         LR23.config(text = "Format de data incorrecte")
@@ -245,9 +237,6 @@ def cotejaFechaBlock        (muralla,fecha,fechalabel):                         
     '''
     return muralla,fecha
 def cotejaFechaEmptyOk      (muralla,dia,dialabel,mes,meslabel,anyo,anyolabel):     # Función que comprueba si la fecha introducida es correcta
-
-    LR23.config(text = "")          # Borramos el mensaje de error que hubiera en la parte inferior derecha de la pantalla
-    LR23.config(fg = "red")         # Pintamos de rojo el campo LR23
     
     if len(dia) == 1:               # Si el día tiene un solo dígito le añadimos un 0 delante
         dia = "0" + dia
@@ -281,15 +270,22 @@ def cotejaFechaEmptyOk      (muralla,dia,dialabel,mes,meslabel,anyo,anyolabel): 
     
     return muralla,dia,mes,anyo
 def cotejaVacio             (muralla,campo,label):                                  # Función que comprueba si el campo está vacío
-
-    LR23.config(text = "")          # Borramos el mensaje de error que hubiera en la parte inferior derecha de la pantalla
-    LR23.config(fg = "red")         # Pintamos de rojo el campo LR23
     
     if campo == "":
         LR23.config(text = "Registre buit")
         label.focus()
         muralla = True
     return muralla
+def cotejaVacioCond1        (muralla,campo1,label,campo2,valor):                    # Función que comprueba si el campo está vacío condicionalmente
+    if campo1 == "" and campo2 != valor:
+        LR23.config(text = "Manca data")
+        label.focus()
+        muralla = True
+    return muralla
+def cotejaCondicional       (campo1,valor1,campo2,valor2):                          # Función que comprueba si el campo es condicional
+    if campo2 == valor2:
+        campo1 = valor1
+    return campo1
 # ------------------------------ Funciones globales ----------------------
 def copia                   ():
     if raiz.focus_get() == None:                # Comprueba si el foco está en alguna label o entry.
@@ -1142,7 +1138,9 @@ def query_registros_busca   ():
     # Coteja fallos
     muralla = False
     muralla,v1,v2,v3 = cotejaFechaEmptyOk(muralla,v1,LRR12,v2,LRR22,v3,LRR32)
-    if muralla == True: return 
+    if muralla == True: 
+        LR23.config(fg = "red")         # Pintamos de rojo el campo LR23
+        return 
        
     # Salva datos       
     # Creamos la base de datos o conectamos con una
@@ -1220,8 +1218,9 @@ def RegistroSalvaCorreccion ():
     muralla = cotejaVacio(muralla,v2,LRR31)
     muralla = cotejaVacio(muralla,v1,LRR21)
     muralla,v9,v8,v7 = cotejaFecha(muralla,v9,diaFecha,v8,mesFecha,v7,anyoFecha)
-    if muralla == True: return    
-       
+    if muralla == True: 
+        LR23.config(fg = "red")         # Pintamos de rojo el campo LR23
+        return        
     base_datos = sqlite3.connect('databases/basesDeDatosRegistros.db')      # Crea una base de datos o abre la existente 
     c = base_datos.cursor()                                                 # Conecta el cursor
 
@@ -4331,8 +4330,10 @@ def menuRegistrosIntroducir                         ():
         muralla = cotejaVacio(muralla,v3,LRR41)
         muralla = cotejaVacio(muralla,v2,LRR31)
         muralla = cotejaVacio(muralla,v1,LRR21)
-        muralla,v9,v8,v7 = cotejaFecha(muralla,v9,diaFecha,v8,mesFecha,v7,anyoFecha)
-        if muralla == True: return    
+        # muralla,v9,v8,v7 = cotejaFecha(muralla,v9,diaFecha,v8,mesFecha,v7,anyoFecha)
+        if muralla == True: 
+            LR23.config(fg = "red")         # Pintamos de rojo el campo LR23
+            return    
 
         # Salva datos
         base_datos_datos = sqlite3.connect('databases/basesDeDatosRegistros.db')        # Crea la base de datos o conecta con ella
@@ -7127,15 +7128,15 @@ def menuIncidenciasIntroducir                       ():
         v1,v2,v3,v4,v5,v6,v7,v8,v9,v10,v11,v12,v13,v14,v16,v17,v18,v19,v20,v21,v22 = LR1.cget("text"),LRR22.get(),LRR31.get(),LRR42.get(),LRR52.get(),LRR61.get(),LRR72.get(),LRR82.get(),LRR92.get(),LRR102.get(),LRR112.get(),LRR122.get(),LRR131.get(),LRR141.get(),LRR161.get(),LRR172.get(),LRR181.get(),LRR213.get(1.0,END),LRR201.get(),LRR192.get(),LRR152.get()
               
         muralla = False
-        muralla,v2 = cotejaFechaBlock(muralla,v2,LRR22)
-        if muralla == True:   return
-        
-        if v2 == "" and v20 != "Pendent gaudir":
-            LR23.config(text = "Manca data")
-            LRR22.focus() 
-            return
-        if v20 == "Pendent gaudir":
-            v2 = "Per definir"    
+        muralla     = cotejaVacio(muralla,v20,LRR201)
+        muralla,v17 = cotejaFechaBlock(muralla,v17,LRR172)
+        muralla,v2  = cotejaFechaBlock(muralla,v2,LRR22)
+        v2          = cotejaCondicional(v2,"Per definir",v20,"Pendent gaudir")
+        muralla     = cotejaVacioCond1(muralla,v2,LRR22,v20,"Pendent gaudir")
+        if muralla == True: 
+            LR23.config(fg = "red")         # Pintamos de rojo el campo LR23
+            return         
+
         # Abre la base de datos bd_incidencias
         conn = sqlite3.connect('databases/basesDeDatosIncidencias.db')
         c = conn.cursor()
@@ -7166,54 +7167,7 @@ def menuIncidenciasIntroducir                       ():
                 return
         # Cerramos la base de datos
         conn.close()
-        
-        # Si v17 contiene algo
-        if v17 != "":
-            try:
-                # Si el principio de v17 es 1 dígito y "/"
-                if v17[1] == "/":
-                    #Añadimos un 0 delante
-                    v17 = "0" + v17
-                # Si el principio de v17 no es 2 dígitos y "/"
-                if v17[0:2].isdigit() == False:
-                    LR23.config(text = "Dia incorrecte")
-                    LRR172.focus()
-                    return
-
-                # Si la posición 4 es "/"
-                if v17[4] == "/":
-                    # Añadimos un 0 entre la posición 2 y 3
-                    v17 = v17[0:3] + "0" + v17[3:]
-                # Si v17 no contiene "/" dos digitos y "/"
-                if v17[3:5].isdigit() == False:
-                    LR23.config(text = "Mes incorrecte")
-                    LRR172.focus()
-                    return
-
-                # Si el largo de la cadena v17 es inferior a 10 caracteres
-                if len(v17) <= 9:
-                    # Añadimos 20 entre las posiciones 5 y 6
-                    v17 = v17[0:6] + "20" + v17[6:] 
-                # Si v17 no acaba en 4 dígitos
-                if v17[6:10].isdigit() == False:
-                    LR23.config(text = "Any incorrecte")
-                    LRR172.focus()
-                    return
-                # Si el largo es superior a 10 caracteres
-                if len(v17) > 10:
-                    LR23.config(text = "Data incorrecte")
-                    LRR172.focus()
-                    return
-            except:
-                    LR23.config(text = "Data incorrecte")
-                    LRR172.focus() 
-                    return
-        # Si ESTADO está vacío
-        if v20 == "":
-            LR23.config(text = "Estat incorrecte")
-            LRR201.focus()
-            return    
-        
+                
         # Miramos si existe una incidencia con la misma fecha y hora
         # Abrimos la base de datos de incidencias
         conn = sqlite3.connect('databases/basesDeDatosIncidencias.db')    
