@@ -286,6 +286,94 @@ def cotejaCondicional       (campo1,valor1,campo2,valor2):                      
     if campo2 == valor2:
         campo1 = valor1
     return campo1
+def cotejaFechaBloqueada    (muralla,dia,hora,label):                               # Función que comprueba si la fecha está bloqueada
+       
+    # Abre la base de datos bd_incidencias
+    conn = sqlite3.connect('databases/basesDeDatosIncidencias.db')
+    c = conn.cursor()
+    # Crea una lista con todos los datos de bd_bloqueos
+    c.execute("SELECT * FROM bd_bloqueos")
+    casos = c.fetchall()
+    # Revisa todos los datos de c por si coinciden con v2
+    for row in casos:
+            
+        horasConcretas = []
+        activo = False
+        for i in horas:
+            if i == row[1]:
+                activo = True
+            if i == row[2]:
+                activo = False
+            if  activo == True:
+                # Añadimos i a la lista de horas concretas
+                horasConcretas.append(i)
+            
+        # Si el dia es igual a la fecha de bloqueo y la hora está entre las horas de la fecha de bloqueo
+        if dia == row[0] and hora in horasConcretas:
+            # Avisamos de la anomalía y regresamos
+            LR23.config(text = "Data bloquejada")
+            label.focus()
+            muralla = True
+            # Cerramos la base de datos
+            conn.close()
+            return muralla
+    # Cerramos la base de datos
+    conn.close()
+    return muralla   
+def cotejaDatosCliente      (cliente,telefono,mail,contacto):                       # Función que comprueba si los datos del cliente son correctos
+
+    base_datos_clientes = sqlite3.connect('databases/basesDeDatosClientes.db')      # Abre la base de datos de clientes
+
+    cursor1 = base_datos_clientes.cursor()                                          # Crea el cursor
+
+    cursor1.execute("SELECT * FROM bd_Clientes WHERE NOM ='"+cliente+"'")           # Busca el cliente 
+
+    clientes = cursor1.fetchall()                                                   # Crea una lista con los datos del cliente
+    largo = len(clientes)                                                           # Si cursor1 tiene una sóla linea
+
+    if largo == 1:
+        if telefono == "":                                                          # Si el telefono está vacío le damos el valor del cliente
+            telefono = clientes[0][4]
+        if mail == "":                                                              # Si el mail está vacío le damos el valor del cliente
+            mail = clientes[0][5]
+        if contacto == "":                                                          # Si el contacto está vacío le damos el valor del cliente   
+            contacto = clientes[0][7]
+    return telefono,mail,contacto
+def cotejaDatoCoincidente   (muralla,retorno,mensaje,base,
+                             lista,busqueda,label,texto,pausa,id,color):            # Función que comprueba si el campo coincide con alguno dentro de la misama base de datos
+    # Abrimos la base de datos de incidencias
+    conn = sqlite3.connect(base)    
+    # Creamos el cursor
+    miCursor = conn.cursor()
+    # Crea una lista con los datos FECHA y HORA
+    miCursor.execute(busqueda)
+    casos = miCursor.fetchall()
+    cant_casos = len(casos)
+    # Busca en casos un caso con el mismo ID que v1
+    for caso in casos:
+        if caso[-1] == id:
+            cant_casos -= 1
+    # Si hay más de un caso con la misma fecha y hora
+    if cant_casos > 0 and mensaje == True:
+        global ventana2
+        ventana2 = Tk()                         # Creamos la ventana
+        ventana2.title(" ")                     # Damos titulo a la ventana
+        ventana2.geometry("500x250")            # Damos tamaño a la ventana
+        ventana2.configure(bg='red')            # Damos color de fondo a la ventana
+        ventana2.iconbitmap("image/icono.ico")  # Damos icono a la ventana
+        ventana2.deiconify()                    # Mostramos la ventana
+        ventana2label = Label(ventana2, text = texto, bg = color, fg = "white", font = ("Helvetica", 12))   
+        ventana2label.place(relx = 0.5, rely = 200, anchor = CENTER)               
+        ventana2label.pack()                    # Coloca el label en la ventana
+        ventana2.overrideredirect(True)         # Quitamos el marco de la ventana
+        ventana2.update()                       # Actualiza la ventana       
+        time.sleep(pausa)                       # X segundos de pausa
+        ventana2.destroy()                      # Destruye la ventana
+    if cant_casos > 0 and retorno == True:
+        muralla = True
+    if label != "":
+        label.focus()
+    return muralla    
 # ------------------------------ Funciones globales ----------------------
 def copia                   ():
     if raiz.focus_get() == None:                # Comprueba si el foco está en alguna label o entry.
@@ -7128,137 +7216,29 @@ def menuIncidenciasIntroducir                       ():
         v1,v2,v3,v4,v5,v6,v7,v8,v9,v10,v11,v12,v13,v14,v16,v17,v18,v19,v20,v21,v22 = LR1.cget("text"),LRR22.get(),LRR31.get(),LRR42.get(),LRR52.get(),LRR61.get(),LRR72.get(),LRR82.get(),LRR92.get(),LRR102.get(),LRR112.get(),LRR122.get(),LRR131.get(),LRR141.get(),LRR161.get(),LRR172.get(),LRR181.get(),LRR213.get(1.0,END),LRR201.get(),LRR192.get(),LRR152.get()
               
         muralla = False
-        muralla     = cotejaVacio(muralla,v20,LRR201)
-        muralla,v17 = cotejaFechaBlock(muralla,v17,LRR172)
-        muralla,v2  = cotejaFechaBlock(muralla,v2,LRR22)
-        v2          = cotejaCondicional(v2,"Per definir",v20,"Pendent gaudir")
-        muralla     = cotejaVacioCond1(muralla,v2,LRR22,v20,"Pendent gaudir")
-        if muralla == True: 
-            LR23.config(fg = "red")         # Pintamos de rojo el campo LR23
-            return         
-
-        # Abre la base de datos bd_incidencias
-        conn = sqlite3.connect('databases/basesDeDatosIncidencias.db')
-        c = conn.cursor()
-        # Crea una lista con todos los datos de bd_bloqueos
-        c.execute("SELECT * FROM bd_bloqueos")
-        casos = c.fetchall()
-        # Revisa todos los datos de c por si coinciden con v2
-        for row in casos:
-            
-            horasConcretas = []
-            activo = False
-            for i in horas:
-                if i == row[1]:
-                    activo = True
-                if i == row[2]:
-                    activo = False
-                if  activo == True:
-                    # Añadimos i a la lista de horas concretas
-                    horasConcretas.append(i)
-            
-            # Si v2 es igual a la fecha de bloqueo y la hora está entre las horas de la fecha de bloqueo
-            if v2 == row[0] and v6 in horasConcretas:
-                # Avisamos de la anomalía y regresamos
-                LR23.config(text = "Data bloquejada")
-                LRR12.focus()
-                # Cerramos la base de datos
-                conn.close()
-                return
-        # Cerramos la base de datos
-        conn.close()
-                
-        # Miramos si existe una incidencia con la misma fecha y hora
-        # Abrimos la base de datos de incidencias
-        conn = sqlite3.connect('databases/basesDeDatosIncidencias.db')    
-        # Creamos el cursor
-        miCursor = conn.cursor()
-        # Crea una lista con los datos FECHA y HORA
-        miCursor.execute("SELECT *,oid FROM bd_incidencias WHERE ((FECHA = '" + v2 + "') AND (HORA = '" + v6+ "'))")
-        casos = miCursor.fetchall()
-        cant_casos = len(casos)
-        # Busca en casos un caso con el mismo ID que v1
-        for caso in casos:
-            if caso[-1] == v1:
-                cant_casos -= 1
-        # Si hay más de un caso con la misma fecha y hora
-        if cant_casos > 0 and v20 != "Pendent gaudir":
-            global ventana2
-            ventana2 = Tk()                         # Creamos la ventana
-            ventana2.title(" ")                     # Damos titulo a la ventana
-            ventana2.geometry("500x250")            # Damos tamaño a la ventana
-            ventana2.configure(bg='red')            # Damos color de fondo a la ventana
-            ventana2.iconbitmap("image/icono.ico")  # Damos icono a la ventana
-            ventana2.deiconify()                    # Mostramos la ventana
-            ventana2label = Label(ventana2, text = "¡¡ATENCIÓ!! Ja existeix una altra incidència amb aquesta data i hora", bg = "red", fg = "white", font = ("Helvetica", 12))   
-            ventana2label.place(relx = 0.5, rely = 200, anchor = CENTER)               
-            ventana2label.pack()                    # Coloca el label en la ventana
-            ventana2.overrideredirect(True)         # Quitamos el marco de la ventana
-            ventana2.update()                       # Actualiza la ventana       
-            time.sleep(3)                           # 2 segundos de pausa
-            ventana2.destroy()                      # Destruye la ventana
-                                   
-        # Si TELF_EXTRA es ""
-        if v4 == "":
-            try:
-                # Abre la base de datos de clientes
-                base_datos_clientes = sqlite3.connect('databases/basesDeDatosClientes.db')
-                # Crea el cursor
-                cursor1 = base_datos_clientes.cursor()
-                # Busca el cliente 
-                cursor1.execute("SELECT * FROM bd_Clientes WHERE NOM ='"+v3+"'")
-                clientes = cursor1.fetchall()
-                # Si cursor1 tiene una sóla linea
-                largo = len(clientes)
-                if largo == 1:
-                    # Buscamos el valor TELEFONO DE la linea CLIENTE
-                    v4 = clientes[0][4]
-                # Cierra la base de datos
-                base_datos_clientes.close() 
-            except:
-                pass
-        # Si MAIL_EXTRA es ""
-        if v5 == "":
-            try:
-                # Abre la base de datos de clientes
-                base_datos_clientes = sqlite3.connect('databases/basesDeDatosClientes.db')
-                # Crea el cursor
-                cursor1 = base_datos_clientes.cursor()
-                # Busca el cliente 
-                cursor1.execute("SELECT * FROM bd_Clientes WHERE NOM ='"+v3+"'")
-                clientes = cursor1.fetchall()
-                # Si cursor1 tiene una sóla linea
-                largo = len(clientes)
-                if largo == 1:
-                    # Buscamos el valor MAIL de la linea CLIENTE
-                    v5 = clientes[0][5]
-                # Cierra la base de datos
-                base_datos_clientes.close()
-            except:
-                pass
-        # Si CONTACTE es ""
-        if v22 == "":
-            # Abre la base de datos de clientes
-            base_datos_clientes = sqlite3.connect('databases/basesDeDatosClientes.db')
-            # Crea el cursor
-            cursor1 = base_datos_clientes.cursor()
-            # Busca el cliente
-            cursor1.execute("SELECT * FROM bd_Clientes WHERE NOM ='"+v3+"'")
-            clientes = cursor1.fetchall()
-            # Si cursor1 tiene una sóla linea
-            largo = len(clientes)
-            if largo == 1:
-                # Buscamos el valor CONTACTE de la linea CLIENTE
-                v22 = clientes[0][7]
-                        
+        muralla     = cotejaVacio(muralla,v20,LRR201)                               # Comprueba que el campo no esté vacío
+        muralla,v17 = cotejaFechaBlock(muralla,v17,LRR172)                          # Comprueba que la fecha no esté bloqueada
+        muralla,v2  = cotejaFechaBlock(muralla,v2,LRR22)                            # Comprueba que la fecha no esté bloqueada
+        v2          = cotejaCondicional(v2,"Per definir",v20,"Pendent gaudir")      # Si el campo v20 es "Pendent gaudir" el campo v2 es "Per definir"
+        muralla     = cotejaVacioCond1(muralla,v2,LRR22,v20,"Pendent gaudir")       # Si el campo v20 no es "Pendent gaudir" el campo v2 no puede estar vacío
+        muralla     = cotejaFechaBloqueada(muralla,v2,v6,LRR22)                     # Comprueba que la fecha no esté bloqueada
+        v4,v5,v22   = cotejaDatosCliente(v3,v4,v5,v22)                              # Comprueba si hay que aprovechar datos del cliente
+        # Comprueba que no exista una incidencia con los mismos datos
+        if muralla == False:
+            muralla     = cotejaDatoCoincidente(muralla,False,True,
+                                            'databases/basesDeDatosIncidencias.db',
+                                            'bd_incidencias',
+                                            "SELECT *,oid FROM bd_incidencias WHERE ((FECHA = '" + v2 + "') AND (HORA = '" + v6+ "'))","",
+                                            "¡¡ATENCIÓ!! Ja existeix una altra incidència amb aquesta data i hora",3,v1,"red")        
+     
+        # Si hay algún error
+        if muralla == True:                                                         # Si hay algún error
+            LR23.config(fg = "red")                                                 # Pintamos de rojo el campo LR23
+            return                                                                  # Salimos de la función
+        
         # Salva datos
-        # Crea la base de datos o conecta con ella
-        base_datos_datos = sqlite3.connect('databases/basesDeDatosIncidencias.db')
-        
-        
-        # Crea el cursor
-        cursor = base_datos_datos.cursor()   
-    
+        base_datos_datos = sqlite3.connect('databases/basesDeDatosIncidencias.db')  # Crea la base de datos o conecta con ella
+        cursor = base_datos_datos.cursor()                                          # Crea el cursor
         # Inserta en la base de tados
         cursor.execute("""INSERT INTO bd_Incidencias VALUES (:fecha,:hora,:pax1,:pax2,:producto,
                        :idioma,:tel_extra,:estado,:usuario,:fecha_cre,:cliente,:mail_extra,:precio1,
@@ -7287,83 +7267,48 @@ def menuIncidenciasIntroducir                       ():
                     'factura':      v19,
                     'contacto':     v22
                     })
-
-
-        # Asegura los cambios
-        base_datos_datos.commit()
-
-        # Cerrar conexion 
-        base_datos_datos.close() 
-                            
+        base_datos_datos.commit()                                                   # Asegura los cambios
+        base_datos_datos.close()                                                    # Cerrar conexion             
         # Pinta datos en zona 3
         query_todos('databases/basesDeDatosIncidencias.db',
                     "SELECT *, oid FROM bd_incidencias ORDER BY FECHA_CREA DESC, HORA DESC",
                     8,
                     "EstamosEnIncidencias",
-                    "ID","DATA","HORA","PAX","PRODUCTE","IDIOMA","ESTAT","CLIENT","PAGAT")        
-
-
-        # Limpia posibles mensajes anteriores innecesarios
-        LR23.config(text = "")
+                    "ID","DATA","HORA","PAX","PRODUCTE","IDIOMA","ESTAT","CLIENT","PAGAT") 
+        LR23.config(text = "")                                                      # Limpia posibles mensajes anteriores innecesarios
 
         # Pinta la lista actualizada
-        # Crea la base de datos o conecta con ella
-        base_datos_datos = sqlite3.connect('databases/basesDeDatosIncidencias.db')
-            
-        # Crea el cursor
-        cursor = base_datos_datos.cursor()
-        
-        # Coge el valor del ultimo oid
-        cursor.execute("SELECT *, oid FROM bd_incidencias")
-        
-        try:
+        base_datos_datos = sqlite3.connect('databases/basesDeDatosIncidencias.db')  # Crea la base de datos o conecta con ella  
+        cursor = base_datos_datos.cursor()                                          # Crea el cursor
+        cursor.execute("SELECT *, oid FROM bd_incidencias")                         # Coge el valor del ultimo oid
+        try:                                                                        # Si hay datos
             datos = cursor.fetchall()
             dato = datos[-1]
             idAdecuado = dato[22]
         except:
             idAdecuado = 0
             
-        idCorrecto = int(idAdecuado)+1
-        
-        # Cerrar conexion 
-        base_datos_datos.close() 
-        
-        # Limpia los campos
-        LimpiaElegibles()
-        
-        # Prepara el nuevo ID    
-        LRR1.config(text = idCorrecto)
+        idCorrecto = int(idAdecuado)+1                                              # Prepara el nuevo ID
+        base_datos_datos.close()                                                    # Cerrar conexion 
+        LimpiaElegibles()                                                           # Limpia los campos
+        LRR1.config(text = idCorrecto)                                              # Prepara el nuevo ID    
+        LRR31.config(state = "readandwrite")                                        # Liberamos la escritura de la etiqueta CLIENT
+        LRR22.focus()                                                               # Coloca foco
 
-
-        # Liberamos la escritura de la etiqueta CLIENT
-        LRR31.config(state = "readandwrite")
-        
-        # Coloca foco
-        LRR22.focus()
-           
-    # Crea la base de datos o conecta con ella
-    base_datos_datos = sqlite3.connect('databases/basesDeDatosIncidencias.db')
-        
-    # Crea el cursor
-    cursor = base_datos_datos.cursor()
-    
-    # Coge el valor del ultimo oid
-    cursor.execute("SELECT *, oid FROM bd_Incidencias")
-    
+    base_datos_datos = sqlite3.connect('databases/basesDeDatosIncidencias.db')      # Crea la base de datos o conecta con ella
+    cursor = base_datos_datos.cursor()                                              # Crea el cursor
+    cursor.execute("SELECT *, oid FROM bd_Incidencias")                             # Coge el valor del ultimo oid
     try:
         datos = cursor.fetchall()
         dato = datos[-1]
         idAdecuado = dato[22]
     except:
-        idAdecuado = 0
-        
-    idCorrecto = int(idAdecuado)+1
-    
-    # Cerrar conexion 
-    base_datos_datos.close()
-    LimpiaLabelsRellena()
-    menusBotones("Tornar",menuIncidencias,"Introduir (I)") 
-    
+        idAdecuado = 0 
+    idCorrecto = int(idAdecuado)+1                                                  # Prepara el nuevo ID
+    base_datos_datos.close()                                                        # Cerrar conexion 
+    LimpiaLabelsRellena()                                                           # Limpia los campos
+    menusBotones("Tornar",menuIncidencias,"Introduir (I)")                          # Pinta los botones
+    # Pinta los campos
     OpcionesQuestionario(["1",LR1,"ID:",LRR1,idCorrecto],
                          ["X2",LR2,"DIA/MES/ANY:",LRR22],
                          ["X1",LR3,"CLIENT:",LRR31,clientes,regresaSinNada1,"readandwrite"],
@@ -7385,23 +7330,20 @@ def menuIncidenciasIntroducir                       ():
                          ["X2",LR19,"FACTURA:",LRR192],
                          ["X1",LR20,"ESTAT:",LRR201,estados],
                          ["X3",LR21,"NOTES:",LRR213])
-   
-    Boton4activado(menuIncidenciasIntroducirIntroduce)
+    Boton4activado(menuIncidenciasIntroducirIntroduce)                              # Boton 4 activado
+    # Pinta datos en zona 3
     query_todos('databases/basesDeDatosIncidencias.db',
                 "SELECT *, oid FROM bd_incidencias ORDER BY FECHA_CREA DESC, HORA DESC",
                 8,
                 "EstamosEnIncidencias",
                 "ID","DATA","HORA","PAX","PRODUCTE","IDIOMA","ESTAT","CLIENT","PAGAT")        
-    
     # Si el usuario tiene un nivel de 3 o más...
     if int(usuarioNivel) >= 3:
         # Ponemos el foco en el botón de estado
         LRR213.focus()
-        return 
-        
-    notasAmpliacion()
-      
-    ActivaBotonPyFocus(LRR22,BotonPrimeroQ22)
+        return  
+    notasAmpliacion()                                                               # Mirmaos si hay que ampliar el blog de notas
+    ActivaBotonPyFocus(LRR22,BotonPrimeroQ22)                                       # Activa el boton de la fecha
 def menuIncidenciasConsultar                        ():
 
     global EstamosEnIntroducir
