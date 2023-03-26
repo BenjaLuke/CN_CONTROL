@@ -104,6 +104,66 @@ stringBusqueda = ""                 # Definimos la variable que vamos a usar par
 global puntero                      # Definimos las variables que vamos a usar en el sector 3
 puntero = 0                         # Definimos el valor del puntero para cuando los listados som más largos que el espacio en pantalla
 
+# ------------------------------------- Ventanas extras -----------------------------------
+def ventanaAviso            (texto,color,pausa):                                    # Función que crea la ventana de aviso
+    global aviso
+    aviso = Tk()                         # Creamos la ventana
+    aviso.title(" ")                     # Damos titulo a la ventana
+    aviso.geometry("500x250+10+10")      # Damos tamaño a la ventana
+    aviso.configure(bg=color)            # Damos color de fondo a la ventana
+    aviso.iconbitmap("image/icono.ico")  # Damos icono a la ventana
+    aviso.deiconify()                    # Mostramos la ventana
+    aviso.config(bd=10)                  # Le da un grosor de borde
+    aviso.config(relief="groove")        # Le da un tipo de borde
+    avisolabel1=Label(aviso,text="",bg = color)    # Creamos un label vacío
+    avisolabel1.pack()                    # Coloca el label en la ventana
+    avisolabel2=Label(aviso,text="",bg = color)    # Creamos un label vacío
+    avisolabel2.pack()                    # Coloca el label en la ventana
+    avisolabel3=Label(aviso,text="",bg = color)    # Creamos un label vacío
+    avisolabel3.pack()                    # Coloca el label en la ventana
+    avisolabel4=Label(aviso,text="",bg = color)    # Creamos un label vacío
+    avisolabel4.pack()                    # Coloca el label en la ventana
+    avisolabel5=Label(aviso,text="",bg = color)    # Creamos un label vacío
+    avisolabel5.pack()                    # Coloca el label en la ventana
+
+    avisolabel6 = Label(aviso, text = texto,
+                       bg = color, fg = "white",
+                       font = ("Helvetica", 13))   
+    avisolabel6.pack()                    # Coloca el label en la ventana
+    aviso.overrideredirect(True)         # Quitamos el marco de la ventana
+    aviso.update()                       # Actualiza la ventana       
+    time.sleep(pausa)                    # X segundos de pausa
+    aviso.destroy()                      # Destruye la ventana 
+def ventanaSeleccion        (texto,color,destinoSi):
+    global seleccion                                                # Función que crea la ventana de selección
+    seleccion = Tk()                         # Creamos la ventana
+    seleccion.title(" ")                     # Damos titulo a la ventana
+    seleccion.geometry("500x250+10+10")      # Damos tamaño a la ventana
+    seleccion.configure(bg=color)            # Damos color de fondo a la ventana
+    seleccion.iconbitmap("image/icono.ico")  # Damos icono a la ventana
+    seleccion.deiconify()                    # Mostramos la ventana
+    seleccion.config(bd=10)                  # Le da un grosor de borde
+    seleccion.config(relief="groove")        # Le da un tipo de borde
+    eti1 = Label(seleccion,text = " ",bg = color)                   # Creamos un label vacío
+    eti1.pack()                                                  # Coloca el label en la ventana
+    eti2 = Label(seleccion,text = " ",bg = color)                   # Creamos un label vacío
+    eti2.pack()                                                  # Coloca el label en la ventana
+    eti3 = Label(seleccion,text = " ",bg = color)                   # Creamos un label vacío
+    eti3.pack()                                                  # Coloca el label en la ventana
+    eti4 = Label(seleccion,text = " ",bg = color)                   # Creamos un label vacío
+    eti4.pack()                                                  # Coloca el label en la ventana
+    aviso = Label(seleccion,text = (texto),
+                  anchor = "center",
+                  background = color, font = ("Helvetica", 13))     # Creamos un label con el texto
+    aviso.pack()                                                  # Coloca el label en la ventana
+    yes_btn = Button(seleccion, text="SI", command=destinoSi)       # Botón SI
+    yes_btn.pack()                                                # Coloca el botón en la ventana
+    no_btn = Button(seleccion, text="NO", command=del_no)           # Botón NO
+    no_btn.pack()                                                 # Coloca el botón en la ventana
+    no_btn.focus()                                                  # Pone el foco en el botón NO
+    seleccion.overrideredirect(True)                                    # Quitamos el marco de la ventana
+    seleccion.update()                                                  # Actualiza la ventana      
+    seleccion.mainloop()                                            # Bucle de la ventana
 # ---------------------- Funciones sobre errores en los questionarios ---------------------      
 def cotejaFecha             (muralla,dia,dialabel,mes,meslabel,anyo,anyolabel):     # Función que comprueba si la fecha introducida es correcta  
     
@@ -113,57 +173,46 @@ def cotejaFecha             (muralla,dia,dialabel,mes,meslabel,anyo,anyolabel): 
         mes = "0" + mes
     if len(anyo) == 2:              # Si el año tiene dos dígitos le añadimos un 20 delante
         anyo = "20" + anyo
-    if anyo == "" or len(anyo) > 4: # Si el año no tiene 4 dígitos o está vacío
-            
+    if anyo == "" or len(anyo) > 4: # Si el año no tiene 4 dígitos o está vacío        
         LR23.config(text = "Any inexistent")
         anyolabel.focus()
-        muralla = True
-        
-    if len(anyo) != 4:              # Si el año no tiene 4 dígitos
-            
+        muralla = True       
+    if len(anyo) != 4:              # Si el año no tiene 4 dígitos           
         LR23.config(text = "Any no vàlid")
         anyolabel.focus()
-        muralla = True
-        
-    if mes == "":                   # Si el mes está vacío
-            
+        muralla = True      
+    if mes == "":                   # Si el mes está vacío       
         LR23.config(text = "Mes inexistent")
         meslabel.focus()
         muralla = True
-
-    if int(mes) > 12 or int(mes) < 1 or len(mes) != 2:
-            
+    # Si el mes es mayor que 12 o menor que 1
+    if int(mes) > 12 or int(mes) < 1 or len(mes) != 2:      
         LR23.config(text = "Mes no vàlid")
         meslabel.focus()
         muralla = True
-    if dia == "":
-           
+    if dia == "":                   # Si el día está vacío      
         LR23.config(text = "Dia inexistent")
         dialabel.focus()
         muralla = True
-    if int(dia) > 31 or int(dia) < 1:
-            
+    if int(dia) > 31 or int(dia) < 1:# Si el día es mayor que 31 o menor que 1       
         LR23.config(text = "Dia no vàlid")
         dialabel.focus()
         muralla = True
-    return muralla,dia,mes,anyo
+    return muralla,dia,mes,anyo     # Devolvemos el valor de la variable muralla y la fecha
 def cotejaFechaBlock        (muralla,fecha,fechalabel):                             # Función que comprueba si la fecha introducida es correcta
     
-    if fecha == "": return muralla,fecha     # Si la fecha está vacía devolvemos el valor de la variable muralla y la fecha
-    # Si fecha no contiene dos veces "/"
-    if fecha.count("/") != 2:
+    if fecha == "": return muralla,fecha                        # Si la fecha está vacía devolvemos el valor de la variable muralla y la fecha
+    if fecha.count("/") != 2:                                   # Si fecha no contiene dos veces "/"
         LR23.config(text = "Format de data incorrecte")
         fechalabel.focus()
         muralla = True
         return muralla,fecha
-    # Si antes de la primera "/" hay más de dos dígitos
-    if len(fecha[0:fecha.find("/")]) > 2:
+    if len(fecha[0:fecha.find("/")]) > 2:                       # Si antes de la primera "/" hay más de dos dígitos
         LR23.config(text = "Dia incorrecte")
         fechalabel.focus()
         muralla = True
         return muralla,fecha
-    # Si entre la primera "/" y la segunda "/" hay más de dos dígitos
-    if len(fecha[fecha.find("/")+1:fecha.rfind("/")]) > 2:
+    if len(fecha[fecha.find("/")+1:fecha.rfind("/")]) > 2:      # Si entre la primera "/" y la segunda "/" hay más de dos dígitos
         LR23.config(text = "Mes incorrecte")
         fechalabel.focus()
         muralla = True
@@ -174,9 +223,8 @@ def cotejaFechaBlock        (muralla,fecha,fechalabel):                         
         fechalabel.focus()
         muralla = True
         return muralla,fecha
-    # Quitamos las "/" de la fecha y comprobamos que sea un número
-    fecha1 = fecha.replace("/","")
-    if fecha1.isdigit() == False:
+    fecha1 = fecha.replace("/","")                              # Quitamos las "/" de la fecha y comprobamos que sea un número
+    if fecha1.isdigit() == False:                               # Si no es un número
         LR23.config(text = "Format de data incorrecte")
         fechalabel.focus()
         muralla = True
@@ -193,110 +241,65 @@ def cotejaFechaBlock        (muralla,fecha,fechalabel):                         
         fechalabel.focus()
         muralla = True
         return muralla,fecha
-    # Si el dia es un solo dígitos le añadimos un 0 delante
-    if len(fecha[0:fecha.find("/")]) == 1:
+    if len(fecha[0:fecha.find("/")]) == 1:                      # Si el dia es un solo dígitos le añadimos un 0 delante
         fecha = "0" + fecha
-    # Si el mes es un solo dígitos le añadimos un 0 delante
-    if len(fecha[fecha.find("/")+1:fecha.rfind("/")]) == 1:
+    if len(fecha[fecha.find("/")+1:fecha.rfind("/")]) == 1:     # Si el mes es un solo dígitos le añadimos un 0 delante
         fecha = fecha[0:fecha.find("/")+1] + "0" + fecha[fecha.find("/")+1:]
-    # Si el año es dos dígitos le añadimos un 20 delante
-    if len(fecha[fecha.rfind("/")+1:]) == 2:
+    if len(fecha[fecha.rfind("/")+1:]) == 2:                    # Si el año es dos dígitos le añadimos un 20 delante
         fecha = fecha[0:fecha.rfind("/")+1] + "20" + fecha[fecha.rfind("/")+1:]
-        
-        
-    '''
-    try:
-
-    if fecha[1] == "/":
-            fecha ="0" + fecha
-    if fecha[0:2].isdigit() == False:
-            LR23.config(text = "Dia incorrecte")
-            fechalabel.focus()
-            muralla = True
-            return muralla,fecha
-    if fecha[4] == "/":
-            fecha = fecha[0:3] + "0" + fecha[3:]
-    if fecha[3:5].isdigit() == False:
-            LR23.config(text = "Mes incorrecte")
-            fechalabel.focus()
-            muralla = True
-            return muralla,fecha
-    if len(fecha) <= 9:
-            fecha = fecha[0:6] + "20" + fecha[6:]
-    if fecha[6:10].isdigit() == False:
-            LR23.config(text = "Any incorrecte")
-            fechalabel.focus()
-            muralla = True
-            return muralla,fecha   
-
-    except:
-        LR23.config(text = "Data incorrecte")
-        fechalabel.focus()
-        muralla = True 
-        return muralla,fecha
-    '''
-    return muralla,fecha
+    return muralla,fecha                                        # Devolvemos el valor de la variable muralla y la fecha
 def cotejaFechaEmptyOk      (muralla,dia,dialabel,mes,meslabel,anyo,anyolabel):     # Función que comprueba si la fecha introducida es correcta
     
-    if len(dia) == 1:               # Si el día tiene un solo dígito le añadimos un 0 delante
+    if len(dia) == 1:                       # Si el día tiene un solo dígito le añadimos un 0 delante
         dia = "0" + dia
-    if len(mes) == 1:               # Si el mes tiene un solo dígito le añadimos un 0 delante
+    if len(mes) == 1:                       # Si el mes tiene un solo dígito le añadimos un 0 delante
         mes = "0" + mes
-    if len(anyo) == 2:              # Si el año tiene dos dígitos le añadimos un 20 delante
+    if len(anyo) == 2:                      # Si el año tiene dos dígitos le añadimos un 20 delante
         anyo = "20" + anyo
-    if len(anyo) != 4 and anyo != "":        # Si el año no tiene 4 dígitos y no está vacío
-            
+    if len(anyo) != 4 and anyo != "":       # Si el año no tiene 4 dígitos y no está vacío          
         LR23.config(text = "Any no vàlid")
         anyolabel.focus()
         muralla = True
-    
-    try:    
-        if (int(mes) > 12 or int(mes) < 1 or len(mes) != 2) and mes != "":
-                
+    try:                                    # Si el año no es un número
+        if (int(mes) > 12 or int(mes) < 1 or len(mes) != 2) and mes != "":            
             LR23.config(text = "Mes no vàlid")
             meslabel.focus()
             muralla = True
-    except:
-        pass
-    
-    try:
+    except:                                 # Si el añp sí es un número
+        pass   
+    try:                                    # Si el día no es un número
         if int(dia) > 31 or int(dia) < 1 and dia != "":
                 
             LR23.config(text = "Dia no vàlid")
             dialabel.focus()
             muralla = True
-    except:
-        pass
-    
-    return muralla,dia,mes,anyo
+    except:                                 # Si el día sí es un número
+        pass    
+    return muralla,dia,mes,anyo             # Devolvemos el valor de la variable muralla y la fecha
 def cotejaVacio             (muralla,campo,label):                                  # Función que comprueba si el campo está vacío
     
-    if campo == "":
+    if campo == "":                                                                 # Si el campo está vacío
         LR23.config(text = "Registre buit")
         label.focus()
         muralla = True
-    return muralla
+    return muralla                                                                  # Devolvemos el valor de la variable muralla
 def cotejaVacioCond1        (muralla,campo1,label,campo2,valor):                    # Función que comprueba si el campo está vacío condicionalmente
-    if campo1 == "" and campo2 != valor:
+    if campo1 == "" and campo2 != valor:                                            # Si el campo está vacío y el campo2 no es igual al valor
         LR23.config(text = "Manca data")
         label.focus()
         muralla = True
-    return muralla
+    return muralla                                                                  # Devolvemos el valor de la variable muralla
 def cotejaCondicional       (campo1,valor1,campo2,valor2):                          # Función que comprueba si el campo es condicional
-    if campo2 == valor2:
+    if campo2 == valor2:                                                            # Si el campo2 es igual al valor2
         campo1 = valor1
-    return campo1
+    return campo1                                                                   # Devolvemos el valor de la variable campo1
 def cotejaFechaBloqueada    (muralla,dia,hora,label):                               # Función que comprueba si la fecha está bloqueada
        
-    # Abre la base de datos bd_incidencias
-    conn = sqlite3.connect('databases/basesDeDatosIncidencias.db')
-    c = conn.cursor()
-    # Crea una lista con todos los datos de bd_bloqueos
-    c.execute("SELECT * FROM bd_bloqueos")
-    casos = c.fetchall()
-    # Revisa todos los datos de c por si coinciden con v2
-    for row in casos:
-            
+    conn = sqlite3.connect('databases/basesDeDatosIncidencias.db')                  # Abre la base de datos bd_incidencias
+    c = conn.cursor()                                                               # Crea un cursor para la base de datos
+    c.execute("SELECT * FROM bd_bloqueos")                                          # Crea una lista con todos los datos de bd_bloqueos
+    casos = c.fetchall()                                                            # Guarda los datos en la variable casos
+    for row in casos:                                                               # Revisa todos los datos de c por si coinciden con v2
         horasConcretas = []
         activo = False
         for i in horas:
@@ -317,63 +320,40 @@ def cotejaFechaBloqueada    (muralla,dia,hora,label):                           
             # Cerramos la base de datos
             conn.close()
             return muralla
-    # Cerramos la base de datos
-    conn.close()
-    return muralla   
+    conn.close()                                                                    # Cerramos la base de datos
+    return muralla                                                                  # Devolvemos el valor de la variable muralla
 def cotejaDatosCliente      (cliente,telefono,mail,contacto):                       # Función que comprueba si los datos del cliente son correctos
 
     base_datos_clientes = sqlite3.connect('databases/basesDeDatosClientes.db')      # Abre la base de datos de clientes
-
     cursor1 = base_datos_clientes.cursor()                                          # Crea el cursor
-
     cursor1.execute("SELECT * FROM bd_Clientes WHERE NOM ='"+cliente+"'")           # Busca el cliente 
-
     clientes = cursor1.fetchall()                                                   # Crea una lista con los datos del cliente
     largo = len(clientes)                                                           # Si cursor1 tiene una sóla linea
-
-    if largo == 1:
+    if largo == 1:                                                                  # Si el cliente existe
         if telefono == "":                                                          # Si el telefono está vacío le damos el valor del cliente
             telefono = clientes[0][4]
         if mail == "":                                                              # Si el mail está vacío le damos el valor del cliente
             mail = clientes[0][5]
         if contacto == "":                                                          # Si el contacto está vacío le damos el valor del cliente   
             contacto = clientes[0][7]
-    return telefono,mail,contacto
+    return telefono,mail,contacto                                                   # Devolvemos los datos del cliente
 def cotejaDatoCoincidente   (muralla,retorno,mensaje,base,
                              lista,busqueda,label,texto,pausa,id,color):            # Función que comprueba si el campo coincide con alguno dentro de la misama base de datos
-    # Abrimos la base de datos de incidencias
-    conn = sqlite3.connect(base)    
-    # Creamos el cursor
-    miCursor = conn.cursor()
-    # Crea una lista con los datos FECHA y HORA
-    miCursor.execute(busqueda)
-    casos = miCursor.fetchall()
-    cant_casos = len(casos)
-    # Busca en casos un caso con el mismo ID que v1
-    for caso in casos:
+    conn = sqlite3.connect(base)                                                    # Abrimos la base de datos de incidencias
+    miCursor = conn.cursor()                                                        # Creamos el cursor
+    miCursor.execute(busqueda)                                                      # Crea una lista con los datos FECHA y HORA
+    casos = miCursor.fetchall()                                                     # Guarda los datos en la variable casos
+    cant_casos = len(casos)                                                         # Cuenta cuantos casos hay con la misma fecha y hora
+    for caso in casos:                                                              # Busca en casos un caso con el mismo ID que v1
         if caso[-1] == id:
             cant_casos -= 1
-    # Si hay más de un caso con la misma fecha y hora
-    if cant_casos > 0 and mensaje == True:
-        global ventana2
-        ventana2 = Tk()                         # Creamos la ventana
-        ventana2.title(" ")                     # Damos titulo a la ventana
-        ventana2.geometry("500x250")            # Damos tamaño a la ventana
-        ventana2.configure(bg='red')            # Damos color de fondo a la ventana
-        ventana2.iconbitmap("image/icono.ico")  # Damos icono a la ventana
-        ventana2.deiconify()                    # Mostramos la ventana
-        ventana2label = Label(ventana2, text = texto, bg = color, fg = "white", font = ("Helvetica", 12))   
-        ventana2label.place(relx = 0.5, rely = 200, anchor = CENTER)               
-        ventana2label.pack()                    # Coloca el label en la ventana
-        ventana2.overrideredirect(True)         # Quitamos el marco de la ventana
-        ventana2.update()                       # Actualiza la ventana       
-        time.sleep(pausa)                       # X segundos de pausa
-        ventana2.destroy()                      # Destruye la ventana
-    if cant_casos > 0 and retorno == True:
-        muralla = True
-    if label != "":
+    if cant_casos > 0 and mensaje == True:                                          # Si hay más de un caso con la misma fecha y hora
+        ventanaAviso(texto,color,pausa)                                             # Avisamos de la anomalía
+    if cant_casos > 0 and retorno == True:                                          # Si hay más de un caso con la misma fecha y hora
+        muralla = True              
+    if label != "":                                                                 # Si la label no está vacía                              
         label.focus()
-    return muralla    
+    return muralla                                                                  # Devolvemos el valor de la variable muralla                               
 # ------------------------------ Funciones globales ----------------------
 def copia                   ():
     if raiz.focus_get() == None:                # Comprueba si el foco está en alguna label o entry.
@@ -399,19 +379,7 @@ def paste                   ():
 def CopiaSeguridadGlobal    ():
     
     # Ventana de aviso
-    # Preparamos la ventana Tk donde trabajaremos
-    global ventana2                             # Definimos la variable ventana2 como global
-    ventana2 = Tk()                             # Creamos la ventana
-    ventana2.title(" ")                         # Título de la ventana
-    ventana2.geometry("400x25")                 # Damos tamaño a la ventana
-    ventana2.configure(bg='blue')               # Color de fondo
-    ventana2.iconbitmap("image/icono.ico")      # Icono de la ventana
-    ventana2.deiconify()                        # Mostramos la ventana
-    ventana2label = Label(ventana2, text = "Fent còpia de seguretat...", bg = "blue", fg = "white", font = ("Helvetica", 12))   # Creamos el label  
-    ventana2label.pack()                        # Coloca el label en la ventana
-    ventana2.overrideredirect(True)             # Quitamos el marco de la ventana
-    ventana2.update()                           # Actualiza la ventana
-
+    ventanaAviso("Fent còpia de seguretat...", "blue", 1)
     fecha = datetime.now()                      # Obtenemos la fecha actual
     # Crea en la carpeta Security una carpeta con nombre fecha y hora actual
     os.mkdir("Security/" + str(anyoGlobal) + "-" + str(mesGlobal) + "-" + str(diaGlobal) + " " + str(fecha.hour) + "-" + str(fecha.minute) + "-" + str(fecha.second))
@@ -420,8 +388,6 @@ def CopiaSeguridadGlobal    ():
     # Copia la carpeta files dentro de esta carpeta
     shutil.copytree("files", "Security/" + str(anyoGlobal) + "-" + str(mesGlobal) + "-" + str(diaGlobal) + " " + str(fecha.hour) + "-" + str(fecha.minute) + "-" + str(fecha.second) + "/files")
     
-    ventana2.destroy()                          # Destruimos la ventana
-
 def Saliendo                ():
     
     CopiaSeguridadGlobal()                      # Hacemos una copia de seguridad antes de salir
@@ -869,12 +835,12 @@ def cargaUsuario            ():
     rUsuario = Tk()                                         # Crea la ventana para identificar el usuario
     rUsuario.title("Identificació d'usuari")                # Le pone un título
     rUsuario.iconbitmap("image/icono.ico")                  # Le pone un icono
-    rUsuario.config(bg="#b7b493")
-    rUsuario.config(bd=10)
-    rUsuario.config(relief="groove")
-    rUsuario.config(width = 300, heigh = 300)               #
-    rUsuario.deiconify()                                    # 
-    rUsuario.overrideredirect(True)                         # 
+    rUsuario.config(bg="#b7b493")                           # Le da un color de fondo
+    rUsuario.config(bd=10)                                  # Le da un grosor de borde
+    rUsuario.config(relief="groove")                        # Le da un tipo de borde
+    rUsuario.config(width = 300, heigh = 300)               # Le da un tamaño
+    rUsuario.deiconify()                                    # La muestra 
+    rUsuario.overrideredirect(True)                         # Desactiva la barra de título 
     
     # Si en cualquier momento se pulsan las teclas CTRL + ESC se fuerza el pulsado del botón SALIR 
     rUsuario.bind("<End>", lambda event: salir())   
@@ -1347,7 +1313,6 @@ def RegistroSalvaCorreccion ():
     anyoFecha.config(text = anyoGlobaltk)
     MiraFecha(anyoFecha)
     menuRegistroCorregir()	            # Vuelve hacia atrás
-
 def registroBorraUno        ():
 
     # Creamos la base de datos o conectamos con una
@@ -1357,58 +1322,20 @@ def registroBorraUno        ():
     global puntero
     query(base_datos,busqueda,columnas,"ID","","DATA","DESCRIPCIÓ","ORIGEN","HORA","PRODUCTE","FONT","")
     
-    val1 = LRR12.get()
+    val1 = LRR12.get()          # Recoge el valor del id
+    if val1 == "":  return      # si no ha puesto ningún id, no hará nada
 
-    # si no ha puesto ningún id, no hará nada
-    if val1 == "":
-        
-        return
-    
     # Ventana de aviso
-    # Preparamos la ventana Tk donde trabajaremos
-    global ventana2
-    ventana2 = Tk()
-    ventana2.title('Atenció!!!')
-    ventana2.geometry("270x60")
-    ventana2.configure(bg='red')
-    ventana2.iconbitmap("image/icono.ico")
-    ventana2.deiconify()
-    
-    aviso = Label(ventana2,text = ("Aixó esborrarà el registre amb id "+
-                                   val1 +", si existeix."),
-                  anchor = "center",
-                  background = "red")
-    aviso.grid(column=0, row = 0, columnspan = 2, pady=(5, 0))
-    
-    yes_btn = Button(ventana2, text="SI", command=del_register_yes)
-    yes_btn.grid(row=1, column=0,  ipadx=5)      
-    
-    no_btn = Button(ventana2, text="NO", command=del_no)
-    no_btn.grid(row=1, column=1, ipadx=5)
-    
-    no_btn.focus()
-    
-    ventana2.mainloop()  
+    ventanaSeleccion("Aixó esborrarà el registre amb id "+ val1 +", si existeix.","red",del_register_yes)
 def del_register_yes        ():
 
-    # Creamos base de datos o conectamos a una
-    base_datos = sqlite3.connect('databases/basesDeDatosRegistros.db')
-    
-	# Creamos el cursor
-    c = base_datos.cursor()
-
-	# Borra el registro
-    c.execute("DELETE from bd_registros WHERE oid = " + LRR12.get())
-
-    LimpiaElegibles()
-    
-	#Asegura los cambios
-    base_datos.commit()
-
-	# Cierra la conexión 
-    base_datos.close()
-    
-    ventana2.destroy()
+    base_datos = sqlite3.connect('databases/basesDeDatosRegistros.db')  # Creamos base de datos o conectamos a una 
+    c = base_datos.cursor()	                                            # Creamos el cursor
+    c.execute("DELETE from bd_registros WHERE oid = " + LRR12.get())	# Borra el registro
+    LimpiaElegibles()                                                   # Limpia los campos de texto
+    base_datos.commit()	                                                # Asegura los cambios
+    base_datos.close()	                                                # Cierra la conexión
+    seleccion.destroy()                                                 # Destruye la ventana de aviso
 
     # Borramos los datos del listado de registros
     query_todos('databases/basesDeDatosRegistros.db',
@@ -1435,40 +1362,14 @@ def query_incidencias_busca0():
 def query_incidencias_busca ():
     
     global EstamosEnIncidencias
-
-    v1 = LRR11.get()
-    v2 = LRR22.get()
-    v3 = LRR32.get()
-    v4 = LRR42.get()
-    v5 = LRR51.get()
-    v6 = LRR61.get()
-    v7 = LRR71.get()
-    v8 = LRR82.get()
-    v9 = LRR92.get()
-    v10= LRR102.get()
-    v11= LRR112.get()
-    v12= LRR121.get()
-    v13= LRR131.get()
-    v14= LRR142.get()
+    v1,v2,v3,v4,v5,v6,v7,v8,v9,v10,v11,v12,v13,v14 = LRR11.get(),LRR22.get(),LRR32.get(),LRR42.get(),LRR51.get(),LRR61.get(),LRR71.get(),LRR82.get(),LRR92.get(),LRR102.get(),LRR112.get(),LRR121.get(),LRR131.get(),LRR142.get()
     
-    # Si el dia es de una cifra, le añadimos un 0 delante
-    if len(v2) == 1:
-        v2 = "0" + v2
-    # Si el mes es de una cifra, le añadimos un 0 delante
-    if len(v3) == 1:
-        v3 = "0" + v3
-    # Si el año es de dos cifras, le añadimos un 20 delante
-    if len(v4) == 2:
-        v4 = "20" + v4
-    # Si el dia de revisión es de una cifra, le añadimos un 0 delante
-    if len(v8) == 1:
-        v8 = "0" + v8
-    # Si el mes de revisión es de una cifra, le añadimos un 0 delante
-    if len(v9) == 1:
-        v9 = "0" + v9
-    # Si el año de revisión es de dos cifras, le añadimos un 20 delante
-    if len(v10) == 2:
-        v10 = "20" + v10
+    muralla = False
+    muralla = cotejaFechaEmptyOk(muralla,v2,LRR22,v3,LRR32,v4,LRR42)
+    muralla = cotejaFechaEmptyOk(muralla,v8,LRR82,v9,LRR92,v10,LRR102)
+    if muralla == True:
+        LR23.config(fg = "red")         # Pintamos de rojo el campo LR23
+        return
     # Creamos la base de datos o conectamos con una
     query_todos('databases/basesDeDatosIncidencias.db',
                 "SELECT *, oid FROM bd_incidencias WHERE ((CLIENTE = '" + v1 + "' or '" + v1 + "' = '') AND (FECHA LIKE '" + v2 + "/%' or '" + v2 + "' = '') AND (FECHA LIKE '%/" + v3 + "/%' or '" + v3 + "' = '') AND (FECHA LIKE '%/" + v4 + "' or '" + v4 + "' = '') AND (PRODUCTO = '" + v5 + "' or '" + v5 + "' = '') AND (IDIOMA = '" + v6 + "' or '" + v6 + "' = '') AND (AGENDADO = '" + v7 + "' or '" + v7 + "' = '') AND (FECHA_REV LIKE '" + v8 + "/%' or '" + v8 + "' = '') AND (FECHA_REV LIKE '%/" + v9 + "/%' or '" + v9 + "' = '')  AND (FECHA_REV LIKE '%/" + v10 + "' or '" + v10 + "' = '') AND (ESTADO = '" + v12 + "' or '" + v12 + "' = '') AND (NOTAS = '" + v11 + "' or '" + v11 + "' = '') AND (PAGAT = '" + v13 + "' OR '" + v13 + "' = '') AND (MAIL_EXTRA = '" + v14 + "' OR '" + v14 + "' = '')) ORDER BY FECHA, HORA",
@@ -1477,62 +1378,22 @@ def query_incidencias_busca ():
                 "ID","DATA","HORA","PAX","PRODUCTE","IDIOMA","ESTAT","CLIENT","PAGAT")
 def incidenciasCorrigeUno   ():
 
-    global val1
-    val1 = LRR12.get()
-    global val2
-    val2 = usuarioReal
-    global diaGlobal
-    diaGlobal = diaGlobaltk.get()
-    global mesGlobal
-    mesGlobal = mesGlobaltk.get()
-    global anyoGlobal
-    anyoGlobal = anyoGlobaltk.get()
-    global usuarioNivel
-    if  val1 == "":
-        return
-                       
-    # Limpia las cajas
-    LimpiaElegibles
-    
-	# Crea una base de datos o se conecta a una
-    base_datos = sqlite3.connect('databases/basesDeDatosIncidencias.db')
+    global val1, val2, diaGlobal, mesGlobal, anyoGlobal, usuarioNivel
+    val1,val2,diaGlobal,mesGlobal,anyoGlobal = LRR12.get(),usuarioReal,diaGlobaltk.get(),mesGlobaltk.get(),anyoGlobaltk.get()
 
-	# Crea cursor
-    c = base_datos.cursor()
-    
-	# Query the database
-    c.execute("SELECT * FROM bd_incidencias WHERE oid = " + val1)
-    records = c.fetchall()
-    
-    menuIncidenciasIntroducir()
+    if  val1 == "":        return                                           # Si no hay nada en el campo ID, no hacemos nada
+                       
+    LimpiaElegibles                                                         # Limpia las cajas
+    base_datos = sqlite3.connect('databases/basesDeDatosIncidencias.db')	# Crea una base de datos o se conecta a una
+    c = base_datos.cursor()	                                                # Crea cursor
+    c.execute("SELECT * FROM bd_incidencias WHERE oid = " + val1)	        # Query the database
+    records = c.fetchall()                                                  # Obtenemos los resultados del query
+    menuIncidenciasIntroducir()                                             # Llamamos a la función que crea la ventana de introducción de datos
       
     # Creando las variables globales
-    global  fecha
-    global  hora
-    global  pax1
-    global  pax2
-    global  producto
-    global  idioma
-    global  tel_extra
-    global  estado
-    global  usuario
-    global  fecha_cre
-    global  cliente
-    global  mail_extra
-    global  precio1
-    global  tipo1
-    global  precio2
-    global  tipo2
-    global  agendado
-    global  fecha_rev
-    global  pagat
-    global  notas
-    global  factura               
-    global  val6
-    
+    global  fecha,hora,pax1,pax2,producto,idioma,tel_extra,estado,usuario,fecha_cre,cliente,mail_extra,precio1,tipo1,precio2,tipo2,agendado,fecha_rev,pagat,notas,factura,val6
       
-    # Loop para volcar los resultados
-    
+    # Loop para volcar los resultados    
     for record in records:
         notillas = record[20]
         notillas = notillas.rstrip()
@@ -1612,36 +1473,27 @@ def incidenciasCorrigeUno   ():
     Boton4activado(IncidenciasSalvaCorrecc)
 def IncidenciasSalvaCorrecc ():
     
-    global origenes
-    global usuarioReal
-    global diaGlobal
-    global mesGlobal
-    global anyoGlobal
+    global origenes,usuarioReal,diaGlobal,mesGlobal,anyoGlobal                  # Variables globales
     
     # Rescata valores
-    v1 = LR1.cget("text")
-    v2 = LRR22.get()
-    v3 = LRR31.get()
-    v4 = LRR42.get()
-    v5 = LRR52.get()
-    v6 = LRR61.get()
-    v7 = LRR72.get()
-    v8 = LRR82.get()
-    v9 = LRR92.get()
-    v10 = LRR102.get()
-    v11 = LRR112.get()
-    v12 = LRR122.get()
-    v13 = LRR131.get()
-    v14 = LRR141.get()
-    v15 = LRR152.get()
-    v16 = LRR161.get()
-    v17 = LRR172.get()
-    v18 = LRR181.get()
-    v19 = LRR213.get(1.0,END)
-    v20 = LRR201.get()
-    v21 = LRR192.get()   
-    v22 = anyoGlobaltk.get() + "/" + mesGlobaltk.get() + "/" + diaGlobaltk.get()
-    
+    v1,v2,v3,v4,v5,v6,v7,v8,v9,v10,v11,v12,v13,v14,v15,v16,v17,v18,v19,v20,v21,v22 = LR1.cget("text"),LRR22.get(),LRR31.get(),LRR42.get(),LRR52.get(),LRR61.get(),LRR72.get(),LRR82.get(),LRR92.get(),LRR102.get(),LRR112.get(),LRR122.get(),LRR131.get(),LRR141.get(),LRR152.get(),LRR161.get(),LRR172.get(),LRR181.get(),LRR213.get(1.0,END),LRR201.get(),LRR192.get(),anyoGlobaltk.get()+"/"+mesGlobaltk.get()+"/"+diaGlobaltk.get()
+
+    muralla = False
+    muralla     = cotejaVacio(muralla,v20,LRR201)                               # Comprueba que el campo no esté vacío
+    muralla,v17 = cotejaFechaBlock(muralla,v17,LRR172)                          # Comprueba que la fecha no esté bloqueada
+    muralla,v2  = cotejaFechaBlock(muralla,v2,LRR22)                            # Comprueba que la fecha no esté bloqueada
+    v2          = cotejaCondicional(v2,"Per definir",v20,"Pendent gaudir")      # Si el campo v20 es "Pendent gaudir" el campo v2 es "Per definir"
+    muralla     = cotejaVacioCond1(muralla,v2,LRR22,v20,"Pendent gaudir")       # Si el campo v20 no es "Pendent gaudir" el campo v2 no puede estar vacío
+    muralla     = cotejaFechaBloqueada(muralla,v2,v6,LRR22)                     # Comprueba que la fecha no esté bloqueada
+    v4,v5,v15   = cotejaDatosCliente(v3,v4,v5,v15)                              # Comprueba si hay que aprovechar datos del cliente
+    # Comprueba que no exista una incidencia con los mismos datos
+    if muralla == False:
+        muralla     = cotejaDatoCoincidente(muralla,False,True,
+                                            'databases/basesDeDatosIncidencias.db',
+                                            'bd_incidencias',
+                                            "SELECT *,oid FROM bd_incidencias WHERE ((FECHA = '" + v2 + "') AND (HORA = '" + v6+ "'))","",
+                                            "¡¡ATENCIÓ!! Ja existeix una altra incidència amb aquesta data i hora",3,v1,"red")          
+    '''
     if v2!= "":
         
         # Si el principio de v2 no es 2 dígitos y "/"
@@ -1739,13 +1591,11 @@ def IncidenciasSalvaCorrecc ():
                 # Buscamos el valor CONTACTE de la linea CLIENTE
                 v22 = clientes[0][7]
             # Cierra la base de datos
-            base_datos_clientes.close()                                     
-    # Crea una base de datos o abre la existente
-    base_datos = sqlite3.connect('databases/basesDeDatosIncidencias.db')
-    
-    # Conecta el cursor
-    c = base_datos.cursor()
-    
+            base_datos_clientes.close() 
+    '''
+                                                
+    base_datos = sqlite3.connect('databases/basesDeDatosIncidencias.db')            # Crea una base de datos o abre la existente
+    c = base_datos.cursor()                                                         # Conecta el cursor
     c.execute("""UPDATE bd_incidencias SET
             FECHA           = :fecha,
             HORA            = :hora,
@@ -1772,51 +1622,42 @@ def IncidenciasSalvaCorrecc ():
                             
             WHERE oid = :val1""",
               {
-                'fecha': v2,
-                'hora': v6,
-                'pax1': v7,
-                'pax2': v10,
+                'fecha':    v2,
+                'hora':     v6,
+                'pax1':     v7,
+                'pax2':     v10,
                 'producto': v13,
-                'idioma': v14,
+                'idioma':   v14,
                 'tel_extra': v4,
-                'estado': v20,
-                'usuario': nomUsuario.cget("text"),
+                'estado':   v20,
+                'usuario':  nomUsuario.cget("text"),
                 'fecha_crea': v22,
-                'cliente': v3,
+                'cliente':  v3,
                 'mail_extra': v5,
-                'precio1': v8,
-                'tipo1' : v9,
-                'precio2': v11,
-                'tipo2': v12,
+                'precio1':  v8,
+                'tipo1' :   v9,
+                'precio2':  v11,
+                'tipo2':    v12,
                 'contacto': v15,
                 'agendado': v16,
                 'fecha_rev': v17,
-                'pagat': v18,
-                'notas' : v21,
-                'factura'   : v19,
-                'val1': val1
+                'pagat':    v18,
+                'notas' :   v21,
+                'factura':  v19,
+                'val1':     val1
                   })
     
-    #Asegura los cambios
-    base_datos.commit()
-
-	# Cierra la conexión 
-    base_datos.close()  
-
-    # Vuelve a pintar usuario y fecha
-    nomUsuario.config(text = val2)
-    
-    # Recupera en las variables tk los datos de fecha salvados en diaGlobal, mesGlobal y anyoGlobal
-    anyoGlobaltk.set(anyoGlobal)
+    base_datos.commit()                                                             #Asegura los cambios
+    base_datos.close()  	                                                        # Cierra la conexión
+    nomUsuario.config(text = val2)                                                  # Vuelve a pintar usuario y fecha
+    anyoGlobaltk.set(anyoGlobal)                                                    # Recupera en las variables tk los datos de fecha salvados en diaGlobal, mesGlobal y anyoGlobal
     mesGlobaltk.set(mesGlobal)
     diaGlobaltk.set(diaGlobal)
-    # Los vuelca a los labels
-    diaFecha.config(text = diaGlobaltk)
+    diaFecha.config(text = diaGlobaltk)                                             # Los vuelca a los labels
     mesFecha.config(text = mesGlobaltk)
     anyoFecha.config(text = anyoGlobaltk)
     MiraFecha(anyoFecha)
-	# Vuelve hacia atrás
-    menuIncidenciasCorregir()
+    menuIncidenciasCorregir()	                                                    # Vuelve hacia atrás
 def incidenciasBorraUno     ():
 
     # Creamos la base de datos o conectamos con una
@@ -1829,34 +1670,10 @@ def incidenciasBorraUno     ():
     val1 = LRR12.get()
 
     # si no ha puesto ningún id, no hará nada
-    if val1 == "":
-        
-        return
+    if val1 == "":  return
     
     # Ventana de aviso
-    # Preparamos la ventana Tk donde trabajaremos
-    global ventana2
-    ventana2 = Tk()
-    ventana2.title('Atenció!!!')
-    ventana2.geometry("270x60")
-    ventana2.configure(bg='red')
-    ventana2.iconbitmap("image/icono.ico")
-    ventana2.deiconify()
-    aviso = Label(ventana2,text = ("Aixó esborrarà la incidència amb id "+
-                                   val1 +", si existeix."),
-                  anchor = "center",
-                  background = "red")
-    aviso.grid(column=0, row = 0, columnspan = 2, pady=(5, 0))
-    
-    yes_btn = Button(ventana2, text="SI", command=del_incidence_yes)
-    yes_btn.grid(row=1, column=0,  ipadx=5)      
-    
-    no_btn = Button(ventana2, text="NO", command=del_no)
-    no_btn.grid(row=1, column=1, ipadx=5)
-    
-    no_btn.focus()
-    
-    ventana2.mainloop()  
+    ventanaSeleccion("Aixó esborrarà la incidència amb id "+ val1 +", si existeix.","red",del_incidence_yes)
 def del_incidence_yes       ():
 
     # Creamos base de datos o conectamos a una
@@ -1876,7 +1693,7 @@ def del_incidence_yes       ():
 	# Cierra la conexión 
     base_datos.close()
     
-    ventana2.destroy()
+    seleccion.destroy()
 
     # Borramos los datos del listado de registros
     query_todos('databases/basesDeDatosIncidencias.db',
@@ -2398,29 +2215,7 @@ def ProformaBorraUno        ():
         return
     
     # Ventana de aviso
-    # Preparamos la ventana Tk donde trabajaremos
-    global ventana2
-    ventana2 = Tk()
-    ventana2.title('Atenció!!!')
-    ventana2.geometry("270x60")
-    ventana2.configure(bg='red')
-    ventana2.iconbitmap("image/icono.ico")
-    ventana2.deiconify()
-    aviso = Label(ventana2,text = ("Aixó esborrarà la proforma amb id "+
-                                   val1 +", si existeix."),
-                  anchor = "center",
-                  background = "red")
-    aviso.grid(column=0, row = 0, columnspan = 2, pady=(5, 0))
-    
-    yes_btn = Button(ventana2, text="SI", command=del_proform_yes)
-    yes_btn.grid(row=1, column=0,  ipadx=5)      
-    
-    no_btn = Button(ventana2, text="NO", command=del_no)
-    no_btn.grid(row=1, column=1, ipadx=5)
-    
-    no_btn.focus()
-    
-    ventana2.mainloop()  
+    ventanaSeleccion("Aixó esborrarà la proforma amb id "+ val1 +", si existeix.","red",del_proform_yes) 
 def del_proform_yes         ():
 
     # Creamos base de datos o conectamos a una
@@ -2440,7 +2235,7 @@ def del_proform_yes         ():
 	# Cierra la conexión 
     base_datos.close()
     
-    ventana2.destroy()
+    seleccion.destroy()
 
     # Borramos los datos del listado de registros
     query_todos('databases/basesDeDatosProforma.db',
@@ -2530,29 +2325,7 @@ def bloqueoBorraUno         ():
     query(base_datos,busqueda,columnas,"ID","DATA","","","","","","","")
     
     # Ventana de aviso
-    # Preparamos la ventana Tk donde trabajaremos
-    global ventana2
-    ventana2 = Tk()
-    ventana2.title('Atenció!!!')
-    ventana2.geometry("270x60")
-    ventana2.configure(bg='red')
-    ventana2.iconbitmap("image/icono.ico")
-    ventana2.deiconify()
-    aviso = Label(ventana2,text = ("Aixó esborrarà el bloqueig del "+
-                                   v2 +", si existeix."),
-                  anchor = "center",
-                  background = "red")
-    aviso.grid(column=0, row = 0, columnspan = 2, pady=(5, 0))
-    
-    yes_btn = Button(ventana2, text="SI", command=del_block_yes)
-    yes_btn.grid(row=1, column=0,  ipadx=5)      
-    
-    no_btn = Button(ventana2, text="NO", command=del_no)
-    no_btn.grid(row=1, column=1, ipadx=5)
-    
-    no_btn.focus()
-    
-    ventana2.mainloop()      
+    ventanaSeleccion("Aixó esborrarà el bloqueig del"+ v2 +", si existeix.","red",del_block_yes)
 def del_block_yes           ():
     
     global v2
@@ -2573,7 +2346,7 @@ def del_block_yes           ():
 	# Cierra la conexión 
     base_datos.close()
     
-    ventana2.destroy()
+    seleccion.destroy()
 
     # Borramos los datos del listado de registros
     query_bloqueos()
@@ -2736,29 +2509,7 @@ def productoBorraUno        ():
     
     # Ventana de aviso
     # Preparamos la ventana Tk donde trabajaremos
-    global ventana2
-    ventana2 = Tk()
-    ventana2.title('Atenció!!!')
-    ventana2.geometry("270x60")
-    ventana2.configure(bg='red')
-    ventana2.iconbitmap("image/icono.ico")
-    ventana2.deiconify()
-    
-    aviso = Label(ventana2,text = ("Aixó esborrarà el producte amb id "+
-                                   val1 +", si existeix."),
-                  anchor = "center",
-                  background = "red")
-    aviso.grid(column=0, row = 0, columnspan = 2, pady=(5, 0))
-    
-    yes_btn = Button(ventana2, text="SI", command=del_product_yes)
-    yes_btn.grid(row=1, column=0,  ipadx=5)      
-    
-    no_btn = Button(ventana2, text="NO", command=del_no)
-    no_btn.grid(row=1, column=1, ipadx=5)
-    
-    no_btn.focus()
-    
-    ventana2.mainloop()  
+    ventanaSeleccion("Aixó esborrarà el producte amb id "+ val1 +", si existeix.","red",del_product_yes)
 def del_product_yes         ():
 
     # Creamos base de datos o conectamos a una
@@ -2778,7 +2529,7 @@ def del_product_yes         ():
 	# Cierra la conexión 
     base_datos.close()
     
-    ventana2.destroy()
+    seleccion.destroy()
 
     # Borramos los datos del listado de registros
     query_todos('databases/basesDeDatosDatos.db',
@@ -2952,35 +2703,9 @@ def clienteBorraUno         ():
     val1 = LRR12.get()
 
     # si no ha puesto ningún id, no hará nada
-    if val1 == "":
-        
-        return
-    
+    if val1 == "":  return
     # Ventana de aviso
-    # Preparamos la ventana Tk donde trabajaremos
-    global ventana2
-    ventana2 = Tk()
-    ventana2.title('Atenció!!!')
-    ventana2.geometry("270x60")
-    ventana2.configure(bg='red')
-    ventana2.iconbitmap("image/icono.ico")
-    ventana2.deiconify()
-    
-    aviso = Label(ventana2,text = ("Aixó esborrarà el client amb id "+
-                                   val1 +", si existeix."),
-                  anchor = "center",
-                  background = "red")
-    aviso.grid(column=0, row = 0, columnspan = 2, pady=(5, 0))
-    
-    yes_btn = Button(ventana2, text="SI", command=del_client_yes)
-    yes_btn.grid(row=1, column=0,  ipadx=5)      
-    
-    no_btn = Button(ventana2, text="NO", command=del_no)
-    no_btn.grid(row=1, column=1, ipadx=5)
-    
-    no_btn.focus()
-    
-    ventana2.mainloop()   
+    ventanaSeleccion("Aixó esborrarà el client amb id "+ val1 +", si existeix.","red",del_client_yes)
 def del_client_yes          ():
 
     # Creamos base de datos o conectamos a una
@@ -3000,7 +2725,7 @@ def del_client_yes          ():
 	# Cierra la conexión 
     base_datos.close()
     
-    ventana2.destroy()
+    seleccion.destroy()
 
     # Borramos los datos del listado de registros
     query_todos('databases/basesDeDatosClientes.db',
@@ -3170,55 +2895,18 @@ def usuariosBorraUno        ():
     val1 = LRR12.get()
 
     # si no ha puesto ningún id, no hará nada
-    if val1 == "":
-        
-        return
-    
+    if val1 == "":  return
     # Ventana de aviso
-    # Preparamos la ventana Tk donde trabajaremos
-    global ventana2
-    ventana2 = Tk()
-    ventana2.title('Atenció!!!')
-    ventana2.geometry("270x60")
-    ventana2.configure(bg='red')
-    ventana2.iconbitmap("image/icono.ico")
-    ventana2.deiconify()
-    
-    aviso = Label(ventana2,text = ("Aixó esborrarà l'usuari amb id "+
-                                   val1 +", si existeix."),
-                  anchor = "center",
-                  background = "red")
-    aviso.grid(column=0, row = 0, columnspan = 2, pady=(5, 0))
-    
-    yes_btn = Button(ventana2, text="SI", command=del_user_yes)
-    yes_btn.grid(row=1, column=0,  ipadx=5)      
-    
-    no_btn = Button(ventana2, text="NO", command=del_no)
-    no_btn.grid(row=1, column=1, ipadx=5)
-    
-    no_btn.focus()
-    
-    ventana2.mainloop()
+    ventanaSeleccion("Aixó esborrarà l'usuari amb id "+ val1 +", si existeix.","red",del_user_yes)
 def del_user_yes            ():
 
-    # Creamos base de datos o conectamos a una
-    base_datos = sqlite3.connect('databases/basesDeDatosDatos.db')
-    
-	# Creamos el cursor
-    c = base_datos.cursor()
-
-	# Borra el registro
-    c.execute("DELETE from bd_usuarios WHERE oid = " + LRR12.get())
-
-    LimpiaElegibles()
-    
-	#Asegura los cambios
-    base_datos.commit()
-
-	# Cierra la conexión 
-    base_datos.close()
-    
-    ventana2.destroy()
+    base_datos = sqlite3.connect('databases/basesDeDatosDatos.db')      # Creamos base de datos o conectamos a una
+    c = base_datos.cursor()	                                            # Creamos el cursor
+    c.execute("DELETE from bd_usuarios WHERE oid = " + LRR12.get())	    # Borra el registro
+    LimpiaElegibles()                                                   # Borra los datos de los campos
+    base_datos.commit()	                                                # Asegura los cambios
+    base_datos.close()	                                                # Cierra la conexión 
+    seleccion.destroy()                                                 # Cierra la ventana
 
     # Borramos los datos del listado de registros
     query_todos('databases/basesDeDatosDatos.db',
@@ -3484,10 +3172,9 @@ def query                   (seleccion,busc,columnas,*enunciados):
     EstamosEnIncidencias, EstamosEnRegistros, EstamosEnProforma, EstamosEnBloqueos, EstamosEnProductos, EstamosEnClientes, EstamosEnProductos, EstamosEnClientes, EstamosEnUsuarios = False, False, False, False, False, False, False, False, False
     return
 def del_no                  ():
-    
-    ventana2.destroy()
-    
-    return
+
+    LimpiaElegibles()           # Limpia las labels de elegibles
+    seleccion.destroy()         # Destruye la ventana de selección
 
 def PDFTablasPax            ():
     
@@ -4031,19 +3718,7 @@ def PDFTablasVOrigen        ():
 def PDFProforma             ():
 
     # Ventana de aviso
-    # Preparamos la ventana Tk donde trabajaremos
-    global ventana2
-    ventana2 = Tk()                         # Creamos la ventana
-    ventana2.title(" ")                     # Damos titulo a la ventana
-    ventana2.geometry("400x25")             # Damos tamaño a la ventana
-    ventana2.configure(bg='blue')           # Damos color de fondo a la ventana
-    ventana2.iconbitmap("image/icono.ico")  # Damos icono a la ventana
-    ventana2.deiconify()                    # Mostramos la ventana
-    ventana2label = Label(ventana2, text = "Generant PDF...", bg = "blue", fg = "white", font = ("Helvetica", 12))   
-    ventana2label.pack()                    # Coloca el label en la ventana
-    ventana2.overrideredirect(True)         # Quitamos el marco de la ventana
-    ventana2.update()                       # Actualiza la ventana
-    
+    ventanaAviso("Generant PDF...","blue",1)
     try:
         # Abrimos la base de datos de clientes
         conn = sqlite3.connect('databases/basesDeDatosClientes.db')
@@ -4223,33 +3898,13 @@ def PDFProforma             ():
         PDF.save()
         
         # Cerramos el proceso
-        ventana2label.config(text = "PDF generat. Recorda salvar l'arxiu", bg = "green")    
-        ventana2.config(bg = "green")       # Cambiamos el fondo del la ventana a verde
-        ventana2.update()                   # Actualizamos la ventana
-        
-        # Hacemos una pausa de 2 segundos
-        time.sleep(2)                       # 2 segundos de pausa
+        ventanaAviso("PDF generat. Recorda salvar l'arxiu", "green",2)
         LRR22.focus()                       # Pone el foco en el campo de texto
-        
-        # Cerramos la ventana
-        ventana2.destroy()                  # Destruye la ventana
 
     except:
-        
-        # Cerramos el proceso
-        ventana2label.config(text = "ERROR al generar el PDF", bg = "red")    
-        ventana2.config(bg = "red")       # Cambiamos el fondo del la ventana a verde
-        ventana2.update()                   # Actualizamos la ventana
-        
-        # Hacemos una pausa de 2 segundos
-        time.sleep(2)                       # 2 segundos de pausa
+        ventanaAviso("ERROR al generar el PDF", "red",2)
         LRR22.focus()                       # Pone el foco en el campo de texto
-        
-        # Cerramos la ventana
-        ventana2.destroy()                  # Destruye la ventana        
 
-    ventana2.mainloop()                     # Bucle de la ventana
-    
 def preMenuTablas           ():
     
     try:
@@ -4317,29 +3972,13 @@ def MenuInicial                             ():
             if incident[17] == fechi:
                 inciRev += 1
         if inciHoy !=0 or (inciRev != 0 and int(usuarioNivel) < 3):
-           
-            global ventana2
-            ventana2 = Tk()                         # Creamos la ventana
-            ventana2.title(" ")                     # Damos titulo a la ventana
-            ventana2.geometry("400x50")             # Damos tamaño a la ventana
-            ventana2.configure(bg='blue')           # Damos color de fondo a la ventana
-            ventana2.iconbitmap("image/icono.ico")  # Damos icono a la ventana
-            ventana2.deiconify()                    # Mostramos la ventana
-            ventana2label = Label(ventana2, text = "Hi ha "+str(inciHoy)+" incidències o grups per atendre avui", bg = "blue", fg = "white", font = ("Helvetica", 12))   
-            ventana2label.pack()                    # Coloca el label en la ventana
+            
+            ventanaAviso("Hi ha "+str(inciHoy)+" incidències o grups per atendre avui", "red",1.5)
             if int(usuarioNivel) <= 2:
-                ventana2label2 = Label(ventana2, text = "Hi ha "+str(inciRev)+" incidències o grups per revisar avui", bg = "blue", fg = "white", font = ("Helvetica", 12))
-                ventana2label2.pack()               # Coloca el label en la ventana    
-            ventana2.overrideredirect(True)         # Quitamos el marco de la ventana
-            ventana2.update()                       # Actualiza la ventana           
-            # Hacemos una pausa de 4 segundos
-            time.sleep(3)                       # 2 segundos de pausa
-            # Cerramos la ventana
-            ventana2.destroy()                  # Destruye la ventana     
-            # Bloqueamos que vuelva a aparecer la ventana
-            avisoint = False
-            # Cerramos la base de datos
-            conexion.close()
+                ventanaAviso("Hi ha "+str(inciRev)+" incidències o grups per revisar avui", "blue",1.5)    
+            avisoint = False            # Bloqueamos que vuelva a aparecer la ventana
+            conexion.close()            # Cerramos la base de datos
+
              
     LimpiaLabelsRellena()
     if int(usuarioNivel) == 0:
@@ -7959,21 +7598,7 @@ def menuIncidenciasBloqueosBloquear                 ():
         cant_casos = len(casos)
         # Si hay más de un caso con la misma fecha y hora
         if cant_casos > 0:
-            global ventana2
-            ventana2 = Tk()                         # Creamos la ventana
-            ventana2.title(" ")                     # Damos titulo a la ventana
-            ventana2.geometry("500x250")            # Damos tamaño a la ventana
-            ventana2.configure(bg='red')            # Damos color de fondo a la ventana
-            ventana2.iconbitmap("image/icono.ico")  # Damos icono a la ventana
-            ventana2.deiconify()                    # Mostramos la ventana
-            ventana2label = Label(ventana2, text = "¡¡ATENCIÓ!! Ja existeixen incidències a la franja.", bg = "red", fg = "white", font = ("Helvetica", 12))   
-            ventana2label.place(relx = 0.5, rely = 200, anchor = CENTER)               
-            ventana2label.pack()                    # Coloca el label en la ventana
-            ventana2.overrideredirect(True)         # Quitamos el marco de la ventana
-            ventana2.update()                       # Actualiza la ventana       
-            time.sleep(3)                           # 2 segundos de pausa
-            ventana2.destroy()                      # Destruye la ventana
-                                                           
+            ventanaAviso("Ja existeixen incidències a la franja.", "red",2)                                                          
         # Salva datos
         # Crea la base de datos o conecta con ella
         base_datos_datos = sqlite3.connect('databases/basesDeDatosIncidencias.db')
@@ -9257,8 +8882,5 @@ base_datos_datos.close()
 # ------------------------------ Loop -----------------------------------------
 crea_espacios_info(frameLista,10,22)
 MenuInicial()
-
-if  DatosUsuario == ():       
-    DatosUsuario = cargaUsuario()
-     
+if  DatosUsuario == ():     DatosUsuario = cargaUsuario()  
 raiz.mainloop()  
