@@ -70,23 +70,23 @@ raiz.bind("<End>", lambda event: Saliendo())                            # Si en 
 raiz.bind("<Control-d>", lambda event: regresaSinNada())                # Si aquí se pulsan las teclas CTRL + D no pasa nada
 raiz.bind("<Control-D>", lambda event: regresaSinNada())
 #  ---------------------- Definiendo variables necesarias ---------------------
-
-global  DatosUsuario, usuarioReal, usuarioNivel                             # Definimos las variables que vamos a usar   
-DatosUsuario, usuarioReal, usuarioNivel = (), "No s'ha identificat", "0"    # Inicializamos las variables
-
-global avisoint, EstamosEnIncidencias, EstamosEnRegistros, EstamosEnProforma, EstamosEnBloqueos, EstamosEnProductos, EstamosEnClientes, EstamosEnUsuarios, EstamosEnIntroducir                                                                      # Definimos las variables que vamos a usar
-avisoint, EstamosEnIncidencias, EstamosEnRegistros, EstamosEnProforma, EstamosEnBloqueos, EstamosEnProductos, EstamosEnClientes, EstamosEnUsuarios, EstamosEnIntroducir = True, False, False, False, False, False, False, False, False              # Inicializamos las variables
-
-global TamanyoLetra                                                         # Definimos las variables que vamos a usar
-TamanyoLetra = 0                                                            # Inicializamos las variables
-
-global origenes, idiomas, horas, fuentes, descripciones, tiposPago, estados, usoUsuarios, productos, productosR, productosS                                                                                                                         # Definimos las variables que vamos a usar      
-origenes, idiomas, horas, fuentes, descripciones, tiposPago, estados, usoUsuarios, productos, productosR, productosS = "","","","","","","","","","",""                                                                                             # Inicializamos las variables
-
-global vr1,vr2,vr3,vr4,vr5,vr6,vr7,vr8,vr9,vr10,vr11,vr12,vr13,vr14                                                                                                                                                                                 # Definimos las variables que vamos a usar
-vr1,vr2,vr3,vr4,vr5,vr6,vr7,vr8,vr9,vr10,vr11,vr12,vr13,vr14 = "","","","","","",False,"","","","","","",False                                                                                                                                      # Inicializamos las variables
-    
-global fecha, diaGlobal, diaGlobaltk, mesGlobal, mesGlobaltk, anyoGlobal, anyoGlobaltk, diaFecha, mesFecha, anyoFecha                                                                                                                               # Definimos las variables que vamos a usar
+# Variables de control de usuario
+global  DatosUsuario, usuarioReal, usuarioNivel                               
+DatosUsuario, usuarioReal, usuarioNivel = (), "No s'ha identificat", "0"    
+# Variables de control de menús
+global avisoint, EstamosEnIncidencias, EstamosEnRegistros, EstamosEnProforma, EstamosEnBloqueos, EstamosEnProductos, EstamosEnClientes, EstamosEnUsuarios, EstamosEnIntroducir                                                                      
+avisoint, EstamosEnIncidencias, EstamosEnRegistros, EstamosEnProforma, EstamosEnBloqueos, EstamosEnProductos, EstamosEnClientes, EstamosEnUsuarios, EstamosEnIntroducir = True, False, False, False, False, False, False, False, False              
+# Variable sobre el tamaño de la letra
+global TamanyoLetra                 
+TamanyoLetra = 0                    
+# Variables de control de la base de datos
+global origenes, idiomas, horas, fuentes, descripciones, tiposPago, estados, usoUsuarios, productos, productosR, productosS                                                                                                                          
+origenes, idiomas, horas, fuentes, descripciones, tiposPago, estados, usoUsuarios, productos, productosR, productosS = "","","","","","","","","","",""                                                                                             
+# Variables de control del manejo de los datos de los cuestionarioa
+global vr1,vr2,vr3,vr4,vr5,vr6,vr7,vr8,vr9,vr10,vr11,vr12,vr13,vr14                                                                                                                                                                                 
+vr1,vr2,vr3,vr4,vr5,vr6,vr7,vr8,vr9,vr10,vr11,vr12,vr13,vr14 = "","","","","","",False,"","","","","","",False                                                                                                                                      
+# Variables de control de la fecha    
+global fecha, diaGlobal, diaGlobaltk, mesGlobal, mesGlobaltk, anyoGlobal, anyoGlobaltk, diaFecha, mesFecha, anyoFecha                                                                                                                               
 
 fecha = datetime.now()              # Obtenemos la fecha actual
 diaGlobal = str(fecha.day)          # Obtenemos el día actual
@@ -125,7 +125,6 @@ def ventanaAviso            (texto,color,pausa):                                
     avisolabel4.pack()                    # Coloca el label en la ventana
     avisolabel5=Label(aviso,text="",bg = color)    # Creamos un label vacío
     avisolabel5.pack()                    # Coloca el label en la ventana
-
     avisolabel6 = Label(aviso, text = texto,
                        bg = color, fg = "white",
                        font = ("Helvetica", 13))   
@@ -135,35 +134,35 @@ def ventanaAviso            (texto,color,pausa):                                
     time.sleep(pausa)                    # X segundos de pausa
     aviso.destroy()                      # Destruye la ventana 
 def ventanaSeleccion        (texto,color,destinoSi):
-    global seleccion                                                # Función que crea la ventana de selección
-    seleccion = Tk()                         # Creamos la ventana
-    seleccion.title(" ")                     # Damos titulo a la ventana
-    seleccion.geometry("500x250+10+10")      # Damos tamaño a la ventana
-    seleccion.configure(bg=color)            # Damos color de fondo a la ventana
-    seleccion.iconbitmap("image/icono.ico")  # Damos icono a la ventana
-    seleccion.deiconify()                    # Mostramos la ventana
-    seleccion.config(bd=10)                  # Le da un grosor de borde
-    seleccion.config(relief="groove")        # Le da un tipo de borde
-    eti1 = Label(seleccion,text = " ",bg = color)                   # Creamos un label vacío
-    eti1.pack()                                                  # Coloca el label en la ventana
-    eti2 = Label(seleccion,text = " ",bg = color)                   # Creamos un label vacío
-    eti2.pack()                                                  # Coloca el label en la ventana
-    eti3 = Label(seleccion,text = " ",bg = color)                   # Creamos un label vacío
-    eti3.pack()                                                  # Coloca el label en la ventana
-    eti4 = Label(seleccion,text = " ",bg = color)                   # Creamos un label vacío
-    eti4.pack()                                                  # Coloca el label en la ventana
+    global seleccion                                            # Función que crea la ventana de selección
+    seleccion = Tk()                                            # Creamos la ventana
+    seleccion.title(" ")                                        # Damos titulo a la ventana
+    seleccion.geometry("500x250+10+10")                         # Damos tamaño a la ventana
+    seleccion.configure(bg=color)                               # Damos color de fondo a la ventana
+    seleccion.iconbitmap("image/icono.ico")                     # Damos icono a la ventana
+    seleccion.deiconify()                                       # Mostramos la ventana
+    seleccion.config(bd=10)                                     # Le da un grosor de borde
+    seleccion.config(relief="groove")                           # Le da un tipo de borde
+    eti1 = Label(seleccion,text = " ",bg = color)               # Creamos un label vacío
+    eti1.pack()                                                 # Coloca el label en la ventana
+    eti2 = Label(seleccion,text = " ",bg = color)               # Creamos un label vacío
+    eti2.pack()                                                 # Coloca el label en la ventana
+    eti3 = Label(seleccion,text = " ",bg = color)               # Creamos un label vacío
+    eti3.pack()                                                 # Coloca el label en la ventana
+    eti4 = Label(seleccion,text = " ",bg = color)               # Creamos un label vacío
+    eti4.pack()                                                 # Coloca el label en la ventana
     aviso = Label(seleccion,text = (texto),
                   anchor = "center",
                   background = color, font = ("Helvetica", 13))     # Creamos un label con el texto
-    aviso.pack()                                                  # Coloca el label en la ventana
-    yes_btn = Button(seleccion, text="SI", command=destinoSi)       # Botón SI
-    yes_btn.pack()                                                # Coloca el botón en la ventana
-    no_btn = Button(seleccion, text="NO", command=del_no)           # Botón NO
-    no_btn.pack()                                                 # Coloca el botón en la ventana
-    no_btn.focus()                                                  # Pone el foco en el botón NO
-    seleccion.overrideredirect(True)                                    # Quitamos el marco de la ventana
-    seleccion.update()                                                  # Actualiza la ventana      
-    seleccion.mainloop()                                            # Bucle de la ventana
+    aviso.pack()                                                # Coloca el label en la ventana
+    yes_btn = Button(seleccion, text="SI", command=destinoSi)   # Botón SI
+    yes_btn.pack()                                              # Coloca el botón en la ventana
+    no_btn = Button(seleccion, text="NO", command=del_no)       # Botón NO
+    no_btn.pack()                                               # Coloca el botón en la ventana
+    no_btn.focus()                                              # Pone el foco en el botón NO
+    seleccion.overrideredirect(True)                            # Quitamos el marco de la ventana
+    seleccion.update()                                          # Actualiza la ventana      
+    seleccion.mainloop()                                        # Bucle de la ventana
 # ---------------------- Funciones sobre errores en los questionarios ---------------------      
 def cotejaFecha             (muralla,dia,dialabel,mes,meslabel,anyo,anyolabel):     # Función que comprueba si la fecha introducida es correcta  
     
@@ -355,9 +354,8 @@ def cotejaDatoCoincidente   (muralla,retorno,mensaje,base,
         label.focus()
     return muralla                                                                  # Devolvemos el valor de la variable muralla                               
 # ------------------------------ Funciones globales ----------------------
-def copia                   ():
-    if raiz.focus_get() == None:                # Comprueba si el foco está en alguna label o entry.
-        return                                  # Si no está en ninguna label o entry, no hace nada
+def copia                   ():                                                     # Función que copia el contenido de una label o entry al portapapeles
+    if raiz.focus_get() == None:    return      # Si no está en ninguna label o entry, no hace nada
     else:                                       # Si está en alguna label o entry, hace lo siguiente
         foco = raiz.focus_get()                 # Descubre en qué label o entry está el foco
 
@@ -366,12 +364,10 @@ def copia                   ():
             clipboard.copy(texto)               # Copia el contenido de la label o entry al portapapeles
         except:                                 # Si no puede hacer lo anterior... 
             pass                                # No hace nada
-def paste                   ():
-    if raiz.focus_get() == None:                # Comprueba si el foco está en alguna label o entry.
-        return                                  # Si no está en ninguna label o entry, no hace nada
+def paste                   ():                                                     # Función que pega el contenido del portapapeles dentro de una label o entry
+    if raiz.focus_get() == None:    return      # Si no está en ninguna label o entry, no hace nada                       
     else:                                       # Si está en alguna label o entry, hace lo siguiente
         foco = raiz.focus_get()                 # Descubre en qué label o entry está el foco
-
         try:                                    # intenta hacer lo siguiente
             foco.insert(INSERT, clipboard_get())# Pega el contenido del portapapeles dentro de la label o entry
         except:                                 # Si no puede hacer lo anterior...
@@ -388,40 +384,33 @@ def CopiaSeguridadGlobal    ():
     # Copia la carpeta files dentro de esta carpeta
     shutil.copytree("files", "Security/" + str(anyoGlobal) + "-" + str(mesGlobal) + "-" + str(diaGlobal) + " " + str(fecha.hour) + "-" + str(fecha.minute) + "-" + str(fecha.second) + "/files")
     
-def Saliendo                ():
+def Saliendo                ():                                                     # Función que se ejecuta al salir de la aplicación  
     
     CopiaSeguridadGlobal()                      # Hacemos una copia de seguridad antes de salir
     raiz.destroy()                              # Cerramos tkinter
 
-def pulsaTeclaCombobox      (event):
+def pulsaTeclaCombobox      (event):                                                # Función que se ejecuta al pulsar una tecla en un combobox
     
-    global stringBusqueda                                           # Creamos global la variable de lo escrito
-    if raiz.focus_get() != LRR31:                                   # Si el foco no está sobre LRR31..
+    global stringBusqueda                       # Creamos global la variable de lo escrito
+    if raiz.focus_get() != LRR31:               # Si el foco no está sobre LRR31..
         return                                                      # No hace nada
-    letter = event.char                                             # Obtener la tecla presionada
-
-    if  event.char.isalpha() or event.char == " " or event.char in "`,´,',À,È,Ì,Ò,Ù,Á,É,Í,Ú,Ó": # Si la tecla pulsada es espacio o vocal con tilde o letra o número...
-    
+    letter = event.char                         # Obtener la tecla presionada
+    # Si la tecla pulsada es espacio o vocal con tilde o letra o número...
+    if  event.char.isalpha() or event.char == " " or event.char in "`,´,',À,È,Ì,Ò,Ù,Á,É,Í,Ú,Ó":    
         try:
-            letter = letter.upper()                                 # Convertir la letra a mayúsculas
+            letter = letter.upper()             # Convertir la letra a mayúsculas
         except:
-            pass
-        
-        stringBusqueda += letter                                    # Añadir la letra a la cadena de búsqueda
-        values = LRR31.cget('values')                               # Obtener las opciones del combobox
-        for value in values:                                        # Buscar la primera opción que comience con la cadena de búsqueda
-
-                if value.startswith(stringBusqueda):
-                    
-                    LRR31.set(value)                    # Seleccionar la opción encontrada y salir del bucle
-
-                    break
-    # Si la letra presionada no es letra o número...
-    else:                                               # Si la tecla pulsada no es una letra o un espacio    
-
-        stringBusqueda = ""         
-def cambiaPasaEncima        (boton, colorEncima, colorFuera): 
-  
+            pass                                # Si no se puede convertir a mayúsculas, no hacer nada        
+        stringBusqueda += letter                # Añadir la letra a la cadena de búsqueda
+        values = LRR31.cget('values')           # Obtener las opciones del combobox
+        for value in values:                    # Buscar la primera opción que comience con la cadena de búsqueda
+                # Si la opción comienza con la cadena de búsqueda...
+                if value.startswith(stringBusqueda):                   
+                    LRR31.set(value)            # Seleccionar la opción encontrada y salir del bucle
+                    break                       # Salir del bucle
+    else:                                       # Si la tecla pulsada no es una letra o un espacio    
+        stringBusqueda = ""                     # Vaciar la cadena de búsqueda
+def cambiaPasaEncima        (boton, colorEncima, colorFuera):                       # Función que cambia el color del botón cuando el ratón pasa por encima 
     boton.bind("<Enter>", func=lambda e: boton.config(background=colorEncima))
     boton.bind("<Leave>", func=lambda e: boton.config(background=colorFuera)) 
 def creaBoton               (boton,frame,texto,comando,fila,columna,colfondo,colletras,altura,ancho,colPasa):
@@ -1365,8 +1354,8 @@ def query_incidencias_busca ():
     v1,v2,v3,v4,v5,v6,v7,v8,v9,v10,v11,v12,v13,v14 = LRR11.get(),LRR22.get(),LRR32.get(),LRR42.get(),LRR51.get(),LRR61.get(),LRR71.get(),LRR82.get(),LRR92.get(),LRR102.get(),LRR112.get(),LRR121.get(),LRR131.get(),LRR142.get()
     
     muralla = False
-    muralla = cotejaFechaEmptyOk(muralla,v2,LRR22,v3,LRR32,v4,LRR42)
-    muralla = cotejaFechaEmptyOk(muralla,v8,LRR82,v9,LRR92,v10,LRR102)
+    muralla,v2,v3,v4 = cotejaFechaEmptyOk(muralla,v2,LRR22,v3,LRR32,v4,LRR42)
+    muralla,v8,v9,v10 = cotejaFechaEmptyOk(muralla,v8,LRR82,v9,LRR92,v10,LRR102)
     if muralla == True:
         LR23.config(fg = "red")         # Pintamos de rojo el campo LR23
         return
@@ -1493,106 +1482,6 @@ def IncidenciasSalvaCorrecc ():
                                             'bd_incidencias',
                                             "SELECT *,oid FROM bd_incidencias WHERE ((FECHA = '" + v2 + "') AND (HORA = '" + v6+ "'))","",
                                             "¡¡ATENCIÓ!! Ja existeix una altra incidència amb aquesta data i hora",3,v1,"red")          
-    '''
-    if v2!= "":
-        
-        # Si el principio de v2 no es 2 dígitos y "/"
-        if v2[1] == "/":
-            # Añade 0 delante
-            v2 = "0" + v2
-        if v2[0:2].isdigit() == False or v2[2] != "/":
-            LR23.config(text = "Dia incorrecte")
-            LRR22.focus()
-            return
-        # Si v2 no contiene "/" dos digitos y "/"
-        if v2[4] == "/":
-            v2 = v2[0:3] + "0" + v2[3:] 
-        if v2[3:5].isdigit() == False or v2[5] != "/":
-            LR23.config(text = "Mes incorrecte")
-            LRR22.focus()
-            return
-        # Si v2 no tiene 10 caracteres
-        if len(v2) < 10:
-            # Añade después del seguno "/" el número 20
-            v2 = v2[0:6] + "20" + v2[6:]
-        # Si v2 no acaba en "/" y 4 dígitos
-        if v2[6:10].isdigit() == False or len(v2) != 10:
-            LR23.config(text = "Any incorrecte")
-            LRR22.focus()
-            return
-    elif v2 == "" and v20 != "Pendent gaudir":
-        LR23.config(text = "Manca data")
-        LRR22.focus() 
-        return
-    if v20 == "Pendent gaudir":
-        v2 = "Per definir"    
-    # Si el principio de v17 no es 2 dígitos y "/"
-    if v17 != "" and (v17[0:2].isdigit() == False or v17[2] != "/"):
-        LR23.config(text = "Dia incorrecte")
-        LRR172.focus()
-        return
-    # Si v17 no contiene "/" dos digitos y "/"
-    if v17 != "" and (v17[3:5].isdigit() == False or v17[5] != "/"):
-        LR23.config(text = "Mes incorrecte")
-        LRR172.focus()
-        return
-    # Si v17 no acaba en "/" y 4 dígitos
-    if v17 != "" and (v17[6:10].isdigit() == False or len(v17) != 10):
-        LR23.config(text = "Any incorrecte")
-        LRR172.focus()
-        return
-    
-    # Si TELEFONO_EXTRA es ""
-    if v4 == "":
-            # Abre la base de datos de clientes
-            base_datos_clientes = sqlite3.connect('databases/basesDeDatosClientes.db')
-            # Crea el cursor
-            cursor1 = base_datos_clientes.cursor()
-            # Busca el cliente 
-            cursor1.execute("SELECT * FROM bd_Clientes WHERE NOM ='"+v3+"'")
-            clientes = cursor1.fetchall()
-            # Si cursor1 tiene una sóla linea
-            largo = len(clientes)
-            if largo == 1:
-                # Buscamos el valor TELEFONO DE la linea CLIENTE
-                v4 = clientes[0][4]
-            # Cierra la base de datos
-            base_datos_clientes.close() 
-
-    # Si MAIL_EXTRA es ""
-    if v5 == "":
-            # Abre la base de datos de clientes
-            base_datos_clientes = sqlite3.connect('databases/basesDeDatosClientes.db')
-            # Crea el cursor
-            cursor1 = base_datos_clientes.cursor()
-            # Busca el cliente 
-            cursor1.execute("SELECT * FROM bd_Clientes WHERE NOM ='"+v3+"'")
-            clientes = cursor1.fetchall()
-            # Si cursor1 tiene una sóla linea
-            largo = len(clientes)
-            if largo == 1:
-                # Buscamos el valor MAIL de la linea CLIENTE
-                v5 = clientes[0][5]
-            # Cierra la base de datos
-            base_datos_clientes.close() 
-    
-    # Si CONTACTE es ""
-    if v15 == "":
-            # Abre la base de datos de clientes
-            base_datos_clientes = sqlite3.connect('databases/basesDeDatosClientes.db')
-            # Crea el cursor
-            cursor1 = base_datos_clientes.cursor()
-            # Busca el cliente
-            cursor1.execute("SELECT * FROM bd_Clientes WHERE NOM ='"+v3+"'")
-            clientes = cursor1.fetchall()
-            # Si cursor1 tiene una sóla linea
-            largo = len(clientes)
-            if largo == 1:
-                # Buscamos el valor CONTACTE de la linea CLIENTE
-                v22 = clientes[0][7]
-            # Cierra la base de datos
-            base_datos_clientes.close() 
-    '''
                                                 
     base_datos = sqlite3.connect('databases/basesDeDatosIncidencias.db')            # Crea una base de datos o abre la existente
     c = base_datos.cursor()                                                         # Conecta el cursor
@@ -4057,7 +3946,7 @@ def menuRegistrosIntroducir                         ():
         muralla = cotejaVacio(muralla,v3,LRR41)
         muralla = cotejaVacio(muralla,v2,LRR31)
         muralla = cotejaVacio(muralla,v1,LRR21)
-        # muralla,v9,v8,v7 = cotejaFecha(muralla,v9,diaFecha,v8,mesFecha,v7,anyoFecha)
+        muralla,v9,v8,v7 = cotejaFecha(muralla,v9,diaFecha,v8,mesFecha,v7,anyoFecha)
         if muralla == True: 
             LR23.config(fg = "red")         # Pintamos de rojo el campo LR23
             return    
@@ -4527,9 +4416,10 @@ def menuTablasPax                                   ():
     global ventanaTabla
     ventanaTabla = Tk()
     ventanaTabla.title('Taula Pax')
-    #ventanaTabla.geometry("1500x700")
     ventanaTabla.configure(bg='green')
     ventanaTabla.iconbitmap("image/icono.ico")
+    ventanaTabla.config(bd=10)                  # Le da un grosor de borde
+    ventanaTabla.config(relief="groove")        # Le da un tipo de borde
     frameTablaPax = Frame(ventanaTabla)
     frames(frameTablaPax,0,0,3,300,50,"green")
     # Si en cualquier momento se pulsan las teclas CTRL + CURSOR IZQUIERDA se fuerza el pulsado del botón REGRESAR
@@ -8631,7 +8521,7 @@ mantieneDistancia.config(padx = 5,bg="#b7b493",fg="#FFFFFF", anchor = E, font=("
 for i in range (1,24):
     globals()['LR%s' % (i)] = Label(frameRellena,text="")   
     globals()['LR%s' % (i)].grid(row=i-1, column=0,rowspan=1,columnspan=1)
-    globals()['LR%s' % (i)].config(padx = 5,bg="#b7b493",fg="#FFFFFF", anchor = E, font=("Helvetica", tamanyoFont,"bold"),width = 15)
+    globals()['LR%s' % (i)].config(padx = 5,bg="#b7b493",fg="#000000", anchor = E, font=("Helvetica", tamanyoFont,"bold"),width = 15)
 
     globals()['LRR%s' % (i) + '1'] = Combobox(frameRellena,state="readonly")                                                                                  
     globals()['LRR%s' % (i) + '1'].grid(rowspan=1,columnspan=1)
