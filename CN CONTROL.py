@@ -155,10 +155,10 @@ def ventanaSeleccion        (texto,color,destinoSi):
                   anchor = "center",
                   background = color, font = ("Helvetica", 13))     # Creamos un label con el texto
     aviso.pack()                                                # Coloca el label en la ventana
-    yes_btn = Button(seleccion, text="SI", command=destinoSi)   # Botón SI
-    yes_btn.pack()                                              # Coloca el botón en la ventana
     no_btn = Button(seleccion, text="NO", command=del_no)       # Botón NO
     no_btn.pack()                                               # Coloca el botón en la ventana
+    yes_btn = Button(seleccion, text="SI", command=destinoSi)   # Botón SI
+    yes_btn.pack()                                              # Coloca el botón en la ventana
     no_btn.focus()                                              # Pone el foco en el botón NO
     seleccion.overrideredirect(True)                            # Quitamos el marco de la ventana
     seleccion.update()                                          # Actualiza la ventana      
@@ -991,13 +991,17 @@ def BotonRegresarForzado    ():
     
     BM11.invoke()        
 
-def Boton4activado          (Destino):
+def Boton4activado          (Destino,subdestino):
+    
+    BB4.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 10, command = lambda: Destino(subdestino))
+    cambiaPasaEncima(BB4,"green","#27779d")
+def Boton4activado2         (Destino):
     
     BB4.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 10, command = Destino)
-    cambiaPasaEncima(BB4,"green","#27779d") 
-def Boton5activado          (Destino):
+    cambiaPasaEncima(BB4,"green","#27779d")      
+def Boton5activado          (Destino,subdestino):
     
-    BB5.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 5, command = Destino)
+    BB5.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 5, command = lambda: Destino(subdestino))
     cambiaPasaEncima(BB5,"green","#27779d") 
 def Boton6activado          (Destino):
     
@@ -1155,22 +1159,26 @@ def query_todos             (archivo,seleccion,column,variableTrue,*datosAlQuery
         puntero = 0
     globals()[variableTrue] = True
     query(base_datos,busqueda,columnas,*datosAlQuery)    
-
-def prequery_registros      ():
-    
+def prequery_todos          (funcion):
     global puntero
     if puntero <= 0:
         puntero = 0
-        query_registros_busca()
+        funcion()
         return
     else:
         puntero -= 42
-        query_registros_busca()
-def query_registros_busca0  ():
+        funcion()
+def query_todos_busca0      (funcion):
     
     global puntero
     puntero = 0
-    query_registros_busca()
+    funcion()
+def Le_Bd_Se_todos          (base_datos):
+    LimpiaElegibles     ()                                              # Limpia los campos de texto
+    base_datos.commit   ()	                                            # Asegura los cambios
+    base_datos.close    ()	                                            # Cierra la conexión
+    seleccion.destroy   ()                                              # Destruye la ventana de aviso
+                   
 def query_registros_busca   ():
     
     global EstamosEnRegistros
@@ -1245,7 +1253,7 @@ def registroCorrigeUno      ():
         MiraFecha(anyoFecha)
         
     LRR21.focus()                                                       # Centramos el cursor
-    Boton4activado(RegistroSalvaCorreccion)                            # Activa el botón de guardar
+    Boton4activado2(RegistroSalvaCorreccion)                            # Activa el botón de guardar
 def RegistroSalvaCorreccion ():
     
     global origenes,usuarioReal,diaGlobal,mesGlobal,anyoGlobal
@@ -1321,33 +1329,15 @@ def del_register_yes        ():
     base_datos = sqlite3.connect('databases/basesDeDatosRegistros.db')  # Creamos base de datos o conectamos a una 
     c = base_datos.cursor()	                                            # Creamos el cursor
     c.execute("DELETE from bd_registros WHERE oid = " + LRR12.get())	# Borra el registro
-    LimpiaElegibles()                                                   # Limpia los campos de texto
-    base_datos.commit()	                                                # Asegura los cambios
-    base_datos.close()	                                                # Cierra la conexión
-    seleccion.destroy()                                                 # Destruye la ventana de aviso
-
+    Le_Bd_Se_todos(base_datos)                                          # Acciones comunes
     # Borramos los datos del listado de registros
     query_todos('databases/basesDeDatosRegistros.db',
                 "SELECT *, oid FROM bd_registros ORDER BY oid DESC",
                 8,
                 "EstamosEnRegistros",
                 "ID","","DATA","DESCRIPCIÓ","ORIGEN","HORA","PRODUCTE","FONT","")
+    LRR12.focus()                                                       # Foco
 
-def prequery_incidencias    ():
-    
-    global puntero
-    if puntero <= 0:
-        puntero = 0
-        query_incidencias_busca()
-        return
-    else:
-        puntero -= 42
-        query_incidencias_busca()
-def query_incidencias_busca0():
-    
-    global puntero
-    puntero = 0
-    query_incidencias_busca()
 def query_incidencias_busca ():
     
     global EstamosEnIncidencias
@@ -1459,7 +1449,7 @@ def incidenciasCorrigeUno   ():
         LRR192.config(state = "readonly")
         LRR201.focus()
             
-    Boton4activado(IncidenciasSalvaCorrecc)
+    Boton4activado2(IncidenciasSalvaCorrecc)
 def IncidenciasSalvaCorrecc ():
     
     global origenes,usuarioReal,diaGlobal,mesGlobal,anyoGlobal                  # Variables globales
@@ -1565,80 +1555,38 @@ def incidenciasBorraUno     ():
     ventanaSeleccion("Aixó esborrarà la incidència amb id "+ val1 +", si existeix.","red",del_incidence_yes)
 def del_incidence_yes       ():
 
-    # Creamos base de datos o conectamos a una
-    base_datos = sqlite3.connect('databases/basesDeDatosIncidencias.db')
-    
-	# Creamos el cursor
-    c = base_datos.cursor()
-
-	# Borra el registro
-    c.execute("DELETE from bd_incidencias WHERE oid = " + LRR12.get())
-
-    LimpiaElegibles()
-    
-	#Asegura los cambios
-    base_datos.commit()
-
-	# Cierra la conexión 
-    base_datos.close()
-    
-    seleccion.destroy()
-
+    base_datos = sqlite3.connect('databases/basesDeDatosIncidencias.db')# Creamos base de datos o conectamos a una    
+    c = base_datos.cursor()	                                            # Creamos el cursor
+    c.execute("DELETE from bd_incidencias WHERE oid = " + LRR12.get())	# Borra el registro
+    LimpiaElegibles()                                                   # Limpia las cajas
+    base_datos.commit()	                                                # Asegura los cambios
+    base_datos.close()	                                                # Cierra la conexión 
+    seleccion.destroy()                                                 # Cierra la ventana de aviso
+    Le_Bd_Se_todos(base_datos)                                          # Acciones comunes
     # Borramos los datos del listado de registros
     query_todos('databases/basesDeDatosIncidencias.db',
                 "SELECT *, oid FROM bd_incidencias ORDER BY oid DESC",
                 8,
                 "EstamosEnIncidencias",
-                "ID","DATA","HORA","PAX","PRODUCTE","IDIOMA","ESTAT","CLIENT","PAGAT")        
-
-    
-    # Foco
-    LRR12.focus() 
+                "ID","DATA","HORA","PAX","PRODUCTE","IDIOMA","ESTAT","CLIENT","PAGAT")         
+    LRR12.focus()                                                       # Foco
 
 def ProformaProduceUno      ():
     
-    global VieneDeIncGrups
-    VieneDeIncGrups = LRR12.get()
-    global val1
-    val1 = LRR12.get()
-
-    if  val1 == "":
-        return
-                       
-    # Limpia las cajas
-    LimpiaElegibles
-    
-	# Crea una base de datos o se conecta a una
-    base_datos = sqlite3.connect('databases/basesDeDatosIncidencias.db')
-
-	# Crea cursor
-    c = base_datos.cursor()
-    
-	# Query the database
-    c.execute("SELECT * FROM bd_incidencias WHERE oid = " + val1)
-    records = c.fetchall()
-    
-    # Cerramos incidencias
-    base_datos.close()
-    
-    menuIncidenciasFacturaProformaIntroducirCrear()
-      
+    global VieneDeIncGrups                                              # Variable global que indica si viene de incidencias o de grupos
+    VieneDeIncGrups = LRR12.get()                                       # Recupera el id de la incidencia o grupo
+    global val1                                                         # Variable global que recupera el id de la incidencia o grupo
+    val1 = LRR12.get()                                                  # Recupera el id de la incidencia o grupo
+    if  val1 == "": return                                              # Si no ha puesto ningún id, no hará nada               
+    LimpiaElegibles                                                     # Limpia las cajas   
+    base_datos = sqlite3.connect('databases/basesDeDatosIncidencias.db')# Crea una base de datos o se conecta a una
+    c = base_datos.cursor()	                                            # Crea cursor
+    c.execute("SELECT * FROM bd_incidencias WHERE oid = " + val1)	    # Query the database
+    records = c.fetchall()                                              # Recupera los resultados
+    base_datos.close()                                                  # Cerramos incidencias
+    menuIncidenciasFacturaProformaIntroducirCrear()                     # Vuelve hacia atrás
     # Creando las variables globales
-    global  fecha
-    global  fechaPro
-    global  NumPro
-    global  Cliente
-    global  Cant1
-    global  concept1
-    global  Precio1
-    global  Cant2
-    global  Concept2
-    global  Precio2
-    global  Iva
-    global  TipoIva
-    global  IncluidoIva
-    global  IdIncidencia
-     
+    global  fecha,fechaPro,NumPro,Cliente,Cant1,concept1,Precio1,Cant2,Concept2,Precio2,Iva,TipoIva,IncluidoIva,IdIncidencia     
     # Loop para volcar los resultados    
     for record in records:
              
@@ -1651,54 +1599,24 @@ def ProformaProduceUno      ():
         LRR72.insert(0,record[12])
         LRR82.insert(0,record[3])
         LRR92.insert(0,record[15])
-        LRR102.insert(0,record[14])
+        LRR102.insert(0,record[14])    
+    LRR22.focus()                                                       # Centramos el cursor 
+def ProformaClonaUno        ():                         
         
-    # Centramos el cursor
-    LRR22.focus()    
-def ProformaClonaUno        ():
-        
-    global VieneDeIncGrups
-    VieneDeIncGrups = LRR12.get()
-    global val1
-    val1 = LRR12.get()
-
-    if  val1 == "":
-        return
-                       
-    # Limpia las cajas
-    LimpiaElegibles
-    
-	# Crea una base de datos o se conecta a una
-    base_datos = sqlite3.connect('databases/basesDeDatosProforma.db')
-
-	# Crea cursor
-    c = base_datos.cursor()
-    
-	# Query the database
-    c.execute("SELECT * FROM bd_proforma WHERE oid = " + val1)
-    records = c.fetchall()
-    
-    # Cerramos incidencias
-    base_datos.close()
-    
-    menuIncidenciasFacturaProformaIntroducirCrear()
-      
+    global VieneDeIncGrups                                              # Variable global que indica si viene de incidencias o de grupos
+    VieneDeIncGrups = LRR12.get()                                       # Recupera el id de la incidencia o grupo
+    global val1                                                         # Variable global que recupera el id de la incidencia o grupo
+    val1 = LRR12.get()                                                  # Recupera el id de la incidencia o grupo
+    if  val1 == "": return                                              # Si no ha puesto ningún id, no hará nada               
+    LimpiaElegibles                                                     # Limpia las cajas
+    base_datos = sqlite3.connect('databases/basesDeDatosProforma.db')	# Crea una base de datos o se conecta a una
+    c = base_datos.cursor()	                                            # Crea cursor
+    c.execute("SELECT * FROM bd_proforma WHERE oid = " + val1)	        # Query the database
+    records = c.fetchall()                                              # Recupera los resultados
+    base_datos.close()                                                  # Cerramos incidencias
+    menuIncidenciasFacturaProformaIntroducirCrear()                     # Vuelve hacia atrás
     # Creando las variables globales
-    global  fecha
-    global  fechaPro
-    global  NumPro
-    global  Cliente
-    global  Cant1
-    global  concept1
-    global  Precio1
-    global  Cant2
-    global  Concept2
-    global  Precio2
-    global  Iva
-    global  TipoIva
-    global  IncluidoIva
-    global  IdIncidencia
-     
+    global  fecha,fechaPro,NumPro,Cliente,Cant1,concept1,Precio1,Cant2,Concept2,Precio2,Iva,TipoIva,IncluidoIva,IdIncidencia   
     # Loop para volcar los resultados    
     for record in records:
              
@@ -1711,25 +1629,8 @@ def ProformaClonaUno        ():
         LRR72.insert(0,record[6])
         LRR82.insert(0,record[7])
         LRR92.insert(0,record[8])
-        LRR102.insert(0,record[9])
-        
-    # Centramos el cursor
-    LRR22.focus()
-def prequery_proforma       ():
-    
-    global puntero
-    
-    if puntero == 0:
-        query_proforma_busca()
-        return
-    else:
-        puntero -= 21
-        query_proforma_busca()
-def query_proforma_busca0   ():
-    
-    global puntero
-    puntero = 0
-    query_proforma_busca()
+        LRR102.insert(0,record[9])  
+    LRR22.focus()                                                       # Centramos el cursor
 def query_proforma_busca    ():
     
     global EstamosEnProforma
@@ -1854,7 +1755,7 @@ def ProformaCorrigeUno      ():
     # Centramos el cursor
     LRR22.focus()
 
-    Boton4activado(ProformaSalvaCorrecc)
+    Boton4activado2(ProformaSalvaCorrecc)
 def ProformaSalvaCorrecc    ():
     
     global origenes
@@ -2099,43 +2000,23 @@ def ProformaBorraUno        ():
     val1 = LRR12.get()
 
     # si no ha puesto ningún id, no hará nada
-    if val1 == "":
+    if val1 == "":  return
         
-        return
-    
     # Ventana de aviso
     ventanaSeleccion("Aixó esborrarà la proforma amb id "+ val1 +", si existeix.","red",del_proform_yes) 
 def del_proform_yes         ():
 
-    # Creamos base de datos o conectamos a una
-    base_datos = sqlite3.connect('databases/basesDeDatosProforma.db')
-    
-	# Creamos el cursor
-    c = base_datos.cursor()
-
-	# Borra el registro
-    c.execute("DELETE from bd_proforma WHERE oid = " + LRR12.get())
-
-    LimpiaElegibles()
-    
-	#Asegura los cambios
-    base_datos.commit()
-
-	# Cierra la conexión 
-    base_datos.close()
-    
-    seleccion.destroy()
-
+    base_datos = sqlite3.connect('databases/basesDeDatosProforma.db')   # Creamos base de datos o conectamos a una    
+    c = base_datos.cursor()	                                            # Creamos el cursor
+    c.execute("DELETE from bd_proforma WHERE oid = " + LRR12.get())	    # Borra el registro
+    Le_Bd_Se_todos(base_datos)                                          # Acciones comunes
     # Borramos los datos del listado de registros
     query_todos('databases/basesDeDatosProforma.db',
                 "SELECT *, oid FROM bd_proforma ORDER BY NUM_PRO",
                 8,
                 "EstamosEnProformas",
-                "ID","DATA","","PROFORMA","CLIENT","QUANTITAT","CONCEPTE","PREU","")        
-
-    
-    # Foco
-    LRR12.focus() 
+                "ID","DATA","","PROFORMA","CLIENT","QUANTITAT","CONCEPTE","PREU","")              
+    LRR12.focus()                                                       # Foco
 
 def query_bloqueos          ():
     
@@ -2149,16 +2030,14 @@ def query_bloqueos          ():
         puntero -= 42
         query_bloqueos_busca()    
 def query_bloqueos_busca    ():
-    
     global EstamosEnBloqueos    
     v2 = LRR12.get()
-
     # Creamos la base de datos o conectamos con una
     query_todos('databases/basesDeDatosIncidencias.db',
                 "SELECT *, oid FROM bd_bloqueos WHERE (FECHA = '" + v2 + "')",
                 8,
                 "EstamosEnBloqueos",
-                "ID","DATA","","","","","","","")
+                "ID","DATA","DESDE","FINS","","","","","")
 def bloqueoBorraUno         ():
 
     global v2
@@ -2211,53 +2090,20 @@ def bloqueoBorraUno         ():
     busqueda = "SELECT *, oid FROM bd_bloqueos WHERE (FECHA = '" + LRR12.get() + "')"
     columnas = 8
     global puntero
-    query(base_datos,busqueda,columnas,"ID","DATA","","","","","","","")
+    query(base_datos,busqueda,columnas,"ID","DATA","DESDE","FINS","","","","","")
     
     # Ventana de aviso
     ventanaSeleccion("Aixó esborrarà el bloqueig del"+ v2 +", si existeix.","red",del_block_yes)
 def del_block_yes           ():
     
-    global v2
-    # Creamos base de datos o conectamos a una
-    base_datos = sqlite3.connect('databases/basesDeDatosIncidencias.db')
-    
-	# Creamos el cursor
-    c = base_datos.cursor()
-
-	# Borra el registro
-    c.execute("DELETE from bd_bloqueos WHERE FECHA = '" + v2 + "'")
-
-    LimpiaElegibles()
-    
-	#Asegura los cambios
-    base_datos.commit()
-
-	# Cierra la conexión 
-    base_datos.close()
-    
-    seleccion.destroy()
-
-    # Borramos los datos del listado de registros
-    query_bloqueos()
-    
-    # Foco
-    LRR12.focus() 
-            
-def prequery_productos      ():
-    
-    global puntero
-    
-    if puntero == 0:
-        query_productos_busca()
-        return
-    else:
-        puntero -= 21
-        query_productos_busca()
-def query_productos_busca0  ():
-    
-    global puntero
-    puntero = 0
-    query_productos_busca()
+    global v2                                                           # Hace global el valor de v2
+    base_datos = sqlite3.connect('databases/basesDeDatosIncidencias.db')# Creamos base de datos o conectamos a una
+    c = base_datos.cursor()	                                            # Creamos el cursor
+    c.execute("DELETE from bd_bloqueos WHERE FECHA = '" + v2 + "'")	    # Borra el registro
+    Le_Bd_Se_todos(base_datos)                                          # Acciones comunes
+    query_bloqueos()                                                    # Borramos los datos del listado de registros
+    LRR12.focus()                                                       # Foco
+           
 def query_productos_busca   ():
     
     global EstamosEnProductos
@@ -2313,7 +2159,7 @@ def productoCorrigeUno      ():
     # Centramos el cursor
     LRR22.focus()
 
-    Boton4activado(ProductoSalvaCorreccion)
+    Boton4activado2(ProductoSalvaCorreccion)
 def ProductoSalvaCorreccion ():
 
     # Rescata valores
@@ -2401,47 +2247,22 @@ def productoBorraUno        ():
     ventanaSeleccion("Aixó esborrarà el producte amb id "+ val1 +", si existeix.","red",del_product_yes)
 def del_product_yes         ():
 
-    # Creamos base de datos o conectamos a una
-    base_datos = sqlite3.connect('databases/basesDeDatosDatos.db')
-    
-	# Creamos el cursor
-    c = base_datos.cursor()
-
-	# Borra el registro
-    c.execute("DELETE from bd_productos WHERE oid = " + LRR12.get())
-
-    LimpiaElegibles()
-    
-	#Asegura los cambios
-    base_datos.commit()
-
-	# Cierra la conexión 
-    base_datos.close()
-    
-    seleccion.destroy()
-
+    base_datos = sqlite3.connect('databases/basesDeDatosDatos.db')      # Creamos base de datos o conectamos a una    
+    c = base_datos.cursor()	                                            # Creamos el cursor
+    c.execute("DELETE from bd_productos WHERE oid = " + LRR12.get())	# Borra el registro
+    LimpiaElegibles()                                                   # Limpia las cajas
+    base_datos.commit()	                                                # Asegura los cambios
+    base_datos.close()	                                                # Cierra la conexión 
+    seleccion.destroy()                                                 # Cierra la ventana de aviso
+    Le_Bd_Se_todos(base_datos)                                          # Acciones comunes
     # Borramos los datos del listado de registros
     query_todos('databases/basesDeDatosDatos.db',
                 "SELECT *, oid FROM bd_productos ORDER BY NOM",
                 4,
                 "EstamosEnProductos",
-                "ID","NOM","PREU REAL","PREU ACTUAL","TIPUS")
+                "ID","NOM","PREU REAL","PREU ACTUAL","TIPUS")              
+    LRR12.focus()                                                       # Foco
 
-def prequery_clientes       ():
-    
-    global puntero
-    
-    if puntero == 0:
-        query_clientes_busca()
-        return
-    else:
-        puntero -= 21
-        query_clientes_busca()
-def query_clientes_busca0   ():
-    
-    global puntero
-    puntero = 0
-    query_clientes_busca()
 def query_clientes_busca    ():
     
     global EstamosEnClientes
@@ -2506,7 +2327,7 @@ def clienteCorrigeUno       ():
     # Centramos el cursor
     LRR22.focus()
 
-    Boton4activado(ClienteSalvaCorreccion)
+    Boton4activado2(ClienteSalvaCorreccion)
 def ClienteSalvaCorreccion  ():
 
     # Rescata valores
@@ -2597,47 +2418,22 @@ def clienteBorraUno         ():
     ventanaSeleccion("Aixó esborrarà el client amb id "+ val1 +", si existeix.","red",del_client_yes)
 def del_client_yes          ():
 
-    # Creamos base de datos o conectamos a una
-    base_datos = sqlite3.connect('databases/basesDeDatosClientes.db')
-    
-	# Creamos el cursor
-    c = base_datos.cursor()
-
-	# Borra el registro
-    c.execute("DELETE from bd_clientes WHERE oid = " + LRR12.get())
-
-    LimpiaElegibles()
-    
-	#Asegura los cambios
-    base_datos.commit()
-
-	# Cierra la conexión 
-    base_datos.close()
-    
-    seleccion.destroy()
-
+    base_datos = sqlite3.connect('databases/basesDeDatosClientes.db')   # Creamos base de datos o conectamos a una    
+    c = base_datos.cursor()	                                            # Creamos el cursor
+    c.execute("DELETE from bd_clientes WHERE oid = " + LRR12.get())	    # Borra el registro
+    LimpiaElegibles()                                                   # Limpia las cajas
+    base_datos.commit()	                                                # Asegura los cambios
+    base_datos.close()	                                                # Cierra la conexión 
+    seleccion.destroy()                                                 # Cierra la ventana de aviso
+    Le_Bd_Se_todos(base_datos)                                          # Acciones comunes
     # Borramos los datos del listado de registros
     query_todos('databases/basesDeDatosClientes.db',
                 "SELECT *, oid FROM bd_clientes ORDER BY NOM",
                 7,
                 "EstamosEnClientes",
-                "ID","NOM","","","CIUTAT/PAIS","TELÈFON","MAIL","NIF/CIF")
+                "ID","NOM","","","CIUTAT/PAIS","TELÈFON","MAIL","NIF/CIF")             
+    LRR12.focus()                                                       # Foco
 
-def prequery_usuarios       ():
-    
-    global puntero
-    
-    if puntero == 0:
-        query_usuarios_busca()
-        return
-    else:
-        puntero -= 21
-        query_usuarios_busca()
-def query_usuarios_busca0   ():
-    
-    global puntero
-    puntero = 0
-    query_usuarios_busca()
 def query_usuarios_busca    ():
 
     global EstamosEnUsuarios
@@ -2709,7 +2505,7 @@ def usuariosCorrigeUno      ():
     # Centramos el cursor
     LRR12.focus()
 
-    Boton4activado(UsuarioSalvaCorreccion)
+    Boton4activado2(UsuarioSalvaCorreccion)
 def UsuarioSalvaCorreccion  ():
 
     # Rescata valores
@@ -2789,20 +2585,21 @@ def usuariosBorraUno        ():
     ventanaSeleccion("Aixó esborrarà l'usuari amb id "+ val1 +", si existeix.","red",del_user_yes)
 def del_user_yes            ():
 
-    base_datos = sqlite3.connect('databases/basesDeDatosDatos.db')      # Creamos base de datos o conectamos a una
+    base_datos = sqlite3.connect('databases/basesDeDatosDatos.db')   # Creamos base de datos o conectamos a una    
     c = base_datos.cursor()	                                            # Creamos el cursor
     c.execute("DELETE from bd_usuarios WHERE oid = " + LRR12.get())	    # Borra el registro
-    LimpiaElegibles()                                                   # Borra los datos de los campos
+    LimpiaElegibles()                                                   # Limpia las cajas
     base_datos.commit()	                                                # Asegura los cambios
     base_datos.close()	                                                # Cierra la conexión 
-    seleccion.destroy()                                                 # Cierra la ventana
-
+    seleccion.destroy()                                                 # Cierra la ventana de aviso
+    Le_Bd_Se_todos(base_datos)                                          # Acciones comunes
     # Borramos los datos del listado de registros
     query_todos('databases/basesDeDatosDatos.db',
                 "SELECT *, oid FROM bd_usuarios ORDER BY NOM",
                 7,
                 "EstamosEnUsuarios",
-                "ID","NOM","CLAU","NIVELL","ANGLÈS","CASTELLÀ"," CATALÀ","FRANCÈS")
+                "ID","NOM","CLAU","NIVELL","ANGLÈS","CASTELLÀ"," CATALÀ","FRANCÈS")          
+    LRR12.focus()                                                       # Foco
 
 def Registros_Todo          (num):
 
@@ -2894,7 +2691,7 @@ def Bloqueos_Todo           (num):
     LRR12.delete(0,'end')
     LRR12.insert(0,TEXTO)
     LRR22.focus()
-    BloqueosCorrigeUno()
+    bloqueoBorraUno()
 def Productos_Todo          (num):
     
     TEXTO = globals()['VIEW%s' % num].cget("text")
@@ -4048,7 +3845,7 @@ def menuRegistrosIntroducir                         ():
         LRR61.set(vr5)
         LRR73.insert(1.0,vr6)
         vr7 = False
-    Boton4activado(menuRegistrosIntroducirIntroduce)
+    Boton4activado2(menuRegistrosIntroducirIntroduce)
     query_todos('databases/basesDeDatosRegistros.db',
                 "SELECT *, oid FROM bd_registros ORDER BY FECHA DESC, oid DESC",
                 8,
@@ -4078,8 +3875,8 @@ def menuRegistrosConsultar                          ():
     raiz.bind("<Control-d>", lambda event: FechaActualIncrustada())
     raiz.bind("<Control-D>", lambda event: FechaActualIncrustada())
          
-    Boton4activado(query_registros_busca0)
-    Boton5activado(prequery_registros)
+    Boton4activado(query_todos_busca0,query_registros_busca)
+    Boton5activado(prequery_todos,query_registros_busca)
     Boton6activado(query_registros_busca)
     ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
 def menuRegistroCorregir                            ():
@@ -4097,7 +3894,7 @@ def menuRegistroCorregir                            ():
     menusBotones("Tornar",menuRegistros,"",regresaSinNada,"",regresaSinNada,"Mirar/Corregir")
     
     OpcionesQuestionario(["X2",LR1,"ID:",LRR12])
-    Boton4activado(registroCorrigeUno)
+    Boton4activado2(registroCorrigeUno)
     ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
 def menuRegistroEliminar                            ():
 
@@ -4107,7 +3904,7 @@ def menuRegistroEliminar                            ():
     LimpiaLabelsRellena()
     menusBotones("Tornar",menuRegistros,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Eliminar")
     OpcionesQuestionario(["X2",LR1,"ID:",LRR12])
-    Boton4activado(registroBorraUno)
+    Boton4activado2(registroBorraUno)
     ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
 
 def menuVentas                                  ():
@@ -4451,7 +4248,7 @@ def menuTablasPax                                   ():
     ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
 
     # Activa la tabla
-    Boton4activado(menuTablasPaxMuestra)
+    Boton4activado2(menuTablasPaxMuestra)
 def menuTablasVGrupo                                ():
     
     def menuTablasVGrupoMuestra ():
@@ -4773,7 +4570,7 @@ def menuTablasVGrupo                                ():
     ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
 
     # Activa la tabla
-    Boton4activado(menuTablasVGrupoMuestra)
+    Boton4activado2(menuTablasVGrupoMuestra)
 def menuTablasVProvincia                            ():
     def menuTablasVProvinciasMuestra ():
         
@@ -5061,7 +4858,7 @@ def menuTablasVProvincia                            ():
     ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
 
     # Activa la tabla
-    Boton4activado(menuTablasVProvinciasMuestra)
+    Boton4activado2(menuTablasVProvinciasMuestra)
 def menuTablasVComarca                              ():
     def menuTablasVComarcasMuestra ():
         
@@ -5339,7 +5136,7 @@ def menuTablasVComarca                              ():
     ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
 
     # Activa la tabla
-    Boton4activado(menuTablasVComarcasMuestra)
+    Boton4activado2(menuTablasVComarcasMuestra)
 def menuTablasVPerfil                               ():
     def menuTablasVPerfilesMuestra ():
         
@@ -5587,7 +5384,7 @@ def menuTablasVPerfil                               ():
     ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
 
     # Activa la tabla
-    Boton4activado(menuTablasVPerfilesMuestra)
+    Boton4activado2(menuTablasVPerfilesMuestra)
 def menuTablasVFuente                               ():
     def menuTablasVFuentesMuestra ():
         
@@ -5835,7 +5632,7 @@ def menuTablasVFuente                               ():
     ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
 
     # Activa la tabla
-    Boton4activado(menuTablasVFuentesMuestra)
+    Boton4activado2(menuTablasVFuentesMuestra)
 def menuTablasVHora                                 ():
     def menuTablasVHorasMuestra ():
         
@@ -6083,7 +5880,7 @@ def menuTablasVHora                                 ():
     ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
 
     # Activa la tabla
-    Boton4activado(menuTablasVHorasMuestra)
+    Boton4activado2(menuTablasVHorasMuestra)
 def menuTablasVDia                                  ():
     def menuTablasVDiasMuestra ():
         
@@ -6347,7 +6144,7 @@ def menuTablasVDia                                  ():
     ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
 
     # Activa la tabla
-    Boton4activado(menuTablasVDiasMuestra)
+    Boton4activado2(menuTablasVDiasMuestra)
 def menuTablasVOrigen                               ():
     def menuTablasVOrigenesMuestra ():
         
@@ -6599,7 +6396,7 @@ def menuTablasVOrigen                               ():
     ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
 
     # Activa la tabla
-    Boton4activado(menuTablasVOrigenesMuestra)
+    Boton4activado2(menuTablasVOrigenesMuestra)
 
 def menuArqueos                                 ():
     
@@ -6859,7 +6656,7 @@ def menuIncidenciasIntroducir                       ():
                          ["X2",LR19,"FACTURA:",LRR192],
                          ["X1",LR20,"ESTAT:",LRR201,estados],
                          ["X3",LR21,"NOTES:",LRR213])
-    Boton4activado(menuIncidenciasIntroducirIntroduce)                              # Boton 4 activado
+    Boton4activado2(menuIncidenciasIntroducirIntroduce)                              # Boton 4 activado
     # Pinta datos en zona 3
     query_todos('databases/basesDeDatosIncidencias.db',
                 "SELECT *, oid FROM bd_incidencias ORDER BY FECHA_CREA DESC, HORA DESC",
@@ -6920,8 +6717,8 @@ def menuIncidenciasConsultar                        ():
     raiz.bind("<Control-d>", lambda event: FechaActualIncrustadaInc())
     raiz.bind("<Control-D>", lambda event: FechaActualIncrustadaInc())
             
-    Boton4activado(query_incidencias_busca0)
-    Boton5activado(prequery_incidencias)
+    Boton4activado(query_todos_busca0,query_incidencias_busca)
+    Boton5activado(prequery_todos,query_incidencias_busca)
     Boton6activado(query_incidencias_busca)
     ActivaBotonPyFocus(LRR11,BotonPrimeroQ11)
 def menuIncidenciasCorregir                         ():
@@ -6940,7 +6737,7 @@ def menuIncidenciasCorregir                         ():
 
     OpcionesQuestionario(["X2",LR1,"ID:",LRR12])
         
-    Boton4activado(incidenciasCorrigeUno)
+    Boton4activado2(incidenciasCorrigeUno)
     ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
 def menuIncidenciasEliminar                         ():
 
@@ -6952,7 +6749,7 @@ def menuIncidenciasEliminar                         ():
 
     OpcionesQuestionario(["X2",LR1,"ID:",LRR12])
  
-    Boton4activado(incidenciasBorraUno)
+    Boton4activado2(incidenciasBorraUno)
     ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
      
 def menuIncidenciasFacturaProforma               ():
@@ -6993,7 +6790,7 @@ def menuIncidenciasFacturaProformaIntroducirProducir    ():
     LR1.config(text = "ID Incidència/grup:")
     LRR12.grid(row=0, column=1)
         
-    Boton4activado(ProformaProduceUno)
+    Boton4activado2(ProformaProduceUno)
     ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
 def menuIncidenciasFacturaProformaIntroducirClonar      ():
 
@@ -7003,7 +6800,7 @@ def menuIncidenciasFacturaProformaIntroducirClonar      ():
     LR1.config(text = "ID Proforma:")
     LRR12.grid(row=0, column=1)
         
-    Boton4activado(ProformaClonaUno)
+    Boton4activado2(ProformaClonaUno)
     ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
 def menuIncidenciasFacturaProformaIntroducirCrear       ():
     
@@ -7334,7 +7131,7 @@ def menuIncidenciasFacturaProformaIntroducirCrear       ():
     raiz.bind("<Control-p>", lambda event: BotonImprimirForzado())
     raiz.bind("<Control-P>", lambda event: BotonImprimirForzado())     
     Boton7activado(PDFProforma)
-    Boton4activado(menuProformaIntroducirIntroduce)
+    Boton4activado2(menuProformaIntroducirIntroduce)
     query_todos('databases/basesDeDatosProforma.db',
                 "SELECT *, oid FROM bd_proforma ORDER BY NUM_PRO DESC",
                 8,
@@ -7362,8 +7159,8 @@ def menuIncidenciasFacturaProformaConsultar         ():
     raiz.bind("<Control-d>", lambda event: FechaActualIncrustada())
     raiz.bind("<Control-D>", lambda event: FechaActualIncrustada())
         
-    Boton4activado(query_proforma_busca0)
-    Boton5activado(prequery_proforma)
+    Boton4activado(query_todos_busca0,query_proforma_busca)
+    Boton5activado(prequery_todos,query_proforma_busca)
     Boton6activado(query_proforma_busca)
     ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
 def menuIncidenciasFacturaProformaCorregir          ():
@@ -7380,7 +7177,7 @@ def menuIncidenciasFacturaProformaCorregir          ():
 
     OpcionesQuestionario(["X2",LR1,"ID:",LRR12])
        
-    Boton4activado(ProformaCorrigeUno)
+    Boton4activado2(ProformaCorrigeUno)
     ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
 def menuIncidenciasFacturaProformaEliminar          ():
 
@@ -7392,7 +7189,7 @@ def menuIncidenciasFacturaProformaEliminar          ():
 
     OpcionesQuestionario(["X2",LR1,"ID:",LRR12])
    
-    Boton4activado(ProformaBorraUno)
+    Boton4activado2(ProformaBorraUno)
     ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
 
 def menuIncidenciasBloqueos                      ():
@@ -7538,7 +7335,7 @@ def menuIncidenciasBloqueosBloquear                 ():
                          ["X1",LR2,"HORA INICI:",LRR21,horas],
                          ["X1",LR3,"HORA FINAL:",LRR31,horas])
           
-    Boton4activado(menuIncidenciasBloqueosBloquea)
+    Boton4activado2(menuIncidenciasBloqueosBloquea)
     query_todos('databases/basesDeDatosIncidencias.db',
                 "SELECT *, oid FROM bd_bloqueos ORDER BY FECHA",
                 8,"EstamosEnBloqueos",
@@ -7553,7 +7350,7 @@ def menuIncidenciasBloqueosDesbloquear              ():
     menusBotones("Tornar",menuIncidenciasBloqueos,"",regresaSinNada,"Desbloqueja")
 
     OpcionesQuestionario(["X2",LR1,"DIA/MES/ANY:",LRR12])       
-    Boton4activado(bloqueoBorraUno)
+    Boton4activado2(bloqueoBorraUno)
     query_todos('databases/basesDeDatosIncidencias.db',
                 "SELECT *, oid FROM bd_bloqueos ORDER BY FECHA",
                 8,
@@ -7836,7 +7633,7 @@ def MenuDatosProductoIntroducir                         ():
                          ["X2",LR4,"PREU ACTUAL:",LRR42],
                          ["X1",LR5,"REGISTRE/STOCK:",LRR51,["Registre","Stock"]])
     
-    Boton4activado(MenuDatosProductoIntroducirIntroduce)
+    Boton4activado2(MenuDatosProductoIntroducirIntroduce)
     query_todos('databases/basesDeDatosDatos.db',
                 "SELECT *, oid FROM bd_productos ORDER BY oid DESC",
                 4,
@@ -7856,8 +7653,8 @@ def MenuDatosProductoConsultar                          ():
                          ["X2",LR3,"PREU ACTUAL:",LRR32],
                          ["X1",LR4,"REGISTRE/STOCK:",LRR41,["Registre","Stock"]])
     
-    Boton4activado(query_productos_busca0)
-    Boton5activado(prequery_productos)
+    Boton4activado(query_todos_busca0,query_productos_busca)
+    Boton5activado(prequery_todos,query_productos_busca)
     Boton6activado(query_productos_busca)
  
     ActivaBotonPyFocus(LRR11,BotonPrimeroQ11)
@@ -7884,7 +7681,7 @@ def menuDatosProductoEliminar                           ():
     
     OpcionesQuestionario(["X2",LR1,"ID:",LRR12])     
    
-    Boton4activado(productoBorraUno)
+    Boton4activado2(productoBorraUno)
     ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
 def MenuDatosCliente                                ():
     
@@ -8064,8 +7861,8 @@ def MenuDatosClienteConsultar                           ():
                          ["X2",LR3,"E-MAIL:",LRR32],
                          ["X2",LR4,"NIF/CIF:",LRR42])
 
-    Boton4activado(query_clientes_busca0)
-    Boton5activado(prequery_clientes)
+    Boton4activado(query_todos_busca0,query_clientes_busca)
+    Boton5activado(prequery_todos,query_clientes_busca)
     Boton6activado(query_clientes_busca)
     ActivaBotonPyFocus(LRR11,BotonPrimeroQ11)
 def MenuDatosClienteCorregir                            ():
@@ -8078,7 +7875,7 @@ def MenuDatosClienteCorregir                            ():
     
     OpcionesQuestionario(["X2",LR1,"ID:",LRR12])     
 
-    Boton4activado(clienteCorrigeUno)
+    Boton4activado2(clienteCorrigeUno)
     ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
 def menuDatosClienteEliminar                            ():
     
@@ -8090,7 +7887,7 @@ def menuDatosClienteEliminar                            ():
     
     OpcionesQuestionario(["X2",LR1,"ID:",LRR12])     
   
-    Boton4activado(clienteBorraUno)
+    Boton4activado2(clienteBorraUno)
     ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
 def menuDatosUsuario                                ():
     
@@ -8193,7 +7990,7 @@ def menuDatosUsuarioIntroducir                          ():
                          ["X1",LR7,"CATALÀ:",LRR71,["Si","No"]],
                          ["X1",LR8,"FRANCÈS:",LRR81,["Si","No"]])
         
-    Boton4activado(MenuDatosUsuarioIntroducirIntroduce)
+    Boton4activado2(MenuDatosUsuarioIntroducirIntroduce)
     query_todos('databases/basesDeDatosDatos.db',
                 "SELECT *, oid FROM bd_usuarios ORDER BY oid DESC",
                 7,
@@ -8216,8 +8013,8 @@ def menuDatosUsuarioConsultar                           ():
                          ["X1",LR5,"CATALÀ:",LRR51,["Si","No"]],
                          ["X1",LR6,"FRANCÈS:",LRR61,["Si","No"]])    
         
-    Boton4activado(query_usuarios_busca0)
-    Boton5activado(prequery_usuarios)
+    Boton4activado(query_todos_busca0,query_usuarios_busca)
+    Boton5activado(prequery_todos,query_usuarios_busca)
     Boton6activado(query_usuarios_busca)
     ActivaBotonPyFocus(LRR11,BotonPrimeroQ11)
 def menuDatosUsuarioCorregir                            ():
@@ -8230,7 +8027,7 @@ def menuDatosUsuarioCorregir                            ():
     
     OpcionesQuestionario(["X2",LR1,"ID:",LRR12])     
    
-    Boton4activado(usuariosCorrigeUno)
+    Boton4activado2(usuariosCorrigeUno)
     ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
 def menuDatosUsuarioEliminar                            ():
     
@@ -8242,7 +8039,7 @@ def menuDatosUsuarioEliminar                            ():
 
     OpcionesQuestionario(["X2",LR1,"ID:",LRR12])     
        
-    Boton4activado(usuariosBorraUno)
+    Boton4activado2(usuariosBorraUno)
     ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
 def menuDatosEmpresa                                ():
 
@@ -8284,7 +8081,7 @@ def menuDatosEmpresa                                ():
             LRR42.insert(0,empresa[3])
     except:
         pass        
-    Boton4activado(MenuDatosEmpresaSalva)
+    Boton4activado2(MenuDatosEmpresaSalva)
     ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
     
 def menuSeguridad                               ():
