@@ -504,11 +504,23 @@ def MiraFecha               (uno):
         textSpace.config(bg = "#b7b493")    
     else:
         
-        frameFecha.config(bg = "red")
-        textFecha.config(bg = "red")
-        textBarra1.config(bg = "red")
-        textBarra2.config(bg = "red")
-        textSpace.config(bg = "red")
+        # mira si el color de la label frameFecha es rojo
+        if frameFecha.cget("bg") != "red":
+            frameFecha.config(bg = "red")
+            textFecha.config(bg = "red")
+            textBarra1.config(bg = "red")
+            textBarra2.config(bg = "red")
+            textSpace.config(bg = "red")
+            # Vuelve a ejecutar la funcion MiraFecha pasados 1 segundos
+            frameRellena.after(1000, MiraFecha, 1)
+        else:
+            frameFecha.config(bg = "yellow")
+            textFecha.config(bg = "yellow")
+            textBarra1.config(bg = "yellow")
+            textBarra2.config(bg = "yellow")
+            textSpace.config(bg = "yellow")
+            # Vuelve a ejecutar la funcion MiraFecha pasados 1 segundos
+            frameRellena.after(1000, MiraFecha, 1)            
 def FechaActualIncrustada   ():
     
     # Introducimos el valor de la fecha actual en los campos de fecha
