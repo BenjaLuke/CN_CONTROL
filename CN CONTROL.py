@@ -353,6 +353,19 @@ def cotejaDatoCoincidente   (muralla,retorno,mensaje,base,
     if label != "":                                                                 # Si la label no está vacía                              
         label.focus()
     return muralla                                                                  # Devolvemos el valor de la variable muralla                               
+def cotejaIgualdad          (muralla,campo1,campo2,label):                          # Función que comprueba si el campo1 es igual al campo2
+    if campo1 != campo2:                                                            # Si el campo1 es diferente al campo2
+        LR23.config(text = "Les claus no coincideixen")                             # Avisamos de la anomalía
+        label.focus()                                                               # Ponemos el foco en la label   
+        muralla = True                                                              # Ponemos la variable muralla en True
+    return muralla                                                                  # Devolvemos el valor de la variable muralla
+def cotejaEsNumero          (muralla,campo,label):                                  # Función que comprueba si el campo es un número
+    # Si campo no es un número
+    if not campo.isdigit():
+        LR23.config(text = "El camp ha de ser numèric")                            # Avisamos de la anomalía
+        label.focus()                                                               # Ponemos el foco en la label
+        muralla = True                                                              # Ponemos la variable muralla en True
+    return muralla                                                                  # Devolvemos el valor de la variable muralla
 # ------------------------------ Funciones globales ----------------------
 def copia                   ():                                                     # Función que copia el contenido de una label o entry al portapapeles
     if raiz.focus_get() == None:    return      # Si no está en ninguna label o entry, no hace nada
@@ -491,36 +504,25 @@ def notasAmpliacion         ():
         LRR213.config(width=100)
     else:
         LRR213.config(width=30)
-
+# ------------------------ Funciones sobre la fecha---------------------- 
+def DaColorAFecha           (color):
+    
+    frameFecha.config(bg = color)               # Cambia el color de la label frameFecha
+    textFecha.config(bg = color)                # Cambia el color de la label textFecha 
+    textBarra1.config(bg = color)               # Cambia el color de la label textBarra1    
+    textBarra2.config(bg = color)               # Cambia el color de la label textBarra2
+    textSpace.config(bg = color)                # Cambia el color de la label textSpace
 def MiraFecha               (uno):
 
     # Comprueba si diafecha, mesfecha y anyofecha contienen las fechas del dia de hoy
-    if diaFecha.get() == diaGlobal and mesFecha.get() == mesGlobal and anyoFecha.get() == anyoGlobal:
-        
-        frameFecha.config(bg = "#b7b493")
-        textFecha.config(bg = "#b7b493")
-        textBarra1.config(bg = "#b7b493")
-        textBarra2.config(bg = "#b7b493")
-        textSpace.config(bg = "#b7b493")    
-    else:
-        
-        # mira si el color de la label frameFecha es rojo
-        if frameFecha.cget("bg") != "red":
-            frameFecha.config(bg = "red")
-            textFecha.config(bg = "red")
-            textBarra1.config(bg = "red")
-            textBarra2.config(bg = "red")
-            textSpace.config(bg = "red")
-            # Vuelve a ejecutar la funcion MiraFecha pasados 1 segundos
-            frameRellena.after(1000, MiraFecha, 1)
-        else:
-            frameFecha.config(bg = "yellow")
-            textFecha.config(bg = "yellow")
-            textBarra1.config(bg = "yellow")
-            textBarra2.config(bg = "yellow")
-            textSpace.config(bg = "yellow")
-            # Vuelve a ejecutar la funcion MiraFecha pasados 1 segundos
-            frameRellena.after(1000, MiraFecha, 1)            
+    if diaFecha.get() == diaGlobal and mesFecha.get() == mesGlobal and anyoFecha.get() == anyoGlobal:        
+        DaColorAFecha("#b7b493")                # Cambia el color de la label frameFecha a verde
+    else:                                       # Si no es el dia de hoy
+        if frameFecha.cget("bg") != "red":      # mira si el color de la label frameFecha es rojo
+            DaColorAFecha("red")                # Si no es rojo, lo pone rojo
+        else:                                   # Si es rojo
+            DaColorAFecha("yellow")             # lo pone amarillo
+        frameRellena.after(1000, MiraFecha, 1)  # Vuelve a ejecutar la funcion MiraFecha pasados 1 segundos        
 def FechaActualIncrustada   ():
     
     # Introducimos el valor de la fecha actual en los campos de fecha
@@ -2448,55 +2450,28 @@ def del_client_yes          ():
 
 def query_usuarios_busca    ():
 
-    global EstamosEnUsuarios
-    v1 = LRR11.get()
-    v2 = LRR21.get()
-    v3 = LRR31.get()
-    v4 = LRR41.get()
-    v5 = LRR51.get()
-    v6 = LRR61.get()
-    
+    global EstamosEnUsuarios                       # Variable global para saber en qué ventana estamos
+    v1,v2,v3,v4,v5,v6 = LRR11.get(),LRR21.get(),LRR31.get(),LRR41.get(),LRR51.get(),LRR61.get()    
     # Creamos la base de datos o conectamos con una
     query_todos('databases/basesDeDatosDatos.db',
                 "SELECT *, oid FROM bd_usuarios WHERE ((NOM = '" + v1 + "' or '" + v1 + "' = '') AND (NIVEL = '" + v2 + "' or '" + v2 + "' = '') AND (INGLES = '" + v3 + "' or '" + v3 + "' = '') AND (CASTELLANO = '" + v4 + "' or '" + v4 + "' = '') AND (CATALAN = '" + v5 + "' or '" + v5 + "' = '') AND (FRANCES = '" + v6 + "' or '" + v6 + "' = '')) ORDER BY NOM",
-                7,
+                8,
                 "EstamosEnUsuarios",
-                "ID","NOM","CLAU","NIVELL","ANGLÈS","CASTELLÀ"," CATALÀ","FRANCÈS")
+                "ID","NOM","CLAU","NIVELL","ANGLÈS","CASTELLÀ"," CATALÀ","FRANCÈS","HORES")
 def usuariosCorrigeUno      ():
 
-    global val1
-    val1 = LRR12.get()
-    
-    # Limpia las cajas
-    LimpiaElegibles
-    
-	# Crea una base de datos o se conecta a una
-    base_datos = sqlite3.connect('databases/basesDeDatosDatos.db')
-
-	# Crea cursor
-    c = base_datos.cursor()
-    
-	# Query the database
-    c.execute("SELECT * FROM bd_usuarios WHERE oid = " + val1)
-    records = c.fetchall()
-    
-    menuDatosUsuarioIntroducir()
-      
-    # Creando las variables globales
-    global nombre
-    global clave
-    global nivel
-    global ingl
-    global cast
-    global cata
-    global fran
-        
-    # Loop para volcar los resultados
-    
-    for record in records:
-       
-        LRR12.insert(0,record[0])
-        LRR22.insert(0,record[1])
+    global val1                                                     # Variable global para el id del registro a modificar
+    val1 = LRR12.get()                                              # Recoge el id del registro a modificar
+    LimpiaElegibles                                                 # Limpia las cajas
+    base_datos = sqlite3.connect('databases/basesDeDatosDatos.db')	# Crea una base de datos o se conecta a una
+    c = base_datos.cursor()	                                        # Crea cursor
+    c.execute("SELECT * FROM bd_usuarios WHERE oid = " + val1)	    # Crea la selección
+    records = c.fetchall()                                          # Recoge los resultados
+    menuDatosUsuarioIntroducir()                                    # Abre la ventana de introducción de datos 
+    global nombre, clave, nivel, ingl, cast, cata, fran, horas      # Creando las variables globales
+    for record in records:                                          # Loop para volcar los resultados      
+        LRR12.insert(0,record[0])                                   # Volcamos los resultados en las cajas
+        LRR22.insert(0,record[1])   
         LRR32.insert(0,record[1])
         LRR41.config(state = "readandwrite")
         LRR41.insert(0,record[2])
@@ -2513,41 +2488,32 @@ def usuariosCorrigeUno      ():
         LRR81.config(state = "readandwrite")
         LRR81.insert(0,record[6])
         LRR81.config(state = "readonly")
-        
-    # Centramos el cursor
-    LRR12.focus()
-
+        LRR92.insert(0,record[7])      
+    LRR12.focus()                   # Centramos el cursor
     Boton4activado2(UsuarioSalvaCorreccion)
 def UsuarioSalvaCorreccion  ():
 
     # Rescata valores
-    v1 = LRR12.get()
-    v2 = LRR22.get()
-    v3 = LRR32.get()
-    v4 = LRR41.get()
-    v5 = LRR51.get()
-    v6 = LRR61.get()
-    v7 = LRR71.get()
-    v8 = LRR81.get()
-
+    v1, v2, v3, v4, v5, v6, v7, v8, v9 = LRR12.get(), LRR22.get(), LRR32.get(), LRR41.get(), LRR51.get(), LRR61.get(), LRR71.get(), LRR81.get(), LRR92.get()
     # Coteja fallos
-    if v1 == "" or v2 == "" or v3 == "" or v4 == "" or v5 == "" or v6 == "" or v7 == "" or v8 == "":
-            
-        LR23.config(text = "S'han d'omplir tots els espais")
-        return
-        
-    if v2 != v3:
-            
-        LR23.config(text = "Clau incorrecte")
-        LRR22.focus()       
-        return
-        
+    muralla = False                                 # Si muralla = True, no se salva
+    muralla = cotejaIgualdad(muralla,v2,v3,LRR22)   # Coteja que no sean iguales
+    muralla = cotejaEsNumero(muralla,v9,LRR92)      # Coteja que sea numero
+    muralla = cotejaVacio(muralla,v1,LRR12)         # Coteja que no esten vacios
+    muralla = cotejaVacio(muralla,v2,LRR22)         # Coteja que no esten vacios
+    muralla = cotejaVacio(muralla,v3,LRR32)         # Coteja que no esten vacios
+    muralla = cotejaVacio(muralla,v4,LRR41)         # Coteja que no esten vacios
+    muralla = cotejaVacio(muralla,v5,LRR51)         # Coteja que no esten vacios
+    muralla = cotejaVacio(muralla,v6,LRR61)         # Coteja que no esten vacios
+    muralla = cotejaVacio(muralla,v7,LRR71)         # Coteja que no esten vacios
+    muralla = cotejaVacio(muralla,v8,LRR81)         # Coteja que no esten vacios
+    muralla = cotejaVacio(muralla,v9,LRR92)         # Coteja que no esten vacios
+    if muralla == True:                             # Si muralla = True, no se salva
+        LR23.config(fg = "red")                     # Pintamos de rojo el campo LR23
+        return                                      # Salimos de la funcion        
     # Crea una base de datos o abre la existente
-    base_datos = sqlite3.connect('databases/basesDeDatosDatos.db')
-    
-    # Conecta el cursor
-    c = base_datos.cursor()
-    
+    base_datos = sqlite3.connect('databases/basesDeDatosDatos.db')   
+    c = base_datos.cursor()                         # Conecta el cursor
     c.execute("""UPDATE bd_usuarios SET
               NOM = :nombre,
               CLAVE = :clave,
@@ -2555,7 +2521,8 @@ def UsuarioSalvaCorreccion  ():
               INGLES = :ingl,
               CASTELLANO = :cast,
               CATALAN = :cata,
-              FRANCES = :fran
+              FRANCES = :fran,
+              HORASMES = :horas
                             
               WHERE oid = :val1""",
               {
@@ -2566,51 +2533,41 @@ def UsuarioSalvaCorreccion  ():
               'cast': LRR61.get(),
               'cata': LRR71.get(),
               'fran': LRR81.get(),
+              'horas': LRR92.get(),
               'val1': val1
                   })
     
-    #Asegura los cambios
-    base_datos.commit()
-
-	# Cierra la conexión 
-    base_datos.close()  
-
-    # Actualiza las bases de datos
-    abreLasListas()
-
-	# Vuelve hacia atrás
-    menuDatosUsuarioCorregir()
+    base_datos.commit()                             # Asegura los cambios
+    base_datos.close()  	                        # Cierra la conexión 
+    abreLasListas()                                 # Actualiza las bases de datos
+    menuDatosUsuarioCorregir()	                    # Vuelve hacia atrás
 def usuariosBorraUno        ():
 
     # Creamos la base de datos o conectamos con una
     base_datos = sqlite3.connect('databases/basesDeDatosDatos.db')
+    # Creamos el cursor
     busqueda = "SELECT *, oid FROM bd_usuarios WHERE (oid = '" + LRR12.get() + "')"
-    columnas = 7
-    global puntero
-    query(base_datos,busqueda,columnas,"ID","NOM","CLAU","NIVELL","ANGLÈS","CASTELLÀ"," CATALÀ","FRANCÈS")
-
-    val1 = LRR12.get()
-
-    # si no ha puesto ningún id, no hará nada
-    if val1 == "":  return
+    columnas = 8                                                        # Número de columnas
+    global puntero                                                      # Variable global
+    # Llamamos a la función que crea la tabla
+    query(base_datos,busqueda,columnas,
+          "ID","NOM","CLAU","NIVELL","ANGLÈS","CASTELLÀ"," CATALÀ","FRANCÈS","HORES")
+    val1 = LRR12.get()                                                  # Rescata el valor de la caja
+    if val1 == "":  return                                              # si no ha puesto ningún id, no hará nada
     # Ventana de aviso
     ventanaSeleccion("Aixó esborrarà l'usuari amb id "+ val1 +", si existeix.","red",del_user_yes)
 def del_user_yes            ():
 
-    base_datos = sqlite3.connect('databases/basesDeDatosDatos.db')   # Creamos base de datos o conectamos a una    
+    base_datos = sqlite3.connect('databases/basesDeDatosDatos.db')      # Creamos base de datos o conectamos a una    
     c = base_datos.cursor()	                                            # Creamos el cursor
     c.execute("DELETE from bd_usuarios WHERE oid = " + LRR12.get())	    # Borra el registro
-    LimpiaElegibles()                                                   # Limpia las cajas
-    base_datos.commit()	                                                # Asegura los cambios
-    base_datos.close()	                                                # Cierra la conexión 
-    seleccion.destroy()                                                 # Cierra la ventana de aviso
     Le_Bd_Se_todos(base_datos)                                          # Acciones comunes
     # Borramos los datos del listado de registros
     query_todos('databases/basesDeDatosDatos.db',
                 "SELECT *, oid FROM bd_usuarios ORDER BY NOM",
-                7,
+                8,
                 "EstamosEnUsuarios",
-                "ID","NOM","CLAU","NIVELL","ANGLÈS","CASTELLÀ"," CATALÀ","FRANCÈS")          
+                "ID","NOM","CLAU","NIVELL","ANGLÈS","CASTELLÀ","CATALÀ","FRANCÈS","HORES")          
     LRR12.focus()                                                       # Foco
 
 def Registros_Todo          (num):
@@ -7903,7 +7860,7 @@ def menuDatosClienteEliminar                            ():
     ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
 def menuDatosUsuario                                ():
     
-    ajusta_espacios_info(10,22,7,41,6,8,9,9,9,9,1,1)
+    ajusta_espacios_info(10,22,7,34,6,8,9,9,9,9,7,1)
     global puntero
     puntero = 0
     global usuarioNivel
@@ -7927,26 +7884,24 @@ def menuDatosUsuarioIntroducir                          ():
     def MenuDatosUsuarioIntroducirIntroduce():
         
         # Rescata valores
-        v1 = LRR12.get()
-        v2 = LRR22.get()
-        v3 = LRR32.get()
-        v4 = LRR41.get()
-        v5 = LRR51.get()
-        v6 = LRR61.get()
-        v7 = LRR71.get()
-        v8 = LRR81.get()
-
+        v1,v2,v3,v4,v5,v6,v7,v8,v9 = LRR12.get(),LRR22.get(),LRR32.get(),LRR41.get(),LRR51.get(),LRR61.get(),LRR71.get(),LRR81.get(),LRR92.get()
         # Coteja fallos
-        if v1 == "" or v2 == "" or v3 == "" or v4 == "" or v5 == "" or v6 == "" or v7 == "" or v8 == "":
-            
-            LR23.config(text = "S'han d'omplir tots els espais")
-            return
-        
-        if v2 != v3:
-            
-            LR23.config(text = "Clau incorrecte")
-            LRR22.focus()       
-            return    
+        muralla = False                                 # Si muralla = True, no se salva
+        muralla = cotejaIgualdad(muralla,v2,v3,LRR22)   # Coteja que no sean iguales
+        muralla = cotejaEsNumero(muralla,v9,LRR92)      # Coteja que sea numero
+        muralla = cotejaVacio(muralla,v1,LRR12)         # Coteja que no esten vacios
+        muralla = cotejaVacio(muralla,v2,LRR22)         # Coteja que no esten vacios
+        muralla = cotejaVacio(muralla,v3,LRR32)         # Coteja que no esten vacios
+        muralla = cotejaVacio(muralla,v4,LRR41)         # Coteja que no esten vacios
+        muralla = cotejaVacio(muralla,v5,LRR51)         # Coteja que no esten vacios
+        muralla = cotejaVacio(muralla,v6,LRR61)         # Coteja que no esten vacios
+        muralla = cotejaVacio(muralla,v7,LRR71)         # Coteja que no esten vacios
+        muralla = cotejaVacio(muralla,v8,LRR81)         # Coteja que no esten vacios
+        muralla = cotejaVacio(muralla,v9,LRR92)         # Coteja que no esten vacio
+        if muralla == True:                             # Si muralla = True, no se salva
+            LR23.config(fg = "red")                     # Pintamos de rojo el campo LR23
+            return                                      # Salimos de la funcion
+ 
 
         # Salva datos       
         # Crea la base de datos o conecta con ella
@@ -7957,7 +7912,7 @@ def menuDatosUsuarioIntroducir                          ():
                             
         # Inserta en la base de tados
         cursor.execute("""INSERT INTO bd_usuarios VALUES (:nombre, :clave, :nivel, 
-                :ingles, :castellano, :catalan, :frances)""",
+                :ingles, :castellano, :catalan, :frances, :horas)""",
                 {
                     'nombre':           LRR12.get(),
                     'clave':            LRR22.get(),
@@ -7965,7 +7920,8 @@ def menuDatosUsuarioIntroducir                          ():
                     'ingles':           LRR51.get(),
                     'castellano':       LRR61.get(),
                     'catalan':          LRR71.get(),
-                    'frances':          LRR81.get()
+                    'frances':          LRR81.get(),
+                    'horas':            LRR92.get()
                     })
 
 
@@ -7980,7 +7936,7 @@ def menuDatosUsuarioIntroducir                          ():
                     "SELECT *, oid FROM bd_usuarios ORDER BY oid DESC",
                     7,
                     "EstamosEnUsuarios",
-                    "ID","NOM","CLAU","NIVELL","ANGLÈS","CASTELLÀ"," CATALÀ","FRANCÈS")
+                    "ID","NOM","CLAU","NIVELL","ANGLÈS","CASTELLÀ"," CATALÀ","FRANCÈS","HORES")
       
 
         # Limpia posibles mensajes anteriores innecesarios
@@ -8000,14 +7956,15 @@ def menuDatosUsuarioIntroducir                          ():
                          ["X1",LR5,"ANGLÈS:",LRR51,["Si","No"]],
                          ["X1",LR6,"CASTELLÀ:",LRR61,["Si","No"]],
                          ["X1",LR7,"CATALÀ:",LRR71,["Si","No"]],
-                         ["X1",LR8,"FRANCÈS:",LRR81,["Si","No"]])
+                         ["X1",LR8,"FRANCÈS:",LRR81,["Si","No"]],
+                         ["X2",LR9,"HORES LABORALS:",LRR92])
         
     Boton4activado2(MenuDatosUsuarioIntroducirIntroduce)
     query_todos('databases/basesDeDatosDatos.db',
                 "SELECT *, oid FROM bd_usuarios ORDER BY oid DESC",
-                7,
+                8,
                 "EstamosEnUsuarios",
-                "ID","NOM","CLAU","NIVELL","ANGLÈS","CASTELLÀ"," CATALÀ","FRANCÈS")
+                "ID","NOM","CLAU","NIVELL","ANGLÈS","CASTELLÀ","CATALÀ","FRANCÈS","HORES")
     ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
 def menuDatosUsuarioConsultar                           ():
       
@@ -8415,7 +8372,8 @@ try:
         INGLES          text,
         CASTELLANO      text,
         CATALAN         text,
-        FRANCES         text)""")
+        FRANCES         text,
+        HORASMES        text)""")
     
     # Ejecutar (commit) instrucción o consulta
     base_datos_datos.commit()
