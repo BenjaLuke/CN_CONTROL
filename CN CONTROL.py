@@ -70,6 +70,8 @@ raiz.bind("<End>", lambda event: Saliendo())                            # Si en 
 raiz.bind("<Control-d>", lambda event: regresaSinNada())                # Si aquí se pulsan las teclas CTRL + D no pasa nada
 raiz.bind("<Control-D>", lambda event: regresaSinNada())
 #  ---------------------- Definiendo variables necesarias ---------------------
+# Variables sobre ventanas
+global ventanaTabla,frameTabla
 # Variables de control de usuario
 global  DatosUsuario, usuarioReal, usuarioNivel                               
 DatosUsuario, usuarioReal, usuarioNivel = (), "No s'ha identificat", "0"    
@@ -133,7 +135,7 @@ def ventanaAviso            (texto,color,pausa):                                
     aviso.update()                       # Actualiza la ventana       
     time.sleep(pausa)                    # X segundos de pausa
     aviso.destroy()                      # Destruye la ventana 
-def ventanaSeleccion        (texto,color,destinoSi):
+def ventanaSeleccion        (texto,color,destinoSi):                                # Función que crea la ventana de selección
     global seleccion                                            # Función que crea la ventana de selección
     seleccion = Tk()                                            # Creamos la ventana
     seleccion.title(" ")                                        # Damos titulo a la ventana
@@ -163,9 +165,44 @@ def ventanaSeleccion        (texto,color,destinoSi):
     seleccion.overrideredirect(True)                            # Quitamos el marco de la ventana
     seleccion.update()                                          # Actualiza la ventana      
     seleccion.mainloop()                                        # Bucle de la ventana
+def ventanaTablas           (titulo,tuplaDeFrames):                                 # Función que crea la ventana de tablas
+    # globalizamos la ventana
+    global ventanaTabla,frameTabla                      
+    ventanaTabla = Tk()                         # Creamos la ventana
+    ventanaTabla.title(titulo)                  # Le da un titulo a la ventana
+    ventanaTabla.configure(bg='green')          # Le da un color de fondo a la ventana
+    ventanaTabla.iconbitmap("image/icono.ico")  # Le da un icono a la ventana
+    ventanaTabla.geometry("+1+1")             # Le da una posicion a la ventana
+    ventanaTabla.config(bd=10)                  # Le da un grosor de borde
+    ventanaTabla.config(relief="groove")        # Le da un tipo de borde
+    frameTabla = Frame(ventanaTabla)         # Creamos un frame dentro de la ventana
+    frames(frameTabla,tuplaDeFrames[0],tuplaDeFrames[1],tuplaDeFrames[2],tuplaDeFrames[3],tuplaDeFrames[4],tuplaDeFrames[5])  # Creamos un frame dentro del frameTabla
+    # Si en cualquier momento se pulsan las teclas CTRL + CURSOR IZQUIERDA se fuerza el pulsado del botón REGRESAR
+    ventanaTabla.bind("<Control-Left>", lambda event: BotonRegresarForzado())
+    # Si en cualquier momento se pulsan las teclas CTRL + P se fuerza la impresión de PDF
+    ventanaTabla.bind("<Control-p>", lambda event: BotonImprimirForzado())
+    ventanaTabla.bind("<Control-P>", lambda event: BotonImprimirForzado())
+    # Importancia en la raiz
+    ventanaTabla.deiconify()    # Desiconifica la raiz
+    ventanaTabla.iconify() # Iconifica la ventanaTabla
 # ---------------------- Funciones sobre errores en los questionarios ---------------------      
 def cotejaFecha             (muralla,dia,dialabel,mes,meslabel,anyo,anyolabel):     # Función que comprueba si la fecha introducida es correcta  
     
+    if dia.isdigit() == False:      # Si el dia no es un entero
+        muralla = True
+        LR23.config(text = "Dia no vàlid")
+        dialabel.focus()
+        return muralla,dia,mes,anyo
+    if mes.isdigit() == False:      # Si el mes no es un entero
+        muralla = True
+        LR23.config(text = "Mes no vàlid")
+        meslabel.focus()
+        return muralla,dia,mes,anyo
+    if anyo.isdigit() == False:     # Si el año no es un entero
+        muralla = True
+        LR23.config(text = "Any no vàlid")
+        anyolabel.focus()
+        return muralla,dia,mes,anyo    
     if len(dia) == 1:               # Si el día tiene un solo dígito le añadimos un 0 delante
         dia = "0" + dia    
     if len(mes) == 1:               # Si el mes tiene un solo dígito le añadimos un 0 delante
@@ -360,12 +397,19 @@ def cotejaIgualdad          (muralla,campo1,campo2,label):                      
         muralla = True                                                              # Ponemos la variable muralla en True
     return muralla                                                                  # Devolvemos el valor de la variable muralla
 def cotejaEsNumero          (muralla,campo,label):                                  # Función que comprueba si el campo es un número
-    # Si campo no es un número
-    if not campo.isdigit():
-        LR23.config(text = "El camp ha de ser numèric")                            # Avisamos de la anomalía
+    if not campo.isdigit():                                                         # Si campo no es un número
+        LR23.config(text = "El camp ha de ser numèric")                             # Avisamos de la anomalía
         label.focus()                                                               # Ponemos el foco en la label
         muralla = True                                                              # Ponemos la variable muralla en True
     return muralla                                                                  # Devolvemos el valor de la variable muralla
+def cotejaCaracteres        (muralla,campo,label,*caracteres):                      # Función que comprueba si el campo contiene según qué caracteres
+    for caracter in caracteres:                                                     # Para cada caracter en caracteres  
+        if caracter in campo:                                                       # Si el caracter está en el campo
+            LR23.config(text = "El camp no pot contenir el caracter "+caracter)     # Avisamos de la anomalía
+            label.focus()                                                           # Ponemos el foco en la label
+            muralla = True                                                          # Ponemos la variable muralla en True
+            return muralla                                                          # Devolvemos el valor de la variable muralla
+        return muralla                                                              # Devolvemos el valor de la variable muralla
 # ------------------------------ Funciones globales ----------------------
 def copia                   ():                                                     # Función que copia el contenido de una label o entry al portapapeles
     if raiz.focus_get() == None:    return      # Si no está en ninguna label o entry, no hace nada
@@ -2121,11 +2165,7 @@ def del_block_yes           ():
 def query_productos_busca   ():
     
     global EstamosEnProductos
-    v1 = LRR11.get()
-    v2 = LRR22.get()
-    v3 = LRR32.get()
-    v4 = LRR41.get()
-       
+    v1,v2,v3,v4 = LRR11.get(),LRR22.get(),LRR32.get(),LRR41.get() 
     # Creamos la base de datos o conectamos con una
     query_todos('databases/basesDeDatosDatos.db',
                 "SELECT *, oid FROM bd_productos WHERE ((NOM = '" + v1 + "' or '" + v1 + "' = '') AND (PREU_HABITUAL = '" + v2 + "' or '" + v2 + "' = '') AND (PREU_ACTUAL = '" + v3 + "' or '" + v3 + "' = '') AND (REGISTRABLE = '" + v4 + "' or '" + v4 + "' = '')) ORDER BY NOM",
@@ -2134,86 +2174,47 @@ def query_productos_busca   ():
                 "ID","NOM","PREU REAL","PREU ACTUAL","TIPUS")
 def productoCorrigeUno      ():
 
-    global val1
-    val1 = LRR12.get()
-    
-    # Limpia las cajas
-    LimpiaElegibles
-    
+    global val1                                 # Hace global el valor de val1
+    val1 = LRR12.get()                          # Rescata el valor del campo de texto  
+    LimpiaElegibles                             # Limpia las cajas
 	# Crea una base de datos o se conecta a una
     base_datos = sqlite3.connect('databases/basesDeDatosDatos.db')
-
-	# Crea cursor
-    c = base_datos.cursor()
-    
+    c = base_datos.cursor()	                    # Crea cursor
 	# Query the database
     c.execute("SELECT * FROM bd_productos WHERE oid = " + val1)
-    records = c.fetchall()
-    
-    MenuDatosProductoIntroducir()
-      
+    records = c.fetchall()                      # Guarda los resultados en una variable
+    MenuDatosProductoIntroducir()               # Llama a la función que crea la ventana de datos
     # Creando las variables globales
-    global nombre
-    global precio
-    global precioact
-    global regsto
-        
-    # Loop para volcar los resultados
-    
-    for record in records:
-       
+    global nombre,precio,precioact,regsto  
+    for record in records:                      # Loop para volcar los resultados
         LRR1.config(text = val1)
         LRR22.insert(0,record[0])
         LRR32.insert(0,record[1])
         LRR42.insert(0,record[2])
         LRR51.config(state = "readandwrite")
         LRR51.insert(0,record[3])
-        LRR51.config(state = "readonly")
-        
-    # Centramos el cursor
-    LRR22.focus()
-
-    Boton4activado2(ProductoSalvaCorreccion)
+        LRR51.config(state = "readonly")    
+    LRR22.focus()                               # Centramos el cursor
+    Boton4activado2(ProductoSalvaCorreccion)    # Activa el botón de guardar
 def ProductoSalvaCorreccion ():
 
     # Rescata valores
-    v1 = LRR22.get()
-    v2 = LRR32.get()
-    v3 = LRR42.get()
-    v4 = LRR51.get()
-                
+    v1,v2,v3,v4 = LRR22.get(),LRR32.get(),LRR42.get(),LRR51.get()           
     # Coteja fallos
-    if v1 == "" or v2 == "" or v3 == "" or v4 == "":
-            
-        LR23.config(text = "Registre incomplert")
-        return
-        
-    try:
-            
-        circunstancial = int(v2)
-            
-    except:
-            
-        LR23.config(text = "Valor no numéric")
-        LRR32.focus()
-        return
-            
-    try:
-            
-        circunstancial = int(v3)
-            
-    except:
-            
-        LR23.config(text = "Valor no numéric")
-        LRR42.focus()
-        return
-        
+    muralla = False                             # Variable de control
+    muralla = cotejaEsNumero(muralla,v3,LRR42)  # Coteja si es número
+    muralla = cotejaEsNumero(muralla,v2,LRR32)  # Coteja si es número
+    muralla = cotejaVacio(muralla,v4,LRR51)     # Coteja si está vacío
+    muralla = cotejaVacio(muralla,v3,LRR42)     # Coteja si está vacío
+    muralla = cotejaVacio(muralla,v2,LRR32)     # Coteja si está vacío
+    muralla = cotejaVacio(muralla,v1,LRR22)     # Coteja si está vacío
+    if muralla == True:                         # Si hay fallos
+        LR23.CONFIG(fg = "red")                 # Cambia el color del texto
+        return                                  # Si hay fallos, no hace nada    
     # Crea una base de datos o abre la existente
     base_datos = sqlite3.connect('databases/basesDeDatosDatos.db')
-    
-    # Conecta el cursor
-    c = base_datos.cursor()
-    
+    c = base_datos.cursor()                     # Conecta el cursor
+    # Actualiza los datos
     c.execute("""UPDATE bd_productos SET
               NOM = :nombre,
               PREU_HABITUAL = :precio,
@@ -2228,18 +2229,10 @@ def ProductoSalvaCorreccion ():
               'regsto': LRR51.get(),
               'val1': val1
                   })
-    
-    #Asegura los cambios
-    base_datos.commit()
-
-	# Cierra la conexión 
-    base_datos.close()  
-
-    # Actualiza las bases de datos
-    abreLasListas()
-
-	# Vuelve hacia atrás
-    MenuDatosProductoCorregir()
+    base_datos.commit()                         # Asegura los cambios
+    base_datos.close()  	                    # Cierra la conexión 
+    abreLasListas()                             # Actualiza las bases de datos
+    MenuDatosProductoCorregir()	                # Vuelve hacia atrás
 def productoBorraUno        ():
     
     # Creamos la base de datos o conectamos con una
@@ -2279,11 +2272,8 @@ def del_product_yes         ():
 
 def query_clientes_busca    ():
     
-    global EstamosEnClientes
-    v1 = LRR11.get()
-    v2 = LRR22.get()
-    v3 = LRR32.get()
-    v4 = LRR42.get()
+    global EstamosEnClientes                                            # Para saber en qué ventana estamos
+    v1,v2,v3,v4 = LRR11.get(),LRR22.get(),LRR32.get(),LRR42.get()       # Rescatamos los valores de las cajas
        
     # Creamos la base de datos o conectamos con una
     query_todos('databases/basesDeDatosClientes.db',
@@ -2293,39 +2283,17 @@ def query_clientes_busca    ():
                 "ID","NOM","","","CIUTAT/PAIS","TELÈFON","MAIL","NIF/CIF")
 def clienteCorrigeUno       ():
 
-    global val1
-    val1 = LRR12.get()
-    
-    # Limpia las cajas
-    LimpiaElegibles
-    
-	# Crea una base de datos o se conecta a una
-    base_datos = sqlite3.connect('databases/basesDeDatosClientes.db')
-
-	# Crea cursor
-    c = base_datos.cursor()
-    
-	# Query the database
-    c.execute("SELECT * FROM bd_clientes WHERE oid = " + val1)
-    records = c.fetchall()
-    
-    MenuDatosClienteIntroducir()
-      
+    global val1                                                         # Hace global la variable val1
+    val1 = LRR12.get()                                                  # Rescatamos el valor de la caja
+    LimpiaElegibles                                                     # Limpia las cajas
+    base_datos = sqlite3.connect('databases/basesDeDatosClientes.db')	# Crea una base de datos o se conecta a una
+    c = base_datos.cursor()	                                            # Crea cursor
+    c.execute("SELECT * FROM bd_clientes WHERE oid = " + val1)	        # Query the database
+    records = c.fetchall()                                              # Guarda los resultados en una variable
+    MenuDatosClienteIntroducir()                                        # Llamamos a la ventana de introducción de datos
     # Creando las variables globales
-    global nombre
-    global dir1
-    global dir2
-    global dir3
-    global telefono
-    global mail
-    global nifcif
-    global contacto
-    global telfcontacto
-        
-    # Loop para volcar los resultados
-    
-    for record in records:
-       
+    global nombre,dir1,dir2,dir3,telefono,mail,nifcif,contacto,telfcontacto
+    for record in records:                                              # Loop para volcar los resultados  
         LRR1.config(text = val1)
         LRR22.insert(0,record[0])
         LRR32.insert(0,record[1])
@@ -2336,49 +2304,25 @@ def clienteCorrigeUno       ():
         LRR82.insert(0,record[6])
         LRR92.insert(0,record[7])
         LRR102.insert(0,record[8])
-        LRR112.insert(0,record[9])
-        
-    # Centramos el cursor
-    LRR22.focus()
-
-    Boton4activado2(ClienteSalvaCorreccion)
+        LRR112.insert(0,record[9])      
+    LRR22.focus()                                                       # Centramos el cursor
+    Boton4activado2(ClienteSalvaCorreccion)                             # Activamos el botón de guardar
 def ClienteSalvaCorreccion  ():
 
-    # Rescata valores
-    v1 = LRR22.get()
-    v4 = LRR62.get()
-                
+    v1,v4 = LRR22.get(),LRR62.get()                     # Rescata valores
     # Coteja fallos
-    if v1 == "":
-            
-        LR23.config(text = "Nom del client obligatori")
-        LRR22.focus()
-        return
-
-    # Si se incluye ' o " en el nombre, No se puede avanzar
-    if "'" in v1 or '"' in v1:
-            
-        LR23.config(text = "No es pot utilitzar ' o \" al nom")  
-        LRR22.focus()
-        return 
-             
+    muralla = False                                     # Variable para controlar si hay fallos
     if v4 != "":
-        try:
-                
-            circunstancial = int(v4)
-                
-        except:
-                
-            LR23.config(text = "Telèfon erroni")
-            LRR52.focus()
-            return
-            
+        muralla = cotejaEsNumero(muralla,v4,LRR52)      # Coteja si el teléfono es un número             
+    muralla = cotejaCaracteres(muralla,v1,LRR22,"'",'"')# Coteja si el nombre tiene caracteres prohibidos
+    muralla = cotejaVacio(muralla,v1,LRR22)             # Coteja si el nombre está vacío    
+    if muralla == True:                                 # Si hay fallos
+        LR23.config(fg = "red")                         # Pone el texto en rojo
+        return                                          # Sale de la función        
     # Crea una base de datos o abre la existente
     base_datos = sqlite3.connect('databases/basesDeDatosClientes.db')
-    
-    # Conecta el cursor
-    c = base_datos.cursor()
-    
+    c = base_datos.cursor()                             # Conecta el cursor
+    # Actualiza los datos 
     c.execute("""UPDATE bd_clientes SET
               NOM = :nombre,
               DIRECCION1    = :dir1,
@@ -2392,42 +2336,33 @@ def ClienteSalvaCorreccion  ():
                             
               WHERE oid     = :val1""",
               {
-              'nombre':     LRR22.get(),
-              'dir1':       LRR32.get(),
-              'dir2':       LRR42.get(),
-              'dir3':       LRR52.get(),
-              'telefono':   LRR62.get(),
-              'mail':       LRR72.get(),
-              'nifcif':     LRR82.get(),
-              'contacto':   LRR92.get(),
-              'telfcontacto': LRR102.get(),
+              'nombre':         LRR22.get(),
+              'dir1':           LRR32.get(),
+              'dir2':           LRR42.get(),
+              'dir3':           LRR52.get(),
+              'telefono':       LRR62.get(),
+              'mail':           LRR72.get(),
+              'nifcif':         LRR82.get(),
+              'contacto':       LRR92.get(),
+              'telfcontacto':   LRR102.get(),
               'val1':       val1
                   })
-    
-    #Asegura los cambios
-    base_datos.commit()
-
-	# Cierra la conexión 
-    base_datos.close()  
-
-    # Actualiza las bases de datos
-    abreLasListas()
-
-	# Vuelve hacia atrás
-    MenuDatosClienteCorregir()
+    base_datos.commit()                                 # Asegura los cambios
+    base_datos.close()	                                # Cierra la conexión 
+    abreLasListas()                                     # Actualiza las bases de datos
+    MenuDatosClienteCorregir()                          # Vuelve a la ventana de corrección
 def clienteBorraUno         ():
     
     # Creamos la base de datos o conectamos con una
     base_datos = sqlite3.connect('databases/basesDeDatosClientes.db')
+    # Creamos la consulta
     busqueda = "SELECT *, oid FROM bd_clientes WHERE (oid = '" + LRR12.get() + "')"
-    columnas = 7
-    global puntero
+    columnas = 7                                        # Número de columnas
+    global puntero                                      # Hace global la variable puntero
+    # Llama a la función query
     query(base_datos,busqueda,columnas,"ID","NOM","","","CIUTAT/PAIS","TELÈFON","MAIL","NIF/CIF")
-
-    val1 = LRR12.get()
-
-    # si no ha puesto ningún id, no hará nada
-    if val1 == "":  return
+    val1 = LRR12.get()                                  # Rescatamos el valor de la caja
+    if val1 == "":  return                              # si no ha puesto ningún id, no hará nada
     # Ventana de aviso
     ventanaSeleccion("Aixó esborrarà el client amb id "+ val1 +", si existeix.","red",del_client_yes)
 def del_client_yes          ():
@@ -2489,7 +2424,7 @@ def usuariosCorrigeUno      ():
         LRR81.insert(0,record[6])
         LRR81.config(state = "readonly")
         LRR92.insert(0,record[7])      
-    LRR12.focus()                   # Centramos el cursor
+    LRR12.focus()                                                   # Centramos el cursor
     Boton4activado2(UsuarioSalvaCorreccion)
 def UsuarioSalvaCorreccion  ():
 
@@ -3993,359 +3928,166 @@ def menuTablasPax                                   ():
     def menuTablasPaxMuestra ():
         
         # Rescata valores
-        v1 = LRR12.get()
-        v2 = LRR22.get()
-        
-        # Coteja fallos
-        if v1 == "":
-            
-            LR23.config(text = "Registre incomplert")
-            LRR12.focus()
-
-            return
-        
-        if v2 == "":
-            
-            LR23.config(text = "Registre incomplert")
-            LRR22.focus()
-
-            return
-        
-        if len(v1) != 4:
-            
-            LR23.config(text = "Estructura d'any no vàlida")
-            LRR12.focus()
-
-            return
-        """
-        if v2[0] == "0":
-            
-            LR23.config(text = "Estructura de mes no vàlida")
-            LRR22.focus()
-
-            return
-        """            
-        try:
-            
-            a=int(v1)
-            
-        except:
-            
-            LR23.config(text = "Dada no numèrica")
-            LRR12.focus()
-            return    
-
-        try:
-            
-            a=int(v2)
-            
-        except:
-            
-            LR23.config(text = "Dada no numèrica")
-            LRR22.focus()
-            return
-        
-        if  a<1 or a>12:
-            
-            LR23.config(text = "Dada sense lògica")
-            LRR22.focus()
-            return 
-        
-        # Si la cantidad de datos de v2 es 1, se le añade un 0 delante
-        if len(v2) == 1:
-                
-                v2 = "0" + v2
-                
-        # Limpia posibles mensajes anteriores innecesarios
-        LR23.config(text = "")
-        
-        # Importancia en la tabla
-        ventanaTabla.deiconify()
+        v1,v2,v3 = LRR12.get(),LRR22.get(),"01"
+        # Coteja fallos        
+        muralla = False                                             #   Si hay fallo en el registro
+        # Si hay error en la fecha
+        muralla,v3,v2,v1 = cotejaFecha(muralla,v3,LRR12,v2,LRR22,v1,LRR12)   
+        if muralla == True:                                         # Si hay fallo en el registro
+            LR23.config(fg = "red")                                 # Pone el fondo en rojo
+            return                                                  # Sale de la función   
+        LR23.config(text = "")                                      # Limpia posibles mensajes anteriores innecesarios
+        ventanaTabla.deiconify()                                    # Importancia en la tabla
+        # Crea el título de la tabla
         ventanaTabla.title('Taula Pax: any ' + v1 + '. Mes ' + v2 + '.')
-
         # Terminamos de dibujar las necesidades de la tabla
-        columna = 1   
-        for data in range (1,32,2):
-            
-            fila = 0
-            for dato in range (39):
-                
-                num = "0" + str(fila) + "0" + str(columna)
-                            
-                globals()['VIEW%s' % num].config(bg = "#9A7048")
-                fila += 1   
-            
-            columna += 2        
-        columna = 0
-        for dato in range (33):
-            
-            num = "000" + str(columna)
-            
-            if num == "0000" or num == "00032":
-                
-                columna += 1
-                
-            else:
-                
+        columna = 1                                                 # Columna de la tabla
+        for data in range (1,32,2):                                 # Recorre los días del mes            
+            fila = 0                                                # Fila de la tabla
+            for dato in range (39):                                 # Recorre las horas del día                
+                num = "0" + str(fila) + "0" + str(columna)          # Crea el número de la celda
+                globals()['VIEW%s' % num].config(bg = "#9A7048")    # Pone el fondo en marrón
+                fila += 1                                           # Siguiente fila            
+            columna += 2                                            # Siguiente columna     
+        columna = 0                                                 # Columna de la tabla
+        for dato in range (33):                                     # Recorre las columnas de la tabla            
+            num = "000" + str(columna)                              # Crea el número de la celda           
+            if num == "0000" or num == "00032":                     # Si es la primera o última columna                
+                columna += 1                                        # Siguiente columna
+            else:                                                   # Si no es la primera o última columna
+                # Crea la celda con color de fondo gris
                 globals()['VIEW%s' % num].config(text = str(dato),bg = "grey",fg = "#FFFFFF")
-                columna += 1
-        columna = 0
-        global horas
-        for dato in range (39):
-            
-            num = "0" + str(columna) + "00"
-            
-            if num == "0000" or num == "04000":
-                
-                columna += 1
-                
-            else:
-                
+                columna += 1                                        # Siguiente columna
+        columna = 0                                                 # Columna de la tabla
+        global horas                                                # Hace global la lista de horas
+        for dato in range (39):                                     # Recorre las horas del día            
+            num = "0" + str(columna) + "00"                         # Crea el número de la celda            
+            if num == "0000" or num == "04000":                     # Si es la primera o última columna 
+                columna += 1                                        # Siguiente columna                
+            else:                                                   # Si no es la primera o última columna                
+                # Crea la celda con color de fondo gris
                 globals()['VIEW%s' % num].config(text = horas[dato-1])
-                columna += 1     
-        
+                columna += 1                                        # Siguiente columna             
         # Abre archivo con los datos en el mes y año necesarios
         # Crea una base de datos o se conecta a una
         base_datos = sqlite3.connect('databases/basesDeDatosRegistros.db')
-        # Crea cursor
-        c = base_datos.cursor()
+        c = base_datos.cursor()                                     # Crea cursor
         # Query the database
         c.execute("SELECT * FROM bd_registros WHERE FECHA LIKE '" + v1 + "/" + v2 + "/%'")
-        records = c.fetchall()
-        
-        # Repasa dia / repasa hora para pegar datos
-        for columna in range (1,39):
-            
-            for fila in range (1,32):
-                valor = 0
-                for pax in records:
-                    fecha = pax[1].split("/")
-                    
-                    if str(int(fecha[2])) == str(fila):
-                        labelHora = "0" + str(columna) + "00"
+        records = c.fetchall()                                      # Devuelve una lista de tuplas        
+        for columna in range (1,39):                                # Repasa hora para pegar datos       
+            for fila in range (1,32):                               # Recorre los días del mes
+                valor = 0                                           # Inicializa el contador de pax
+                for pax in records:                                 # Recorre los registros
+                    fecha = pax[1].split("/")                       # Separa la fecha en día, mes y año                    
+                    if str(int(fecha[2])) == str(fila):             # Si el día del registro es el mismo que el de la tabla
+                        labelHora = "0" + str(columna) + "00"       # Crea el número de la celda
+                        # Crea la celda con color de fondo gris
                         hora = globals()['VIEW%s' % labelHora].cget("text")
-                        if  hora == pax[4]:
-                            valor +=1
-                if valor == 0: valor = ""             
-                num = "0" + str(columna) + "0" + str(fila)
-                globals()['VIEW%s' % num].config(text = str(valor))    
-        
-        # Cierra archivo
-        base_datos.close()
-        
-        # Suma totales y pinta resultados
-        for columna in range(1,39): 
-            valor = 0           
-            for fila in range (1,32):
-                labelPax = "0" + str(columna) + "0" + str(fila)
-                pax = globals()['VIEW%s' % labelPax].cget("text")
-                if pax == "": pax = "0" 
-                valor += int(pax)
-            
-            num = "0" + str(columna) + "032"
-            globals()['VIEW%s' % num].config(text = str(valor)) 
-        
-        valorTotal = 0
-        for fila in range(1,32):
-            valor = 0           
-            for columna in range (1,39):
-                labelPax = "0" + str(columna) + "0" + str(fila)
-                pax = globals()['VIEW%s' % labelPax].cget("text")
-                if pax == "": pax = "0" 
-                valor += int(pax)
-                valorTotal += int(pax)
-            num = "0390" + str(fila)
-            globals()['VIEW%s' % num].config(text = str(valor)) 
-        
-        num = "039032"
-        globals()['VIEW%s' % num].config(text = str(valorTotal), font =("Helvetica",9,"bold"))          
-        
+                        if  hora == pax[4]:                         # Si la hora del registro es la misma que la de la tabla
+                            valor +=1                               # Suma un pax
+                if valor == 0: valor = ""                           # Si no hay pax pone una cadena vacía           
+                num = "0" + str(columna) + "0" + str(fila)          # Crea el número de la celda
+                # Crea la celda con color de fondo gris
+                globals()['VIEW%s' % num].config(text = str(valor))  
+        base_datos.close()                                          # Cierra archivo 
+        for columna in range(1,39):                                 # Suma totales y pinta resultados
+            valor = 0                                               # Inicializa el contador de pax
+            for fila in range (1,32):                               # Recorre los días
+                labelPax = "0" + str(columna) + "0" + str(fila)     # Crea el número de la celda
+                pax = globals()['VIEW%s' % labelPax].cget("text")   # Crea la celda con color de fondo gris
+                if pax == "": pax = "0"                             # Si no hay pax pone una cadena vacía
+                valor += int(pax)                                   # Suma un pax
+            num = "0" + str(columna) + "032"                        # Crea el número de la celda
+            globals()['VIEW%s' % num].config(text = str(valor))     # Crea la celda con color de fondo gris    
+        valorTotal = 0                                              # Inicializa el contador de pax
+        for fila in range(1,32):                                    # Suma totales y pinta resultados
+            valor = 0                                               # Inicializa el contador de pax
+            for columna in range (1,39):                            # Recorre los días del mes
+                labelPax = "0" + str(columna) + "0" + str(fila)     # Crea el número de la celda
+                pax = globals()['VIEW%s' % labelPax].cget("text")   # Crea la celda con color de fondo gris
+                if pax == "": pax = "0"                             # Si no hay pax pone una cadena vacía
+                valor += int(pax)                                   # Suma un pax
+                valorTotal += int(pax)                              # Suma un pax
+            num = "0390" + str(fila)                                # Crea el número de la celda
+            globals()['VIEW%s' % num].config(text = str(valor))     # Crea la celda con color de fondo gris     
+        num = "039032"                                              # Crea el número de la celda
+        # Crea la celda con color de fondo gris
+        globals()['VIEW%s' % num].config(text = str(valorTotal), font =("Helvetica",9,"bold"))                  
         # Elimina columnas sin datos y limpia su casilla de hora
-        for columna in range(1,39):
-            num = "0" + str(columna) + "032"
-            pax = globals()['VIEW%s' % num].cget("text")
-            if pax == "0":
-                globals()['VIEW%s' % num].config(text = "")
-                num = "0" + str(columna) + "00"
-                globals()['VIEW%s' % num].config(text = "")
-                for fila in range (33):
-                    num = "0" + str(columna) + "0" + str(fila)
-                    globals()['VIEW%s' % num].config(width = 0)
-                    
-        # Activa boton pdf
-        Boton7activado(PDFTablasPax)
+        for columna in range(1,39):                                 # Recorre las horas del día
+            num = "0" + str(columna) + "032"                        # Crea el número de la celda
+            pax = globals()['VIEW%s' % num].cget("text")            # Crea la celda con color de fondo gris
+            if pax == "0":                                          # Si no hay pax pone una cadena vacía
+                globals()['VIEW%s' % num].config(text = "")         # Crea la celda con color de fondo gris
+                num = "0" + str(columna) + "00"                     # Crea el número de la celda
+                globals()['VIEW%s' % num].config(text = "")         # Crea la celda con color de fondo gris
+                for fila in range (33):                             # Recorre los días del mes
+                    num = "0" + str(columna) + "0" + str(fila)      # Crea el número de la celda
+                    globals()['VIEW%s' % num].config(width = 0)     # Crea la celda con color de fondo gris
+        # Boton de cerrar ventana    
+        ventanaTabla.protocol("WM_DELETE_WINDOW", BotonRegresarForzado)        
+        Boton7activado(PDFTablasPax)                                # Activa boton pdf
                           
-    # Destruimos las labels de informacion para no sobrecargar el sistema
-    destruye_espacios_info(10,22)
-    
-    # Creamos ventana extra para esta tabla
-    global ventanaTabla
-    ventanaTabla = Tk()
-    ventanaTabla.title('Taula Pax')
-    ventanaTabla.configure(bg='green')
-    ventanaTabla.iconbitmap("image/icono.ico")
-    ventanaTabla.config(bd=10)                  # Le da un grosor de borde
-    ventanaTabla.config(relief="groove")        # Le da un tipo de borde
-    frameTablaPax = Frame(ventanaTabla)
-    frames(frameTablaPax,0,0,3,300,50,"green")
-    # Si en cualquier momento se pulsan las teclas CTRL + CURSOR IZQUIERDA se fuerza el pulsado del botón REGRESAR
-    ventanaTabla.bind("<Control-Left>", lambda event: BotonRegresarForzado())
-    # Si en cualquier momento se pulsan las teclas CTRL + P se fuerza la impresión de PDF
-    ventanaTabla.bind("<Control-p>", lambda event: BotonImprimirForzado())
-    ventanaTabla.bind("<Control-P>", lambda event: BotonImprimirForzado())
-    # Importancia en la raiz
-    raiz.deiconify()
-    ventanaTabla.iconify()
-       
-    # Cramos las labels dentro de la tabla
-    crea_espacios_info(frameTablaPax,40,33)
-    ajusta_espacios_info(40,33,8,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,8)
- 
-
-                     
-    # Preparamos la salida
-    menusBotones("Tornar",preMenuTablas,"Pax")
-
+    destruye_espacios_info(10,22)                       # Destruimos las labels de informacion para no sobrecargar el sistema
+    ventanaTablas('Taula Pax',[0,0,3,300,50,"green"])   # Creamos ventana extra para esta tabla
+    crea_espacios_info(frameTabla,40,33)             # Cramos las labels dentro de la tabla
+    # Ajustamos las labels
+    ajusta_espacios_info(40,33,8,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,8)           
+    menusBotones("Tornar",preMenuTablas,"Pax")          # Preparamos la salida
     # Datos a rellenar
     OpcionesQuestionario(["X2",LR1,"ANY:",LRR12],
                          ["X2",LR2,"MES:",LRR22])
-
     # Si aquí se pulsan las teclas CTRL + D se pone la fecha actual
     raiz.bind("<Control-d>", lambda event: FechaActualIncrustadaPax())
     raiz.bind("<Control-D>", lambda event: FechaActualIncrustadaPax())
-    # Foco en el año
-    ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
-
-    # Activa la tabla
-    Boton4activado2(menuTablasPaxMuestra)
+    ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)           # Foco en el año
+    Boton4activado2(menuTablasPaxMuestra)               # Activa la tabla
 def menuTablasVGrupo                                ():
     
     def menuTablasVGrupoMuestra ():
         
         # Rescata valores
-        v1 = LRR12.get()
-        v2 = LRR22.get()
-        v3 = LRR32.get()
-        v4 = LRR42.get()
-        v5 = LRR52.get()
-        v6 = LRR62.get()
-
+        v1,v2,v3,v4,v5,v6 = LRR12.get(),LRR22.get(),LRR32.get(),LRR42.get(),LRR52.get(),LRR62.get()
         # Coteja fallos
-        if v1 == "" or v2 == "" or v3 == "" or v4 == "" or v5 == "" or v6 == "":
-            
-            LR23.config(text = "Registre incomplert")
-            LRR12.focus()
-
-            return
-                
-        if len(v3) != 4 or len(v6) != 4:
-            
-            LR23.config(text = "Estructura d'any no vàlida")
-            LRR32.focus()
-
-            return
-
-        # Si v2 tiene len 1, le añadimos un 0 delante
-        if len(v2) == 1:
-            v2 = "0" + v2
-            LRR22.delete(0,END)
-            LRR22.insert(0,v2)
-
-        # Si v5 tiene len 1, le añadimos un 0 delante
-        if len(v5) == 1:
-            v5 = "0" + v5
-            LRR52.delete(0,END)
-            LRR52.insert(0,v5)
-        
-        # Si v1 tiene len 1, le añadimos un 0 delante
-        if len(v1) == 1:
-            v1 = "0" + v1
-            LRR12.delete(0,END)
-            LRR12.insert(0,v1)
-        
-        # Si v4 tiene len 1, le añadimos un 0 delante
-        if len(v4) == 1:
-            v4 = "0" + v4
-            LRR42.delete(0,END)
-            LRR42.insert(0,v4)
-                    
-        if len(v2) != 2 or len(v5) != 2:
-            
-            LR23.config(text = "Estructura de mes no vàlida")
-            LRR22.focus()
-
-            return
-        
-        if len(v1) != 2 or len(v4) != 2:
-            
-            LR23.config(text = "Estructura de dia no vàlida")
-            LRR12.focus()
-
-            return
-                            
-        try:
-            a = int(v1)
-            a = int(v2)
-            a = int(v3)
-            a = int(v4)
-            a = int(v5)
-            a = int(v6)
-        
-        except:
-            
-            LR23.config(text = "Dada no numèrica")
-            LRR12.focus()
-            return    
-
-        if int(v2) < 1 or int(v5) < 1 or int(v2) > 12 or int(v5) > 12:
-            
-            LR23.config(text = "Mes impossible")
-            LRR22.focus()
-
-            return
-
-        if int(v1) < 1 or int(v4) < 1 or int(v1) > 31 or int(v4) > 31:
-            
-            LR23.config(text = "Dia impossible")
-            LRR12.focus()
-
-            return
-         
-        # Limpia posibles mensajes anteriores innecesarios
-        LR23.config(text = "")
-        
+        muralla = False
+        muralla,v4,v5,v6 = cotejaFecha(muralla,v4,LRR42,v5,LRR52,v6,LRR62)
+        muralla,v1,v2,v3 = cotejaFecha(muralla,v1,LRR12,v2,LRR22,v3,LRR32)
+        muralla = cotejaVacio(muralla,v1,LRR12)
+        muralla = cotejaVacio(muralla,v2,LRR22)
+        muralla = cotejaVacio(muralla,v3,LRR32)
+        muralla = cotejaVacio(muralla,v4,LRR42)
+        muralla = cotejaVacio(muralla,v5,LRR52)
+        muralla = cotejaVacio(muralla,v6,LRR62)
+        if muralla == True:
+            LR23.config(fg = "red")
+            return      
+        LR23.config(text = "")                      # Limpia posibles mensajes anteriores innecesarios       
         # Importancia en la tabla
         ventanaTabla.deiconify()
         ventanaTabla.title('Taula per zones: desde ' +v1 + '/'+v2+'/'+v3+' fins '+v4+'/'+v5+'/'+v6+'.')
 
         # Terminamos de dibujar las necesidades de la tabla
-        columna = 1   
-        for data in range (1,35,2):
-            
-            fila = 0
-            for dato in range (3):
-                
+        columna = 1                                 # Iniciamos la columna  
+        for data in range (1,35,2):                 # Recorremos las columnas            
+            fila = 0                                # Iniciamos la fila
+            for dato in range (3):                  # Recorremos las filas                
+                # Creamos la celda
                 num = "0" + str(fila) + "0" + str(columna)
-                            
+                # Crea la celda con color de fondo gris 
                 globals()['VIEW%s' % num].config(bg = "#9A7048")
-                fila += 1   
-            
-            columna += 2        
-        columna = 0
-        for dato in range (35):
-            
-            num = "000" + str(columna)
-            
-            if num == "0000":
-                
-                columna += 1
-                
-            else:
-                
+                fila += 1                           # Avanzamos la fila            
+            columna += 2                            # Avanzamos la columna      
+        columna = 0                                 # Iniciamos la columna
+        for dato in range (35):                     # Recorremos las filas                 
+            num = "000" + str(columna)              # Crea el número de la celda          
+            if num == "0000":                       # Si es la primera celda           
+                columna += 1                        # Avanzamos la columna           
+            else:                                   # Si no es la primera celda
+                # Crea la celda con color de fondo gris
                 globals()['VIEW%s' % num].config(bg = "grey",fg = "#FFFFFF")
-                columna += 1
-        columna = 0
-
+                columna += 1                        # Avanzamos la columna
+        columna = 0                                 # Iniciamos la columna
         # Pinta Casillas fijas
         globals()['VIEW%s' % "0000"].config(text="ZONA")
         globals()['VIEW%s' % "0100"].config(text="VISITANTS")
@@ -4353,69 +4095,64 @@ def menuTablasVGrupo                                ():
         globals()['VIEW%s' % "0001"].config(text="REUS")
         globals()['VIEW%s' % "0002"].config(text="CATALUNYA")
         globals()['VIEW%s' % "00013"].config(text="ESPANYA")
-        globals()['VIEW%s' % "00024"].config(text="INTERNACIONAL")
-        
+        globals()['VIEW%s' % "00024"].config(text="INTERNACIONAL")        
         # Preparamos las listas por grupos
-        todosOrigenes = open("files/origens.DAT")
-        todosOrigenes = list(todosOrigenes)
-        OrigenReus = 0
-        OrigenCatalunya = []
-        OrigenEspanya = []
-        OrigenInternacional = []
-
-        for todos in todosOrigenes:
-            
-            todosPartido = todos.split(",")
-            todosPartido = list(todosPartido)
-            try:
-                if todosPartido[1] == "CATALUNYA":
+        todosOrigenes = open("files/origens.DAT")   # Abrimos el archivo con los datos
+        todosOrigenes = list(todosOrigenes)         # Lo convertimos en lista
+        OrigenReus = 0                              # Iniciamos el contador de Reus
+        OrigenCatalunya = []                        # Iniciamos la lista de Catalunya
+        OrigenEspanya = []                          # Iniciamos la lista de España
+        OrigenInternacional = []                    # Iniciamos la lista de Internacional
+        for todos in todosOrigenes:                 # Recorremos la lista           
+            todosPartido = todos.split(",")         # Separamos los datos
+            todosPartido = list(todosPartido)       # Lo convertimos en lista
+            try:                                    # Si hay datos
+                if todosPartido[1] == "CATALUNYA":  # Si es de Catalunya
+                    # Añadimos a la lista de Catalunya
                     OrigenCatalunya.append([todosPartido[0],0])
-                elif todosPartido[1] == "ESPANYA":
+                elif todosPartido[1] == "ESPANYA":  # Si es de España
+                    # Añadimos a la lista de España
                     OrigenEspanya.append([todosPartido[0],0])
+                # Si es de Internacional
                 elif todosPartido[1] == "INTERNACIONAL":
+                    # Añadimos a la lista de Internacional
                     OrigenInternacional.append([todosPartido[0],0])
-            except:
-                pass    
-        
-        
+            except:                                 # Si no hay datos
+                pass                                # Pasamos a la siguiente iteración       
         # Abre archivo con los datos en el mes y año necesarios
         # Crea una base de datos o se conecta a una
         base_datos = sqlite3.connect('databases/basesDeDatosRegistros.db')
-        # Crea cursor
-        c = base_datos.cursor()
+        c = base_datos.cursor()                     # Crea cursor
         # Query the database
         c.execute("SELECT * FROM bd_registros WHERE FECHA >= '"+v3+"/"+v2+"/"+v1+"' and FECHA <= '"+v6+"/"+v5+"/"+v4+"'")
-        records = c.fetchall()
-    
-        # Repasa dia cada registro para poner sumar a la lista adecuada    
-        for reu in records:
-            
-            if reu[3] == "REUS":
-                OrigenReus += 1
-        suma = 0
-        for cat in OrigenCatalunya:
-            for cata in records:
+        records = c.fetchall()                      # Obtiene todos los registros
+        for reu in records:                         # Repasa dia cada registro para poner sumar a la lista adecuada    
+            if reu[3] == "REUS":                    # Si es de Reus
+                OrigenReus += 1                     # Suma uno al contador de Reus 
+        suma = 0                                    # Iniciamos el contador de sumas
+        for cat in OrigenCatalunya:                 # Recorremos la lista de Catalunya
+            for cata in records:                    # Recorremos los registros
+                # Si el origen del registro es igual al origen de la lista
                 if cata[3] != "REUS" and cata[3] == cat[0]:
-                    cat[1] += 1
-            suma +=1   
-        suma = 0
-        for esp in OrigenEspanya:
+                    cat[1] += 1                     # Suma uno al contador de ese origen
+            suma +=1                                # Suma uno al contador de sumas
+        suma = 0                                    # Iniciamos el contador de sumas
+        for esp in OrigenEspanya:                   # Recorremos la lista de España
             for espa in records:
                 if espa[3] == esp[0]:
                     esp[1] += 1
             suma +=1     
-        suma = 0
-        for inter in OrigenInternacional:
-            for inte in records:
-                if inte[3] == inter[0]:
-                    inter[1] += 1
-            suma +=1      
+        suma = 0                                    # Iniciamos el contador de sumas
+        for inter in OrigenInternacional:           # Recorremos la lista de Internacional
+            for inte in records:                    # Recorremos los registros
+                if inte[3] == inter[0]:             # Si el origen del registro es igual al origen de la lista
+                    inter[1] += 1                   # Suma uno al contador de ese origen
+            suma +=1                                # Suma uno al contador de sumas
         # Listas finales para usar y valor global de pax
         OrigenCatalunya = sorted(OrigenCatalunya, key=lambda valor: valor[1],reverse = True)
         OrigenEspanya = sorted(OrigenEspanya, key=lambda valor: valor[1],reverse = True)
         OrigenInternacional = sorted(OrigenInternacional, key=lambda valor: valor[1],reverse = True)
         CantidadRegistros = len(records)
-        
         # Pintamos datos
         globals()['VIEW%s' % "0101"].config(text=OrigenReus,font=("Helvetica",9,"bold"))
         try:
@@ -4488,41 +4225,17 @@ def menuTablasVGrupo                                ():
         globals()['VIEW%s' % "02024"].config(text=str(circun)+" %",font=("Helvetica",9,"bold"))
         # Cierra archivo
         base_datos.close()
-                 
+        # Boton de cerrar ventana    
+        ventanaTabla.protocol("WM_DELETE_WINDOW", BotonRegresarForzado)                    
         # Activa boton pdf
         Boton7activado(PDFTablasVGrupos)
                           
-    # Destruimos las labels de informacion para no sobrecargar el sistema
-    destruye_espacios_info(10,22)
-    
-    # Creamos ventana extra para esta tabla
-    global ventanaTabla
-    ventanaTabla = Tk()
-    ventanaTabla.title('Taula zones')
-    #ventanaTabla.geometry("1500x700")
-    ventanaTabla.configure(bg='green')
-    ventanaTabla.iconbitmap("image/icono.ico")
-    frameTablaVGrupo = Frame(ventanaTabla)
-    frames(frameTablaVGrupo,0,0,1,300,50,"green")
-    # Si en cualquier momento se pulsan las teclas CTRL + CURSOR IZQUIERDA se fuerza el pulsado del botón REGRESAR
-    ventanaTabla.bind("<Control-Left>", lambda event: BotonRegresarForzado())
-    # Si en cualquier momento se pulsan las teclas CTRL + P se fuerza la impresión de PDF
-    ventanaTabla.bind("<Control-p>", lambda event: BotonImprimirForzado())
-    ventanaTabla.bind("<Control-P>", lambda event: BotonImprimirForzado())   
-    # Si en cualquier momento se pulsa la tecla ESCAPE se centra el foco en RAIZ
-    ventanaTabla.bind("<Escape>", lambda event: raiz.focus_force()) 
-       
-    # Importancia en la raiz
-    raiz.deiconify()
-    ventanaTabla.iconify()
-       
-    # Cramos las labels dentro de la tabla
-    crea_espacios_info(frameTablaVGrupo,3,35)
-    ajusta_espacios_info(3,35,20,15,15)
-                 
+    destruye_espacios_info(10,22)                       # Destruimos las labels de informacion para no sobrecargar el sistema
+    ventanaTablas('Taula zones',[0,0,1,300,50,"green"]) # Creamos ventana extra para esta tabla
+    crea_espacios_info(frameTabla,3,35)                 # Ajustamos las labels
+    ajusta_espacios_info(3,35,20,15,15)                 # Ajustamos las labels
     # Preparamos la salida
     menusBotones("Tornar",preMenuTablas,"",regresaSinNada,"Visitants per zona")
-
     # Datos a rellenar
     OpcionesQuestionario(["X2",LR1,"desde DIA:",LRR12],
                          ["X2",LR2,"MES:",LRR22],
@@ -4530,117 +4243,36 @@ def menuTablasVGrupo                                ():
                          ["X2",LR4,"fins DIA:",LRR42],
                          ["X2",LR5,"MES:",LRR52],
                          ["X2",LR6,"ANY:",LRR62])
- 
     # Si aquí se pulsan las teclas CTRL + D se pone la fecha actual
     raiz.bind("<Control-d>", lambda event: FechaActualIncrustadaGru())
-    raiz.bind("<Control-D>", lambda event: FechaActualIncrustadaGru())
-    
-    # Foco en el año
-    ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
-
-    # Activa la tabla
-    Boton4activado2(menuTablasVGrupoMuestra)
+    raiz.bind("<Control-D>", lambda event: FechaActualIncrustadaGru())    
+    ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)           # Foco en el año
+    Boton4activado2(menuTablasVGrupoMuestra)            # Activa la tabla
 def menuTablasVProvincia                            ():
     def menuTablasVProvinciasMuestra ():
         
         # Rescata valores
-        v1 = LRR12.get()
-        v2 = LRR22.get()
-        v3 = LRR32.get()
-        v4 = LRR42.get()
-        v5 = LRR52.get()
-        v6 = LRR62.get()
-
+        v1,v2,v3,v4,v5,v6 = LRR12.get(),LRR22.get(),LRR32.get(),LRR42.get(),LRR52.get(),LRR62.get()
         # Coteja fallos
-        if v1 == "" or v2 == "" or v3 == "" or v4 == "" or v5 == "" or v6 == "":
-            
-            LR23.config(text = "Registre incomplert")
-            LRR12.focus()
-
-            return
-                
-        if len(v3) != 4 or len(v6) != 4:
-            
-            LR23.config(text = "Estructura d'any no vàlida")
-            LRR32.focus()
-
-            return
-
-                # Si v2 tiene len 1, le añadimos un 0 delante
-        if len(v2) == 1:
-            v2 = "0" + v2
-            LRR22.delete(0,END)
-            LRR22.insert(0,v2)
-
-        # Si v5 tiene len 1, le añadimos un 0 delante
-        if len(v5) == 1:
-            v5 = "0" + v5
-            LRR52.delete(0,END)
-            LRR52.insert(0,v5)
-        
-        # Si v1 tiene len 1, le añadimos un 0 delante
-        if len(v1) == 1:
-            v1 = "0" + v1
-            LRR12.delete(0,END)
-            LRR12.insert(0,v1)
-        
-        # Si v4 tiene len 1, le añadimos un 0 delante
-        if len(v4) == 1:
-            v4 = "0" + v4
-            LRR42.delete(0,END)
-            LRR42.insert(0,v4)
-            
-        if len(v2) != 2 or len(v5) != 2:
-            
-            LR23.config(text = "Estructura de mes no vàlida")
-            LRR22.focus()
-
-            return
-        
-        if len(v1) != 2 or len(v4) != 2:
-            
-            LR23.config(text = "Estructura de dia no vàlida")
-            LRR12.focus()
-
-            return
-                            
-        try:
-            a = int(v1)
-            a = int(v2)
-            a = int(v3)
-            a = int(v4)
-            a = int(v5)
-            a = int(v6)
-        
-        except:
-            
-            LR23.config(text = "Dada no numèrica")
-            LRR12.focus()
-            return    
-
-        if int(v2) < 1 or int(v5) < 1 or int(v2) > 12 or int(v5) > 12:
-            
-            LR23.config(text = "Mes impossible")
-            LRR22.focus()
-
-            return
-
-        if int(v1) < 1 or int(v4) < 1 or int(v1) > 31 or int(v4) > 31:
-            
-            LR23.config(text = "Dia impossible")
-            LRR12.focus()
-
-            return
-        
-        # Limpia posibles mensajes anteriores innecesarios
-        LR23.config(text = "")
-        
+        muralla = False
+        muralla,v4,v5,v6 = cotejaFecha(muralla,v4,LRR42,v5,LRR52,v6,LRR62)
+        muralla,v1,v2,v3 = cotejaFecha(muralla,v1,LRR12,v2,LRR22,v3,LRR32)
+        muralla = cotejaVacio(muralla,v1,LRR12)
+        muralla = cotejaVacio(muralla,v2,LRR22)
+        muralla = cotejaVacio(muralla,v3,LRR32)
+        muralla = cotejaVacio(muralla,v4,LRR42)
+        muralla = cotejaVacio(muralla,v5,LRR52)
+        muralla = cotejaVacio(muralla,v6,LRR62)
+        if muralla == True:
+            LR23.config(fg = "red")
+            return         
+        LR23.config(text = "")          # Limpia posibles mensajes anteriores innecesarios 
         # Importancia en la tabla
-        ventanaTabla.deiconify()
+        ventanaTabla.deiconify()        # Desiconifica la ventana
+        # Preparamos la salida
         ventanaTabla.title('Taula per Provincies: desde ' +v1 + '/'+v2+'/'+v3+' fins '+v4+'/'+v5+'/'+v6+'.')
-
         # Terminamos de dibujar las necesidades de la tabla
-        columna = 1   
+        columna = 1                     # Columna 0 es la de los nombres de las provincias
         for data in range (1,5,2):
             
             fila = 0
@@ -4652,7 +4284,7 @@ def menuTablasVProvincia                            ():
                 fila += 1   
             
             columna += 2        
-        columna = 0
+        columna = 0                     
         for dato in range (5):
             
             num = "000" + str(columna)
@@ -4666,7 +4298,7 @@ def menuTablasVProvincia                            ():
                 globals()['VIEW%s' % num].config(bg = "grey",fg = "#FFFFFF")
                 columna += 1
         columna = 0
-
+        LR23.config(text = "")        # Limpia posibles mensajes anteriores innecesarios       
         # Pinta Casillas fijas
         globals()['VIEW%s' % "0000"].config(text="PROVÍNCIES")
         globals()['VIEW%s' % "0100"].config(text="VISITANTS")
@@ -4778,39 +4410,17 @@ def menuTablasVProvincia                            ():
         
         # Cierra archivo
         base_datos.close()
-                 
+        # Boton de cerrar ventana    
+        ventanaTabla.protocol("WM_DELETE_WINDOW", BotonRegresarForzado)                    
         # Activa boton pdf
         Boton7activado(PDFTablasVProvincias)
                           
-    # Destruimos las labels de informacion para no sobrecargar el sistema
-    destruye_espacios_info(10,22)
-    
-    # Creamos ventana extra para esta tabla
-    global ventanaTabla
-    ventanaTabla = Tk()
-    ventanaTabla.title('Taula Províncies')
-    #ventanaTabla.geometry("1500x700")
-    ventanaTabla.configure(bg='green')
-    ventanaTabla.iconbitmap("image/icono.ico")
-    frameTablaVProvincia = Frame(ventanaTabla)
-    frames(frameTablaVProvincia,0,0,1,300,50,"green")
-    # Si en cualquier momento se pulsan las teclas CTRL + CURSOR IZQUIERDA se fuerza el pulsado del botón REGRESAR
-    ventanaTabla.bind("<Control-Left>", lambda event: BotonRegresarForzado())
-    # Si en cualquier momento se pulsan las teclas CTRL + P se fuerza la impresión de PDF
-    ventanaTabla.bind("<Control-p>", lambda event: BotonImprimirForzado())
-    ventanaTabla.bind("<Control-P>", lambda event: BotonImprimirForzado())   
-   
-    # Importancia en la raiz
-    raiz.deiconify()
-    ventanaTabla.iconify()
-       
-    # Cramos las labels dentro de la tabla
-    crea_espacios_info(frameTablaVProvincia,4,5)
-    ajusta_espacios_info(4,5,20,15,15,15)
-                 
+    destruye_espacios_info(10,22)                               # Destruimos las labels de informacion para no sobrecargar el sistema
+    ventanaTablas('Taula Províncies',[0,0,1,300,50,"green"])    # Creamos ventana extra para esta tabla
+    crea_espacios_info(frameTabla,4,5)                          # Cramos las labels dentro de la tabla
+    ajusta_espacios_info(4,5,20,15,15,15)                       # Ajustamos las labels dentro de la tabla
     # Preparamos la salida
     menusBotones("Tornar",preMenuTablas,"",regresaSinNada,"",regresaSinNada,"Visitants per províncies")
-
     # Datos a rellenar
     OpcionesQuestionario(["X2",LR1,"desde DIA:",LRR12],
                          ["X2",LR2,"MES:",LRR22],
@@ -4818,111 +4428,30 @@ def menuTablasVProvincia                            ():
                          ["X2",LR4,"fins DIA:",LRR42],
                          ["X2",LR5,"MES:",LRR52],
                          ["X2",LR6,"ANY:",LRR62])
-
     # Si aquí se pulsan las teclas CTRL + D se pone la fecha actual
     raiz.bind("<Control-d>", lambda event: FechaActualIncrustadaGru())
-    raiz.bind("<Control-D>", lambda event: FechaActualIncrustadaGru())
-    
-    # Foco en el año
-    ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
-
-    # Activa la tabla
-    Boton4activado2(menuTablasVProvinciasMuestra)
+    raiz.bind("<Control-D>", lambda event: FechaActualIncrustadaGru())   
+    ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)                   # Foco en el año
+    Boton4activado2(menuTablasVProvinciasMuestra)               # Activa la tabla
 def menuTablasVComarca                              ():
     def menuTablasVComarcasMuestra ():
         
         # Rescata valores
-        v1 = LRR12.get()
-        v2 = LRR22.get()
-        v3 = LRR32.get()
-        v4 = LRR42.get()
-        v5 = LRR52.get()
-        v6 = LRR62.get()
-
+        v1,v2,v3,v4,v5,v6 = LRR12.get(),LRR22.get(),LRR32.get(),LRR42.get(),LRR52.get(),LRR62.get()
         # Coteja fallos
-        if v1 == "" or v2 == "" or v3 == "" or v4 == "" or v5 == "" or v6 == "":
-            
-            LR23.config(text = "Registre incomplert")
-            LRR12.focus()
-
-            return
-                
-        if len(v3) != 4 or len(v6) != 4:
-            
-            LR23.config(text = "Estructura d'any no vàlida")
-            LRR32.focus()
-
-            return
-
-                # Si v2 tiene len 1, le añadimos un 0 delante
-        if len(v2) == 1:
-            v2 = "0" + v2
-            LRR22.delete(0,END)
-            LRR22.insert(0,v2)
-
-        # Si v5 tiene len 1, le añadimos un 0 delante
-        if len(v5) == 1:
-            v5 = "0" + v5
-            LRR52.delete(0,END)
-            LRR52.insert(0,v5)
-        
-        # Si v1 tiene len 1, le añadimos un 0 delante
-        if len(v1) == 1:
-            v1 = "0" + v1
-            LRR12.delete(0,END)
-            LRR12.insert(0,v1)
-        
-        # Si v4 tiene len 1, le añadimos un 0 delante
-        if len(v4) == 1:
-            v4 = "0" + v4
-            LRR42.delete(0,END)
-            LRR42.insert(0,v4)
-            
-        if len(v2) != 2 or len(v5) != 2:
-            
-            LR23.config(text = "Estructura de mes no vàlida")
-            LRR22.focus()
-
-            return
-        
-        if len(v1) != 2 or len(v4) != 2:
-            
-            LR23.config(text = "Estructura de dia no vàlida")
-            LRR12.focus()
-
-            return
-                            
-        try:
-            a = int(v1)
-            a = int(v2)
-            a = int(v3)
-            a = int(v4)
-            a = int(v5)
-            a = int(v6)
-        
-        except:
-            
-            LR23.config(text = "Dada no numèrica")
-            LRR12.focus()
-            return    
-
-        if int(v2) < 1 or int(v5) < 1 or int(v2) > 12 or int(v5) > 12:
-            
-            LR23.config(text = "Mes impossible")
-            LRR22.focus()
-
-            return
-
-        if int(v1) < 1 or int(v4) < 1 or int(v1) > 31 or int(v4) > 31:
-            
-            LR23.config(text = "Dia impossible")
-            LRR12.focus()
-
-            return
-         
-        # Limpia posibles mensajes anteriores innecesarios
-        LR23.config(text = "")
-        
+        muralla = False
+        muralla,v4,v5,v6 = cotejaFecha(muralla,v4,LRR42,v5,LRR52,v6,LRR62)
+        muralla,v1,v2,v3 = cotejaFecha(muralla,v1,LRR12,v2,LRR22,v3,LRR32)
+        muralla = cotejaVacio(muralla,v1,LRR12)
+        muralla = cotejaVacio(muralla,v2,LRR22)
+        muralla = cotejaVacio(muralla,v3,LRR32)
+        muralla = cotejaVacio(muralla,v4,LRR42)
+        muralla = cotejaVacio(muralla,v5,LRR52)
+        muralla = cotejaVacio(muralla,v6,LRR62)
+        if muralla == True:
+            LR23.config(fg = "red")
+            return      
+        LR23.config(text = "")        # Limpia posibles mensajes anteriores innecesarios       
         # Importancia en la tabla
         ventanaTabla.deiconify()
         ventanaTabla.title('Taula per Comarca: desde ' +v1 + '/'+v2+'/'+v3+' fins '+v4+'/'+v5+'/'+v6+'.')
@@ -5056,39 +4585,20 @@ def menuTablasVComarca                              ():
                 circun1 = 0
 
             globals()['VIEW%s' % "020" + str(linea+1)].config(text=str(circun1)+" %")
-       
+        # Boton de cerrar ventana    
+        ventanaTabla.protocol("WM_DELETE_WINDOW", BotonRegresarForzado)                    
         # Activa boton pdf
         Boton7activado(PDFTablasVComarcas)
                           
     # Destruimos las labels de informacion para no sobrecargar el sistema
     destruye_espacios_info(10,22)
-    
     # Creamos ventana extra para esta tabla
-    global ventanaTabla
-    ventanaTabla = Tk()
-    ventanaTabla.title('Taula Comarques')
-    #ventanaTabla.geometry("1500x700")
-    ventanaTabla.configure(bg='green')
-    ventanaTabla.iconbitmap("image/icono.ico")
-    frameTablaVComarca = Frame(ventanaTabla)
-    frames(frameTablaVComarca,0,0,1,300,50,"green")
-    # Si en cualquier momento se pulsan las teclas CTRL + CURSOR IZQUIERDA se fuerza el pulsado del botón REGRESAR
-    ventanaTabla.bind("<Control-Left>", lambda event: BotonRegresarForzado())
-    # Si en cualquier momento se pulsan las teclas CTRL + P se fuerza la impresión de PDF
-    ventanaTabla.bind("<Control-p>", lambda event: BotonImprimirForzado())
-    ventanaTabla.bind("<Control-P>", lambda event: BotonImprimirForzado())   
-   
-    # Importancia en la raiz
-    raiz.deiconify()
-    ventanaTabla.iconify()
-       
+    ventanaTablas('Taula Comarques',[0,0,1,300,50,"green"])      
     # Cramos las labels dentro de la tabla
-    crea_espacios_info(frameTablaVComarca,3,11)
-    ajusta_espacios_info(3,11,20,15,15)
-                 
+    crea_espacios_info(frameTabla,3,11)
+    ajusta_espacios_info(3,11,20,15,15)                
     # Preparamos la salida
     menusBotones("Tornar",preMenuTablas,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Visitants per comarca")
-
     # Datos a rellenar
     OpcionesQuestionario(["X2",LR1,"desde DIA:",LRR12],
                          ["X2",LR2,"MES:",LRR22],
@@ -5096,111 +4606,32 @@ def menuTablasVComarca                              ():
                          ["X2",LR4,"fins DIA:",LRR42],
                          ["X2",LR5,"MES:",LRR52],
                          ["X2",LR6,"ANY:",LRR62])
-
     # Si aquí se pulsan las teclas CTRL + D se pone la fecha actual
     raiz.bind("<Control-d>", lambda event: FechaActualIncrustadaGru())
-    raiz.bind("<Control-D>", lambda event: FechaActualIncrustadaGru())
-    
+    raiz.bind("<Control-D>", lambda event: FechaActualIncrustadaGru())    
     # Foco en el año
     ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
-
     # Activa la tabla
     Boton4activado2(menuTablasVComarcasMuestra)
 def menuTablasVPerfil                               ():
     def menuTablasVPerfilesMuestra ():
         
         # Rescata valores
-        v1 = LRR12.get()
-        v2 = LRR22.get()
-        v3 = LRR32.get()
-        v4 = LRR42.get()
-        v5 = LRR52.get()
-        v6 = LRR62.get()
-
+        v1,v2,v3,v4,v5,v6 = LRR12.get(),LRR22.get(),LRR32.get(),LRR42.get(),LRR52.get(),LRR62.get()
         # Coteja fallos
-        if v1 == "" or v2 == "" or v3 == "" or v4 == "" or v5 == "" or v6 == "":
-            
-            LR23.config(text = "Registre incomplert")
-            LRR12.focus()
-
-            return
-                
-        if len(v3) != 4 or len(v6) != 4:
-            
-            LR23.config(text = "Estructura d'any no vàlida")
-            LRR32.focus()
-
-            return
-
-                # Si v2 tiene len 1, le añadimos un 0 delante
-        if len(v2) == 1:
-            v2 = "0" + v2
-            LRR22.delete(0,END)
-            LRR22.insert(0,v2)
-
-        # Si v5 tiene len 1, le añadimos un 0 delante
-        if len(v5) == 1:
-            v5 = "0" + v5
-            LRR52.delete(0,END)
-            LRR52.insert(0,v5)
-        
-        # Si v1 tiene len 1, le añadimos un 0 delante
-        if len(v1) == 1:
-            v1 = "0" + v1
-            LRR12.delete(0,END)
-            LRR12.insert(0,v1)
-        
-        # Si v4 tiene len 1, le añadimos un 0 delante
-        if len(v4) == 1:
-            v4 = "0" + v4
-            LRR42.delete(0,END)
-            LRR42.insert(0,v4)
-            
-        if len(v2) != 2 or len(v5) != 2:
-            
-            LR23.config(text = "Estructura de mes no vàlida")
-            LRR22.focus()
-
-            return
-        
-        if len(v1) != 2 or len(v4) != 2:
-            
-            LR23.config(text = "Estructura de dia no vàlida")
-            LRR12.focus()
-
-            return
-                            
-        try:
-            a = int(v1)
-            a = int(v2)
-            a = int(v3)
-            a = int(v4)
-            a = int(v5)
-            a = int(v6)
-        
-        except:
-            
-            LR23.config(text = "Dada no numèrica")
-            LRR12.focus()
-            return    
-
-        if int(v2) < 1 or int(v5) < 1 or int(v2) > 12 or int(v5) > 12:
-            
-            LR23.config(text = "Mes impossible")
-            LRR22.focus()
-
-            return
-
-        if int(v1) < 1 or int(v4) < 1 or int(v1) > 31 or int(v4) > 31:
-            
-            LR23.config(text = "Dia impossible")
-            LRR12.focus()
-
-            return
-         
-        # Limpia posibles mensajes anteriores innecesarios
-        LR23.config(text = "")
-        
+        muralla = False
+        muralla,v4,v5,v6 = cotejaFecha(muralla,v4,LRR42,v5,LRR52,v6,LRR62)
+        muralla,v1,v2,v3 = cotejaFecha(muralla,v1,LRR12,v2,LRR22,v3,LRR32)
+        muralla = cotejaVacio(muralla,v1,LRR12)
+        muralla = cotejaVacio(muralla,v2,LRR22)
+        muralla = cotejaVacio(muralla,v3,LRR32)
+        muralla = cotejaVacio(muralla,v4,LRR42)
+        muralla = cotejaVacio(muralla,v5,LRR52)
+        muralla = cotejaVacio(muralla,v6,LRR62)
+        if muralla == True:
+            LR23.config(fg = "red")
+            return      
+        LR23.config(text = "")        # Limpia posibles mensajes anteriores innecesarios       
         # Importancia en la tabla
         ventanaTabla.deiconify()
         ventanaTabla.title('Taula per perfils: desde ' +v1 + '/'+v2+'/'+v3+' fins '+v4+'/'+v5+'/'+v6+'.')
@@ -5304,7 +4735,8 @@ def menuTablasVPerfil                               ():
                 circun1 = 0
 
             globals()['VIEW%s' % "020" + str(linea+1)].config(text=str(circun1)+" %")
-       
+        # Boton de cerrar ventana    
+        ventanaTabla.protocol("WM_DELETE_WINDOW", BotonRegresarForzado)                    
         # Activa boton pdf
         Boton7activado(PDFTablasVPerfiles)
                           
@@ -5312,31 +4744,12 @@ def menuTablasVPerfil                               ():
     destruye_espacios_info(10,22)
     
     # Creamos ventana extra para esta tabla
-    global ventanaTabla
-    ventanaTabla = Tk()
-    ventanaTabla.title('Taula perfils')
-    #ventanaTabla.geometry("1500x700")
-    ventanaTabla.configure(bg='green')
-    ventanaTabla.iconbitmap("image/icono.ico")
-    frameTablaVPerfil = Frame(ventanaTabla)
-    frames(frameTablaVPerfil,0,0,1,300,50,"green")
-    # Si en cualquier momento se pulsan las teclas CTRL + CURSOR IZQUIERDA se fuerza el pulsado del botón REGRESAR
-    ventanaTabla.bind("<Control-Left>", lambda event: BotonRegresarForzado())
-    # Si en cualquier momento se pulsan las teclas CTRL + P se fuerza la impresión de PDF
-    ventanaTabla.bind("<Control-p>", lambda event: BotonImprimirForzado())
-    ventanaTabla.bind("<Control-P>", lambda event: BotonImprimirForzado())   
-  
-    # Importancia en la raiz
-    raiz.deiconify()
-    ventanaTabla.iconify()
-       
+    ventanaTablas('Taula perfils',[0,0,1,300,50,"green"])
     # Cramos las labels dentro de la tabla
     crea_espacios_info(frameTablaVPerfil,3,11)
-    ajusta_espacios_info(3,11,20,15,15)
-                 
+    ajusta_espacios_info(3,11,20,15,15)                 
     # Preparamos la salida
     menusBotones("Tornar",preMenuTablas,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Visitants per perfil")
-
     # Datos a rellenar
     OpcionesQuestionario(["X2",LR1,"desde DIA:",LRR12],
                          ["X2",LR2,"MES:",LRR22],
@@ -5344,111 +4757,32 @@ def menuTablasVPerfil                               ():
                          ["X2",LR4,"fins DIA:",LRR42],
                          ["X2",LR5,"MES:",LRR52],
                          ["X2",LR6,"ANY:",LRR62])
-
     # Si aquí se pulsan las teclas CTRL + D se pone la fecha actual
     raiz.bind("<Control-d>", lambda event: FechaActualIncrustadaGru())
-    raiz.bind("<Control-D>", lambda event: FechaActualIncrustadaGru())
-    
+    raiz.bind("<Control-D>", lambda event: FechaActualIncrustadaGru())    
     # Foco en el año
     ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
-
     # Activa la tabla
     Boton4activado2(menuTablasVPerfilesMuestra)
 def menuTablasVFuente                               ():
     def menuTablasVFuentesMuestra ():
         
         # Rescata valores
-        v1 = LRR12.get()
-        v2 = LRR22.get()
-        v3 = LRR32.get()
-        v4 = LRR42.get()
-        v5 = LRR52.get()
-        v6 = LRR62.get()
-
+        v1,v2,v3,v4,v5,v6 = LRR12.get(),LRR22.get(),LRR32.get(),LRR42.get(),LRR52.get(),LRR62.get()
         # Coteja fallos
-        if v1 == "" or v2 == "" or v3 == "" or v4 == "" or v5 == "" or v6 == "":
-            
-            LR23.config(text = "Registre incomplert")
-            LRR12.focus()
-
-            return
-                
-        if len(v3) != 4 or len(v6) != 4:
-            
-            LR23.config(text = "Estructura d'any no vàlida")
-            LRR32.focus()
-
-            return
-
-                # Si v2 tiene len 1, le añadimos un 0 delante
-        if len(v2) == 1:
-            v2 = "0" + v2
-            LRR22.delete(0,END)
-            LRR22.insert(0,v2)
-
-        # Si v5 tiene len 1, le añadimos un 0 delante
-        if len(v5) == 1:
-            v5 = "0" + v5
-            LRR52.delete(0,END)
-            LRR52.insert(0,v5)
-        
-        # Si v1 tiene len 1, le añadimos un 0 delante
-        if len(v1) == 1:
-            v1 = "0" + v1
-            LRR12.delete(0,END)
-            LRR12.insert(0,v1)
-        
-        # Si v4 tiene len 1, le añadimos un 0 delante
-        if len(v4) == 1:
-            v4 = "0" + v4
-            LRR42.delete(0,END)
-            LRR42.insert(0,v4)
-            
-        if len(v2) != 2 or len(v5) != 2:
-            
-            LR23.config(text = "Estructura de mes no vàlida")
-            LRR22.focus()
-
-            return
-        
-        if len(v1) != 2 or len(v4) != 2:
-            
-            LR23.config(text = "Estructura de dia no vàlida")
-            LRR12.focus()
-
-            return
-                            
-        try:
-            a = int(v1)
-            a = int(v2)
-            a = int(v3)
-            a = int(v4)
-            a = int(v5)
-            a = int(v6)
-        
-        except:
-            
-            LR23.config(text = "Dada no numèrica")
-            LRR12.focus()
-            return    
-
-        if int(v2) < 1 or int(v5) < 1 or int(v2) > 12 or int(v5) > 12:
-            
-            LR23.config(text = "Mes impossible")
-            LRR22.focus()
-
-            return
-
-        if int(v1) < 1 or int(v4) < 1 or int(v1) > 31 or int(v4) > 31:
-            
-            LR23.config(text = "Dia impossible")
-            LRR12.focus()
-
-            return
-         
-        # Limpia posibles mensajes anteriores innecesarios
-        LR23.config(text = "")
-        
+        muralla = False
+        muralla,v4,v5,v6 = cotejaFecha(muralla,v4,LRR42,v5,LRR52,v6,LRR62)
+        muralla,v1,v2,v3 = cotejaFecha(muralla,v1,LRR12,v2,LRR22,v3,LRR32)
+        muralla = cotejaVacio(muralla,v1,LRR12)
+        muralla = cotejaVacio(muralla,v2,LRR22)
+        muralla = cotejaVacio(muralla,v3,LRR32)
+        muralla = cotejaVacio(muralla,v4,LRR42)
+        muralla = cotejaVacio(muralla,v5,LRR52)
+        muralla = cotejaVacio(muralla,v6,LRR62)
+        if muralla == True:
+            LR23.config(fg = "red")
+            return      
+        LR23.config(text = "")        # Limpia posibles mensajes anteriores innecesarios       
         # Importancia en la tabla
         ventanaTabla.deiconify()
         ventanaTabla.title('Taula per perfils: desde ' +v1 + '/'+v2+'/'+v3+' fins '+v4+'/'+v5+'/'+v6+'.')
@@ -5538,7 +4872,7 @@ def menuTablasVFuente                               ():
                                            
         # Organizamos lista de mayor a menor por el SEGUNDO elemento de sus listas  
         lista = sorted(lista, key=lambda valor: int(valor[1]),reverse = True)
-     
+    
         # Pintamos datos      
         for linea in range(10):
             circun = lista[linea]
@@ -5552,39 +4886,20 @@ def menuTablasVFuente                               ():
                 circun1 = 0
 
             globals()['VIEW%s' % "020" + str(linea+1)].config(text=str(circun1)+" %")
-       
+        # Boton de cerrar ventana    
+        ventanaTabla.protocol("WM_DELETE_WINDOW", BotonRegresarForzado)                           
         # Activa boton pdf
         Boton7activado(PDFTablasVFuentes)
                           
     # Destruimos las labels de informacion para no sobrecargar el sistema
     destruye_espacios_info(10,22)
-    
     # Creamos ventana extra para esta tabla
-    global ventanaTabla
-    ventanaTabla = Tk()
-    ventanaTabla.title('Taula fonts')
-    #ventanaTabla.geometry("1500x700")
-    ventanaTabla.configure(bg='green')
-    ventanaTabla.iconbitmap("image/icono.ico")
-    frameTablaVFuente = Frame(ventanaTabla)
-    frames(frameTablaVFuente,0,0,1,300,50,"green")
-    # Si en cualquier momento se pulsan las teclas CTRL + CURSOR IZQUIERDA se fuerza el pulsado del botón REGRESAR
-    ventanaTabla.bind("<Control-Left>", lambda event: BotonRegresarForzado())
-    # Si en cualquier momento se pulsan las teclas CTRL + P se fuerza la impresión de PDF
-    ventanaTabla.bind("<Control-p>", lambda event: BotonImprimirForzado())
-    ventanaTabla.bind("<Control-P>", lambda event: BotonImprimirForzado())   
-   
-    # Importancia en la raiz
-    raiz.deiconify()
-    ventanaTabla.iconify()
-       
+    ventanaTablas('Taula fonts',[0,0,1,300,50,"green"])
     # Cramos las labels dentro de la tabla
-    crea_espacios_info(frameTablaVFuente,3,11)
-    ajusta_espacios_info(3,11,20,15,15)
-                 
+    crea_espacios_info(frameTabla,3,11)
+    ajusta_espacios_info(3,11,20,15,15)                
     # Preparamos la salida
     menusBotones("Tornar",preMenuTablas,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Visitants per font")
-
     # Datos a rellenar
     OpcionesQuestionario(["X2",LR1,"desde DIA:",LRR12],
                          ["X2",LR2,"MES:",LRR22],
@@ -5592,115 +4907,35 @@ def menuTablasVFuente                               ():
                          ["X2",LR4,"fins DIA:",LRR42],
                          ["X2",LR5,"MES:",LRR52],
                          ["X2",LR6,"ANY:",LRR62])
-
     # Si aquí se pulsan las teclas CTRL + D se pone la fecha actual
     raiz.bind("<Control-d>", lambda event: FechaActualIncrustadaGru())
-    raiz.bind("<Control-D>", lambda event: FechaActualIncrustadaGru())
-    
+    raiz.bind("<Control-D>", lambda event: FechaActualIncrustadaGru())    
     # Foco en el año
     ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
-
     # Activa la tabla
     Boton4activado2(menuTablasVFuentesMuestra)
 def menuTablasVHora                                 ():
     def menuTablasVHorasMuestra ():
         
         # Rescata valores
-        v1 = LRR12.get()
-        v2 = LRR22.get()
-        v3 = LRR32.get()
-        v4 = LRR42.get()
-        v5 = LRR52.get()
-        v6 = LRR62.get()
-
+        v1,v2,v3,v4,v5,v6 = LRR12.get(),LRR22.get(),LRR32.get(),LRR42.get(),LRR52.get(),LRR62.get()
         # Coteja fallos
-        if v1 == "" or v2 == "" or v3 == "" or v4 == "" or v5 == "" or v6 == "":
-            
-            LR23.config(text = "Registre incomplert")
-            LRR12.focus()
-
-            return
-                
-        if len(v3) != 4 or len(v6) != 4:
-            
-            LR23.config(text = "Estructura d'any no vàlida")
-            LRR32.focus()
-
-            return
-
-                # Si v2 tiene len 1, le añadimos un 0 delante
-        if len(v2) == 1:
-            v2 = "0" + v2
-            LRR22.delete(0,END)
-            LRR22.insert(0,v2)
-
-        # Si v5 tiene len 1, le añadimos un 0 delante
-        if len(v5) == 1:
-            v5 = "0" + v5
-            LRR52.delete(0,END)
-            LRR52.insert(0,v5)
-        
-        # Si v1 tiene len 1, le añadimos un 0 delante
-        if len(v1) == 1:
-            v1 = "0" + v1
-            LRR12.delete(0,END)
-            LRR12.insert(0,v1)
-        
-        # Si v4 tiene len 1, le añadimos un 0 delante
-        if len(v4) == 1:
-            v4 = "0" + v4
-            LRR42.delete(0,END)
-            LRR42.insert(0,v4)
-            
-        if len(v2) != 2 or len(v5) != 2:
-            
-            LR23.config(text = "Estructura de mes no vàlida")
-            LRR22.focus()
-
-            return
-        
-        if len(v1) != 2 or len(v4) != 2:
-            
-            LR23.config(text = "Estructura de dia no vàlida")
-            LRR12.focus()
-
-            return
-                            
-        try:
-            a = int(v1)
-            a = int(v2)
-            a = int(v3)
-            a = int(v4)
-            a = int(v5)
-            a = int(v6)
-        
-        except:
-            
-            LR23.config(text = "Dada no numèrica")
-            LRR12.focus()
-            return    
-
-        if int(v2) < 1 or int(v5) < 1 or int(v2) > 12 or int(v5) > 12:
-            
-            LR23.config(text = "Mes impossible")
-            LRR22.focus()
-
-            return
-
-        if int(v1) < 1 or int(v4) < 1 or int(v1) > 31 or int(v4) > 31:
-            
-            LR23.config(text = "Dia impossible")
-            LRR12.focus()
-
-            return
-         
-        # Limpia posibles mensajes anteriores innecesarios
-        LR23.config(text = "")
-        
+        muralla = False
+        muralla,v4,v5,v6 = cotejaFecha(muralla,v4,LRR42,v5,LRR52,v6,LRR62)
+        muralla,v1,v2,v3 = cotejaFecha(muralla,v1,LRR12,v2,LRR22,v3,LRR32)
+        muralla = cotejaVacio(muralla,v1,LRR12)
+        muralla = cotejaVacio(muralla,v2,LRR22)
+        muralla = cotejaVacio(muralla,v3,LRR32)
+        muralla = cotejaVacio(muralla,v4,LRR42)
+        muralla = cotejaVacio(muralla,v5,LRR52)
+        muralla = cotejaVacio(muralla,v6,LRR62)
+        if muralla == True:
+            LR23.config(fg = "red")
+            return      
+        LR23.config(text = "")        # Limpia posibles mensajes anteriores innecesarios       
         # Importancia en la tabla
         ventanaTabla.deiconify()
         ventanaTabla.title('Taula per hores: desde ' +v1 + '/'+v2+'/'+v3+' fins '+v4+'/'+v5+'/'+v6+'.')
-
         # Terminamos de dibujar las necesidades de la tabla
         columna = 1   
         for data in range (1,11,2):
@@ -5800,39 +5035,20 @@ def menuTablasVHora                                 ():
                 circun1 = 0
 
             globals()['VIEW%s' % "020" + str(linea+1)].config(text=str(circun1)+" %")
-       
+        # Boton de cerrar ventana    
+        ventanaTabla.protocol("WM_DELETE_WINDOW", BotonRegresarForzado)                       
         # Activa boton pdf
         Boton7activado(PDFTablasVHoras)
                           
     # Destruimos las labels de informacion para no sobrecargar el sistema
     destruye_espacios_info(10,22)
-    
-    # Creamos ventana extra para esta tabla
-    global ventanaTabla
-    ventanaTabla = Tk()
-    ventanaTabla.title('Taula hores')
-    #ventanaTabla.geometry("1500x700")
-    ventanaTabla.configure(bg='green')
-    ventanaTabla.iconbitmap("image/icono.ico")
-    frameTablaVHora = Frame(ventanaTabla)
-    frames(frameTablaVHora,0,0,1,300,50,"green")
-    # Si en cualquier momento se pulsan las teclas CTRL + CURSOR IZQUIERDA se fuerza el pulsado del botón REGRESAR
-    ventanaTabla.bind("<Control-Left>", lambda event: BotonRegresarForzado())
-    # Si en cualquier momento se pulsan las teclas CTRL + P se fuerza la impresión de PDF
-    ventanaTabla.bind("<Control-p>", lambda event: BotonImprimirForzado())
-    ventanaTabla.bind("<Control-P>", lambda event: BotonImprimirForzado())   
-   
-    # Importancia en la raiz
-    raiz.deiconify()
-    ventanaTabla.iconify()
-       
+# Creamos ventana extra para esta tabla
+    ventanaTablas('Taula hores',[0,0,1,300,50,"green"])
     # Cramos las labels dentro de la tabla
-    crea_espacios_info(frameTablaVHora,3,11)
-    ajusta_espacios_info(3,11,20,15,15)
-                 
+    crea_espacios_info(frameTabla,3,11)
+    ajusta_espacios_info(3,11,20,15,15)                 
     # Preparamos la salida
     menusBotones("Tornar",preMenuTablas,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Visitants per hora")
-
     # Datos a rellenar
     OpcionesQuestionario(["X2",LR1,"desde DIA:",LRR12],
                          ["X2",LR2,"MES:",LRR22],
@@ -5840,111 +5056,32 @@ def menuTablasVHora                                 ():
                          ["X2",LR4,"fins DIA:",LRR42],
                          ["X2",LR5,"MES:",LRR52],
                          ["X2",LR6,"ANY:",LRR62])
-
     # Si aquí se pulsan las teclas CTRL + D se pone la fecha actual
     raiz.bind("<Control-d>", lambda event: FechaActualIncrustadaGru())
-    raiz.bind("<Control-D>", lambda event: FechaActualIncrustadaGru())
-    
+    raiz.bind("<Control-D>", lambda event: FechaActualIncrustadaGru())    
     # Foco en el año
     ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
-
     # Activa la tabla
     Boton4activado2(menuTablasVHorasMuestra)
 def menuTablasVDia                                  ():
     def menuTablasVDiasMuestra ():
         
         # Rescata valores
-        v1 = LRR12.get()
-        v2 = LRR22.get()
-        v3 = LRR32.get()
-        v4 = LRR42.get()
-        v5 = LRR52.get()
-        v6 = LRR62.get()
-
+        v1,v2,v3,v4,v5,v6 = LRR12.get(),LRR22.get(),LRR32.get(),LRR42.get(),LRR52.get(),LRR62.get()
         # Coteja fallos
-        if v1 == "" or v2 == "" or v3 == "" or v4 == "" or v5 == "" or v6 == "":
-            
-            LR23.config(text = "Registre incomplert")
-            LRR12.focus()
-
-            return
-                
-        if len(v3) != 4 or len(v6) != 4:
-            
-            LR23.config(text = "Estructura d'any no vàlida")
-            LRR32.focus()
-
-            return
-
-                # Si v2 tiene len 1, le añadimos un 0 delante
-        if len(v2) == 1:
-            v2 = "0" + v2
-            LRR22.delete(0,END)
-            LRR22.insert(0,v2)
-
-        # Si v5 tiene len 1, le añadimos un 0 delante
-        if len(v5) == 1:
-            v5 = "0" + v5
-            LRR52.delete(0,END)
-            LRR52.insert(0,v5)
-        
-        # Si v1 tiene len 1, le añadimos un 0 delante
-        if len(v1) == 1:
-            v1 = "0" + v1
-            LRR12.delete(0,END)
-            LRR12.insert(0,v1)
-        
-        # Si v4 tiene len 1, le añadimos un 0 delante
-        if len(v4) == 1:
-            v4 = "0" + v4
-            LRR42.delete(0,END)
-            LRR42.insert(0,v4)
-            
-        if len(v2) != 2 or len(v5) != 2:
-            
-            LR23.config(text = "Estructura de mes no vàlida")
-            LRR22.focus()
-
-            return
-        
-        if len(v1) != 2 or len(v4) != 2:
-            
-            LR23.config(text = "Estructura de dia no vàlida")
-            LRR12.focus()
-
-            return
-                            
-        try:
-            a = int(v1)
-            a = int(v2)
-            a = int(v3)
-            a = int(v4)
-            a = int(v5)
-            a = int(v6)
-        
-        except:
-            
-            LR23.config(text = "Dada no numèrica")
-            LRR12.focus()
-            return    
-
-        if int(v2) < 1 or int(v5) < 1 or int(v2) > 12 or int(v5) > 12:
-            
-            LR23.config(text = "Mes impossible")
-            LRR22.focus()
-
-            return
-
-        if int(v1) < 1 or int(v4) < 1 or int(v1) > 31 or int(v4) > 31:
-            
-            LR23.config(text = "Dia impossible")
-            LRR12.focus()
-
-            return
-         
-        # Limpia posibles mensajes anteriores innecesarios
-        LR23.config(text = "")
-        
+        muralla = False
+        muralla,v4,v5,v6 = cotejaFecha(muralla,v4,LRR42,v5,LRR52,v6,LRR62)
+        muralla,v1,v2,v3 = cotejaFecha(muralla,v1,LRR12,v2,LRR22,v3,LRR32)
+        muralla = cotejaVacio(muralla,v1,LRR12)
+        muralla = cotejaVacio(muralla,v2,LRR22)
+        muralla = cotejaVacio(muralla,v3,LRR32)
+        muralla = cotejaVacio(muralla,v4,LRR42)
+        muralla = cotejaVacio(muralla,v5,LRR52)
+        muralla = cotejaVacio(muralla,v6,LRR62)
+        if muralla == True:
+            LR23.config(fg = "red")
+            return      
+        LR23.config(text = "")        # Limpia posibles mensajes anteriores innecesarios       
         # Importancia en la tabla
         ventanaTabla.deiconify()
         ventanaTabla.title('Taula per dies: desde ' +v1 + '/'+v2+'/'+v3+' fins '+v4+'/'+v5+'/'+v6+'.')
@@ -6064,39 +5201,20 @@ def menuTablasVDia                                  ():
                 globals()['VIEW%s' % "020" + str(linea+7)].config(text=str(circun1)+" %")
         except:
             pass
-
+        # Boton de cerrar ventana    
+        ventanaTabla.protocol("WM_DELETE_WINDOW", BotonRegresarForzado)                    
         # Activa boton pdf
         Boton7activado(PDFTablasVDias)
                           
     # Destruimos las labels de informacion para no sobrecargar el sistema
     destruye_espacios_info(10,22)
-    
     # Creamos ventana extra para esta tabla
-    global ventanaTabla
-    ventanaTabla = Tk()
-    ventanaTabla.title('Taula dies')
-    #ventanaTabla.geometry("1500x700")
-    ventanaTabla.configure(bg='green')
-    ventanaTabla.iconbitmap("image/icono.ico")
-    frameTablaVDia = Frame(ventanaTabla)
-    frames(frameTablaVDia,0,0,1,300,50,"green")
-    # Si en cualquier momento se pulsan las teclas CTRL + CURSOR IZQUIERDA se fuerza el pulsado del botón REGRESAR
-    ventanaTabla.bind("<Control-Left>", lambda event: BotonRegresarForzado())
-    # Si en cualquier momento se pulsan las teclas CTRL + P se fuerza la impresión de PDF
-    ventanaTabla.bind("<Control-p>", lambda event: BotonImprimirForzado())
-    ventanaTabla.bind("<Control-P>", lambda event: BotonImprimirForzado())   
-   
-    # Importancia en la raiz
-    raiz.deiconify()
-    ventanaTabla.iconify()
-       
+    ventanaTablas('Taula dies',[0,0,1,300,50,"green"])       
     # Cramos las labels dentro de la tabla
-    crea_espacios_info(frameTablaVDia,3,12)
-    ajusta_espacios_info(3,12,20,15,15)
-                 
+    crea_espacios_info(frameTabla,3,12)
+    ajusta_espacios_info(3,12,20,15,15)                
     # Preparamos la salida
     menusBotones("Tornar",preMenuTablas,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Visitants per dia")
-
     # Datos a rellenar
     OpcionesQuestionario(["X2",LR1,"desde DIA:",LRR12],
                          ["X2",LR2,"MES:",LRR22],
@@ -6104,115 +5222,35 @@ def menuTablasVDia                                  ():
                          ["X2",LR4,"fins DIA:",LRR42],
                          ["X2",LR5,"MES:",LRR52],
                          ["X2",LR6,"ANY:",LRR62])
-
     # Si aquí se pulsan las teclas CTRL + D se pone la fecha actual
     raiz.bind("<Control-d>", lambda event: FechaActualIncrustadaGru())
-    raiz.bind("<Control-D>", lambda event: FechaActualIncrustadaGru())
-    
+    raiz.bind("<Control-D>", lambda event: FechaActualIncrustadaGru())    
     # Foco en el año
     ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
-
     # Activa la tabla
     Boton4activado2(menuTablasVDiasMuestra)
 def menuTablasVOrigen                               ():
     def menuTablasVOrigenesMuestra ():
         
         # Rescata valores
-        v1 = LRR12.get()
-        v2 = LRR22.get()
-        v3 = LRR32.get()
-        v4 = LRR42.get()
-        v5 = LRR52.get()
-        v6 = LRR62.get()
-
+        v1,v2,v3,v4,v5,v6 = LRR12.get(),LRR22.get(),LRR32.get(),LRR42.get(),LRR52.get(),LRR62.get()
         # Coteja fallos
-        if v1 == "" or v2 == "" or v3 == "" or v4 == "" or v5 == "" or v6 == "":
-            
-            LR23.config(text = "Registre incomplert")
-            LRR12.focus()
-
-            return
-                
-        if len(v3) != 4 or len(v6) != 4:
-            
-            LR23.config(text = "Estructura d'any no vàlida")
-            LRR32.focus()
-
-            return
-
-                # Si v2 tiene len 1, le añadimos un 0 delante
-        if len(v2) == 1:
-            v2 = "0" + v2
-            LRR22.delete(0,END)
-            LRR22.insert(0,v2)
-
-        # Si v5 tiene len 1, le añadimos un 0 delante
-        if len(v5) == 1:
-            v5 = "0" + v5
-            LRR52.delete(0,END)
-            LRR52.insert(0,v5)
-        
-        # Si v1 tiene len 1, le añadimos un 0 delante
-        if len(v1) == 1:
-            v1 = "0" + v1
-            LRR12.delete(0,END)
-            LRR12.insert(0,v1)
-        
-        # Si v4 tiene len 1, le añadimos un 0 delante
-        if len(v4) == 1:
-            v4 = "0" + v4
-            LRR42.delete(0,END)
-            LRR42.insert(0,v4)
-            
-        if len(v2) != 2 or len(v5) != 2:
-            
-            LR23.config(text = "Estructura de mes no vàlida")
-            LRR22.focus()
-
-            return
-        
-        if len(v1) != 2 or len(v4) != 2:
-            
-            LR23.config(text = "Estructura de dia no vàlida")
-            LRR12.focus()
-
-            return
-                            
-        try:
-            a = int(v1)
-            a = int(v2)
-            a = int(v3)
-            a = int(v4)
-            a = int(v5)
-            a = int(v6)
-        
-        except:
-            
-            LR23.config(text = "Dada no numèrica")
-            LRR12.focus()
-            return    
-
-        if int(v2) < 1 or int(v5) < 1 or int(v2) > 12 or int(v5) > 12:
-            
-            LR23.config(text = "Mes impossible")
-            LRR22.focus()
-
-            return
-
-        if int(v1) < 1 or int(v4) < 1 or int(v1) > 31 or int(v4) > 31:
-            
-            LR23.config(text = "Dia impossible")
-            LRR12.focus()
-
-            return
-         
-        # Limpia posibles mensajes anteriores innecesarios
-        LR23.config(text = "")
-        
+        muralla = False
+        muralla,v4,v5,v6 = cotejaFecha(muralla,v4,LRR42,v5,LRR52,v6,LRR62)
+        muralla,v1,v2,v3 = cotejaFecha(muralla,v1,LRR12,v2,LRR22,v3,LRR32)
+        muralla = cotejaVacio(muralla,v1,LRR12)
+        muralla = cotejaVacio(muralla,v2,LRR22)
+        muralla = cotejaVacio(muralla,v3,LRR32)
+        muralla = cotejaVacio(muralla,v4,LRR42)
+        muralla = cotejaVacio(muralla,v5,LRR52)
+        muralla = cotejaVacio(muralla,v6,LRR62)
+        if muralla == True:
+            LR23.config(fg = "red")
+            return      
+        LR23.config(text = "")        # Limpia posibles mensajes anteriores innecesarios       
         # Importancia en la tabla
         ventanaTabla.deiconify()
         ventanaTabla.title('Taula per Origens: desde ' +v1 + '/'+v2+'/'+v3+' fins '+v4+'/'+v5+'/'+v6+'.')
-
         # Terminamos de dibujar las necesidades de la tabla
         columna = 1   
         for data in range (1,11,2):
@@ -6240,12 +5278,10 @@ def menuTablasVOrigen                               ():
                 globals()['VIEW%s' % num].config(bg = "grey",fg = "#FFFFFF")
                 columna += 1
         columna = 0
-
         # Pinta Casillas fijas
         globals()['VIEW%s' % "0000"].config(text="ORIGENS")
         globals()['VIEW%s' % "0100"].config(text="PAX")
-        globals()['VIEW%s' % "0200"].config(text="TANT PER CENT")
-        
+        globals()['VIEW%s' % "0200"].config(text="TANT PER CENT")        
         # Abrimos el archivo de las descripciones
         archivo = open("files/ORIGENS.DAT","r")
         # Convertimos en lista de listas
@@ -6316,39 +5352,20 @@ def menuTablasVOrigen                               ():
                 circun1 = 0
 
             globals()['VIEW%s' % "020" + str(linea+1)].config(text=str(circun1)+" %")
-       
+        # Boton de cerrar ventana    
+        ventanaTabla.protocol("WM_DELETE_WINDOW", BotonRegresarForzado)                           
         # Activa boton pdf
         Boton7activado(PDFTablasVOrigen)
                           
     # Destruimos las labels de informacion para no sobrecargar el sistema
     destruye_espacios_info(10,22)
-    
     # Creamos ventana extra para esta tabla
-    global ventanaTabla
-    ventanaTabla = Tk()
-    ventanaTabla.title('Taula origens')
-    #ventanaTabla.geometry("1500x700")
-    ventanaTabla.configure(bg='green')
-    ventanaTabla.iconbitmap("image/icono.ico")
-    frameTablaVOrigen = Frame(ventanaTabla)
-    frames(frameTablaVOrigen,0,0,1,300,50,"green")
-    # Si en cualquier momento se pulsan las teclas CTRL + CURSOR IZQUIERDA se fuerza el pulsado del botón REGRESAR
-    ventanaTabla.bind("<Control-Left>", lambda event: BotonRegresarForzado())
-    # Si en cualquier momento se pulsan las teclas CTRL + P se fuerza la impresión de PDF
-    ventanaTabla.bind("<Control-p>", lambda event: BotonImprimirForzado())
-    ventanaTabla.bind("<Control-P>", lambda event: BotonImprimirForzado())   
-   
-    # Importancia en la raiz
-    raiz.deiconify()
-    ventanaTabla.iconify()
-       
+    ventanaTablas('Taula origens',[0,0,1,300,50,"green"])
     # Cramos las labels dentro de la tabla
-    crea_espacios_info(frameTablaVOrigen,3,11)
-    ajusta_espacios_info(3,11,20,15,15)
-                 
+    crea_espacios_info(frameTabla,3,11)
+    ajusta_espacios_info(3,11,20,15,15)                 
     # Preparamos la salida
     menusBotones("Tornar",preMenuTablas,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Visitants per origen")
-
     # Datos a rellenar
     OpcionesQuestionario(["X2",LR1,"desde DIA:",LRR12],
                          ["X2",LR2,"MES:",LRR22],
@@ -6356,14 +5373,11 @@ def menuTablasVOrigen                               ():
                          ["X2",LR4,"fins DIA:",LRR42],
                          ["X2",LR5,"MES:",LRR52],
                          ["X2",LR6,"ANY:",LRR62])
-
     # Si aquí se pulsan las teclas CTRL + D se pone la fecha actual
     raiz.bind("<Control-d>", lambda event: FechaActualIncrustadaGru())
-    raiz.bind("<Control-D>", lambda event: FechaActualIncrustadaGru())
-    
+    raiz.bind("<Control-D>", lambda event: FechaActualIncrustadaGru())    
     # Foco en el año
     ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
-
     # Activa la tabla
     Boton4activado2(menuTablasVOrigenesMuestra)
 
