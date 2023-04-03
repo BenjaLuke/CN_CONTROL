@@ -105,7 +105,6 @@ stringBusqueda = ""                 # Definimos la variable que vamos a usar par
 
 global puntero                      # Definimos las variables que vamos a usar en el sector 3
 puntero = 0                         # Definimos el valor del puntero para cuando los listados som más largos que el espacio en pantalla
-
 # ------------------------------------- Ventanas extras -----------------------------------
 def ventanaAviso            (texto,color,pausa):                                    # Función que crea la ventana de aviso
     global aviso
@@ -450,7 +449,10 @@ def pulsaTeclaCombobox      (event):                                            
     
     global stringBusqueda                       # Creamos global la variable de lo escrito
     if raiz.focus_get() != LRR31:               # Si el foco no está sobre LRR31..
-        return                                                      # No hace nada
+        return                                  # No hace nada
+    letter = event.keysym                        # Obtener la tecla presionada
+    if  letter in ["Control_L", "Control_R", "Shift_L", "Shift_R", "Alt_L", "Alt_R"]:
+        return                                  # Si es una tecla de control, no hacer nada 
     letter = event.char                         # Obtener la tecla presionada
     # Si la tecla pulsada es espacio o vocal con tilde o letra o número...
     if  event.char.isalpha() or event.char == " " or event.char in "`,´,',À,È,Ì,Ò,Ù,Á,É,Í,Ú,Ó":    
@@ -465,8 +467,10 @@ def pulsaTeclaCombobox      (event):                                            
                 if value.startswith(stringBusqueda):                   
                     LRR31.set(value)            # Seleccionar la opción encontrada y salir del bucle
                     break                       # Salir del bucle
-    else:                                       # Si la tecla pulsada no es una letra o un espacio    
+    elif event.char == "\x08":                  # Si la tecla pulsada es la tecla de retroceso
         stringBusqueda = ""                     # Vaciar la cadena de búsqueda
+    else:                                        # Si la tecla pulsada no es ninguna de las anteriores
+        return                                  # No hacer nada 
 def cambiaPasaEncima        (boton, colorEncima, colorFuera):                       # Función que cambia el color del botón cuando el ratón pasa por encima 
     boton.bind("<Enter>", func=lambda e: boton.config(background=colorEncima))
     boton.bind("<Leave>", func=lambda e: boton.config(background=colorFuera)) 
@@ -4746,7 +4750,7 @@ def menuTablasVPerfil                               ():
     # Creamos ventana extra para esta tabla
     ventanaTablas('Taula perfils',[0,0,1,300,50,"green"])
     # Cramos las labels dentro de la tabla
-    crea_espacios_info(frameTablaVPerfil,3,11)
+    crea_espacios_info(frameTabla,3,11)
     ajusta_espacios_info(3,11,20,15,15)                 
     # Preparamos la salida
     menusBotones("Tornar",preMenuTablas,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Visitants per perfil")
@@ -7307,13 +7311,14 @@ for i in range (1,24):
     globals()['LRR%s' % (i) + '1'].grid(rowspan=1,columnspan=1)
     globals()['LRR%s' % (i) + '1'].config(font=("Helvetica", tamanyoFont),width = 30)
     globals()['LRR%s' % (i) + '1'].grid(padx=10, pady=10)
+    globals()['LRR%s' % (i) + '1'].bind('<Key>', pulsaTeclaCombobox)                 # Para que se actualice el combobox cuando se pulsa una tecla
     
     globals()['LRR%s' % (i) + '2'] = Entry(frameRellena)                                                                                                    
     globals()['LRR%s' % (i) + '2'].grid(rowspan=1,columnspan=1)
     globals()['LRR%s' % (i) + '2'].config(font=("Helvetica", tamanyoFont),width = 33)
     globals()['LRR%s' % (i) + '2'].grid(padx=10, pady=10)
 
-LRR31.bind('<Key>', pulsaTeclaCombobox)                 # Para que se actualice el combobox cuando se pulsa una tecla
+# LRR31.bind('<Key>', pulsaTeclaCombobox)                 # Para que se actualice el combobox cuando se pulsa una tecla
 
 LRR1 = Label(frameRellena,text="PENDIENTE")                                                                                      
 LRR1.grid(rowspan=1,columnspan=1)
