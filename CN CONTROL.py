@@ -448,29 +448,39 @@ def Saliendo                ():                                                 
 def pulsaTeclaCombobox      (event):                                                # Función que se ejecuta al pulsar una tecla en un combobox
     
     global stringBusqueda                       # Creamos global la variable de lo escrito
-    if raiz.focus_get() != LRR31:               # Si el foco no está sobre LRR31..
-        return                                  # No hace nada
+    lugar = raiz.focus_get()                    # Obtenemos el foco
     letter = event.keysym                        # Obtener la tecla presionada
     if  letter in ["Control_L", "Control_R", "Shift_L", "Shift_R", "Alt_L", "Alt_R"]:
         return                                  # Si es una tecla de control, no hacer nada 
     letter = event.char                         # Obtener la tecla presionada
     # Si la tecla pulsada es espacio o vocal con tilde o letra o número...
-    if  event.char.isalpha() or event.char == " " or event.char in "`,´,',À,È,Ì,Ò,Ù,Á,É,Í,Ú,Ó":    
-        try:
-            letter = letter.upper()             # Convertir la letra a mayúsculas
-        except:
-            pass                                # Si no se puede convertir a mayúsculas, no hacer nada        
+    if  event.char.isalpha() or event.char.isdigit() or event.char == " " or event.char in "`,´,',À,È,Ì,Ò,Ù,Á,É,Í,Ú,Ó":        
         stringBusqueda += letter                # Añadir la letra a la cadena de búsqueda
-        values = LRR31.cget('values')           # Obtener las opciones del combobox
+        values = lugar.cget('values')           # Obtener las opciones del combobox
         for value in values:                    # Buscar la primera opción que comience con la cadena de búsqueda
+                try:
+                    # stringBusqueda, todas en minúsculas
+                    stringBusqueda = stringBusqueda.lower()
+                    # stringbusqueda la primera en mayúsculas
+                    stringBusqueda = stringBusqueda[0].upper() + stringBusqueda[1:]
+                except:
+                    pass
                 # Si la opción comienza con la cadena de búsqueda...
                 if value.startswith(stringBusqueda):                   
-                    LRR31.set(value)            # Seleccionar la opción encontrada y salir del bucle
+                    lugar.set(value)            # Seleccionar la opción encontrada y salir del bucle
                     break                       # Salir del bucle
-    elif event.char == "\x08":                  # Si la tecla pulsada es la tecla de retroceso
+                else:
+                    try:
+                        # StringBusqueda todo en mayúsculas
+                        stringBusqueda = stringBusqueda.upper()
+                    except:
+                        pass
+                    if value.startswith(stringBusqueda):                   
+                        lugar.set(value)        # Seleccionar la opción encontrada y salir del bucle
+                        break                   # Salir del bucle                                          
+    else:                                       # Si no...
         stringBusqueda = ""                     # Vaciar la cadena de búsqueda
-    else:                                        # Si la tecla pulsada no es ninguna de las anteriores
-        return                                  # No hacer nada 
+
 def cambiaPasaEncima        (boton, colorEncima, colorFuera):                       # Función que cambia el color del botón cuando el ratón pasa por encima 
     boton.bind("<Enter>", func=lambda e: boton.config(background=colorEncima))
     boton.bind("<Leave>", func=lambda e: boton.config(background=colorFuera)) 
@@ -1197,7 +1207,7 @@ def OpcionesQuestionario    (*opciones):
         elif opcion[0] == "X1":
             opcion[3]['values'] = opcion[4]
             try:
-                if opcion[5] != False:
+                if opcion[5] != False and opcion[7] != False:
                     opcion[3].bind('<Key>', opcion[5])
             except:
                 pass
@@ -3736,7 +3746,7 @@ def menuRegistrosIntroducir                         ():
     
     OpcionesQuestionario(["1",LR1,"ID:",LRR1,idCorrecto],
                          ["X1",LR2,"DESCRIPCIÓ:",LRR21,descripciones],
-                         ["X1",LR3,"ORIGEN:",LRR31,origenes,pulsaTeclaCombobox],
+                         ["X1",LR3,"ORIGEN:",LRR31,origenes],
                          ["X1",LR4,"HORA:",LRR41,horas],
                          ["X1",LR5,"PRODUCTE:",LRR51,productosR],
                          ["X1",LR6,"FONT:",LRR61,fuentes],
@@ -3772,7 +3782,7 @@ def menuRegistrosConsultar                          ():
                          ["X2",LR2,"MES:",LRR22],
                          ["X2",LR3,"ANY:",LRR32],
                          ["X1",LR4,"DESCRIPCIÓ:",LRR41,descripciones],
-                         ["X1",LR5,"ORIGEN:",LRR51,origenes,False,"readandwrite"],
+                         ["X1",LR5,"ORIGEN:",LRR51,origenes],
                          ["X1",LR6,"desde HORA:",LRR61,horas],
                          ["X1",LR7,"fins a HORA:",LRR71,horas],
                          ["X1",LR8,"PRODUCTE:",LRR81,productosR],
