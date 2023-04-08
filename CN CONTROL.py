@@ -409,7 +409,7 @@ def cotejaCaracteres        (muralla,campo,label,*caracteres):                  
             muralla = True                                                          # Ponemos la variable muralla en True
             return muralla                                                          # Devolvemos el valor de la variable muralla
         return muralla                                                              # Devolvemos el valor de la variable muralla
-# ------------------------------ Funciones globales ----------------------
+# ------------------------------ Funciones copuy/paste y seguridad ----------------------
 def copia                   ():                                                     # Función que copia el contenido de una label o entry al portapapeles
     if raiz.focus_get() == None:    return      # Si no está en ninguna label o entry, no hace nada
     else:                                       # Si está en alguna label o entry, hace lo siguiente
@@ -461,8 +461,6 @@ def pulsaTeclaCombobox      (event):                                            
                 try:
                     # stringBusqueda, todas en minúsculas
                     stringBusqueda = stringBusqueda.lower()
-                    # stringbusqueda la primera en mayúsculas
-                    stringBusqueda = stringBusqueda[0].upper() + stringBusqueda[1:]
                 except:
                     pass
                 # Si la opción comienza con la cadena de búsqueda...
@@ -471,13 +469,23 @@ def pulsaTeclaCombobox      (event):                                            
                     break                       # Salir del bucle
                 else:
                     try:
-                        # StringBusqueda todo en mayúsculas
-                        stringBusqueda = stringBusqueda.upper()
+                        # stringbusqueda la primera en mayúsculas
+                        stringBusqueda = stringBusqueda[0].upper() + stringBusqueda[1:]
                     except:
                         pass
+                    # Si la opción comienza con la cadena de búsqueda...
                     if value.startswith(stringBusqueda):                   
-                        lugar.set(value)        # Seleccionar la opción encontrada y salir del bucle
-                        break                   # Salir del bucle                                          
+                        lugar.set(value)            # Seleccionar la opción encontrada y salir del bucle
+                        break                       # Salir del bucle
+                    else:
+                        try:
+                            # StringBusqueda todo en mayúsculas
+                            stringBusqueda = stringBusqueda.upper()
+                        except:
+                            pass
+                        if value.startswith(stringBusqueda):                   
+                            lugar.set(value)        # Seleccionar la opción encontrada y salir del bucle
+                            break                   # Salir del bucle                                          
     else:                                       # Si no...
         stringBusqueda = ""                     # Vaciar la cadena de búsqueda
 
@@ -548,7 +556,7 @@ def RepintaTodoTextoTamanyo ():
     LRR6.config(font=("Helvetica", tamanyoFont))
     LRR73.config(font=("Helvetica", tamanyoFont))
     LRR213.config(font=("Helvetica", tamanyoFont))
-
+# ------------------------ Funciones sobre las notas----------------------
 def bindNotasEvento         (text_widget):
     # Enlazar el evento <FocusIn>
     text_widget.bind("<FocusIn>", lambda event: notasAmpliacion())
@@ -613,7 +621,7 @@ def FechaActualIncrustadaGru():
     LRR42.insert(0,"31")
     LRR52.insert(0,mesGlobal)
     LRR62.insert(0,anyoGlobal)
-
+# ------------------------ Funciones sobre botones----------------------
 def ActivaBotonPyFocus      (valor,lineaQ):
     valor.focus()
         
@@ -641,7 +649,7 @@ def BotonPrimeroQNada       ():
     # Si pulsamos la tecla Q  no hace nada
     raiz.bind("<Control-q>", lambda event: regresaSinNada())
     raiz.bind("<Control-Q>", lambda event: regresaSinNada())
-    
+# ------------------------ Funciones de limpieza y listas----------------------    
 def LimpiaElegibles         ():
     
     for i in range(1,24):
