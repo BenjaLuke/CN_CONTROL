@@ -38,18 +38,18 @@ logo = PhotoImage(file="image/logo.png")                # Carga laimagen del log
 logo = logo.subsample(8, 8)                             # Lo colocamos en raiz utilizando la transparencia
 Label(raiz, image=logo, bg="#b7b493").place(x=30, y=20) # Lo colocamos en raiz utilizando la transparencia
         
-raiz.bind("<Control-r>", lambda event: menuRegistrosIntroducir())       # Si en cualquier momento se pulsan las teclas CTRL + R se va al menu de registro
-raiz.bind("<Control-R>", lambda event: menuRegistrosIntroducir())
+raiz.bind("<Control-r>", lambda event: menuRegistrosIntroducir("Yes"))  # Si en cualquier momento se pulsan las teclas CTRL + R se va al menu de registro
+raiz.bind("<Control-R>", lambda event: menuRegistrosIntroducir("Yes"))
 raiz.bind("<Control-c>", lambda event: copia())                         # Si en cualquier momento se pulsa las teclas CTRL + C intenta copiar al portapapeles
 raiz.bind("<Control-C>", lambda event: copia())
 raiz.bind("<Control-v>", lambda event: paste())                         # Si en cualquier momento se pulsan las teclas CTRL + V intenta copiar lo del portapapeles
 raiz.bind("<Control-V>", lambda event: paste())
 raiz.bind("<Control-e>", lambda event: paste())                         # Si en cualquier momento se pulsan las teclas CTRL + V se va al menu de ventas
 raiz.bind("<Control-E>", lambda event: paste())
-raiz.bind("<Control-i>", lambda event: menuIncidenciasIntroducir())     # Si en cualquier momento se pulsan las teclas CTRL + I se va al menu de incidencias
-raiz.bind("<Control-I>", lambda event: menuIncidenciasIntroducir()) 
-raiz.bind("<Control-o>", lambda event: menuIncidenciasConsultar())      # Si en cualquier momento se pulsan las teclas CTRL + O se va al menu de consultar incidencias
-raiz.bind("<Control-O>", lambda event: menuIncidenciasConsultar())
+raiz.bind("<Control-i>", lambda event: menuIncidenciasIntroducir("Yes"))# Si en cualquier momento se pulsan las teclas CTRL + I se va al menu de incidencias
+raiz.bind("<Control-I>", lambda event: menuIncidenciasIntroducir("Yes")) 
+raiz.bind("<Control-o>", lambda event: menuIncidenciasConsultar("Yes")) # Si en cualquier momento se pulsan las teclas CTRL + O se va al menu de consultar incidencias
+raiz.bind("<Control-O>", lambda event: menuIncidenciasConsultar("Yes"))
 raiz.bind("<Control-u>", lambda event: cambioUsuario1())                # Si en cualquier momento se pulsan las teclas CTRL + U se va al menu de cambio de usuario
 raiz.bind("<Control-U>", lambda event: cambioUsuario1())
 raiz.bind("<Control-n>", lambda event: LimpiaElegibles())               # Si en cualquier momento se pulsan las teclas CTRL + N se limpian las celdas de texto
@@ -76,8 +76,8 @@ global ventanaTabla,frameTabla
 global  DatosUsuario, usuarioReal, usuarioNivel                               
 DatosUsuario, usuarioReal, usuarioNivel = (), "No s'ha identificat", "0"    
 # Variables de control de menús
-global avisoint, EstamosEnIncidencias, EstamosEnRegistros, EstamosEnProforma, EstamosEnBloqueos, EstamosEnProductos, EstamosEnClientes, EstamosEnUsuarios, EstamosEnIntroducir                                                                      
-avisoint, EstamosEnIncidencias, EstamosEnRegistros, EstamosEnProforma, EstamosEnBloqueos, EstamosEnProductos, EstamosEnClientes, EstamosEnUsuarios, EstamosEnIntroducir = True, False, False, False, False, False, False, False, False              
+global avisoint, EstamosEnIncidencias, EstamosEnRegistros, EstamosEnProforma, EstamosEnBloqueos, EstamosEnProductos, EstamosEnClientes, EstamosEnUsuarios, EstamosEnIntroducir,PrimeraVez                                                                      
+avisoint, EstamosEnIncidencias, EstamosEnRegistros, EstamosEnProforma, EstamosEnBloqueos, EstamosEnProductos, EstamosEnClientes, EstamosEnUsuarios, EstamosEnIntroducir,PrimeraVez = True, False, False, False, False, False, False, False, False,True              
 # Variable sobre el tamaño de la letra
 global TamanyoLetra                 
 TamanyoLetra = 0                    
@@ -579,16 +579,19 @@ def DaColorAFecha           (color):
     textBarra2.config(bg = color)               # Cambia el color de la label textBarra2
     textSpace.config(bg = color)                # Cambia el color de la label textSpace
 def MiraFecha               (uno):
-
+    global PrimeraVez
     # Comprueba si diafecha, mesfecha y anyofecha contienen las fechas del dia de hoy
-    if diaFecha.get() == diaGlobal and mesFecha.get() == mesGlobal and anyoFecha.get() == anyoGlobal:        
-        DaColorAFecha("#b7b493")                # Cambia el color de la label frameFecha a verde
-    else:                                       # Si no es el dia de hoy
-        if frameFecha.cget("bg") != "red":      # mira si el color de la label frameFecha es rojo
-            DaColorAFecha("red")                # Si no es rojo, lo pone rojo
-        else:                                   # Si es rojo
-            DaColorAFecha("yellow")             # lo pone amarillo
-        frameRellena.after(1000, MiraFecha, 1)  # Vuelve a ejecutar la funcion MiraFecha pasados 1 segundos        
+    if diaFecha.get() == diaGlobal and mesFecha.get() == mesGlobal and anyoFecha.get() == anyoGlobal:
+        DaColorAFecha("#b7b493")                                # Cambia el color de la label frameFecha a verde
+        PrimeraVez = True                                       # Pone PrimeraVez a True
+    else:                                                       # Si no es el dia de hoy
+        if frameFecha.cget("bg") != "red":                      # mira si el color de la label frameFecha es rojo
+            DaColorAFecha("red")                                # Si no es rojo, lo pone rojo
+        else:                                                   # Si es rojo
+            DaColorAFecha("yellow")                             # lo pone amarillo
+        if uno == True or PrimeraVez == True:                   # Si uno es True o PrimeraVez es True
+            frameRellena.after(1000, MiraFecha, True)           # Vuelve a ejecutar la funcion MiraFecha pasado 1 segundo
+            PrimeraVez = False                                  # Pone PrimeraVez a False
 def FechaActualIncrustada   ():
     
     # Introducimos el valor de la fecha actual en los campos de fecha
@@ -3644,15 +3647,15 @@ def menuRegistros                               ():
     LimpiaLabelsRellena()
     menusBotones("Tornar",MenuInicial,"Introduir (R)",menuRegistrosIntroducir,"Consultar",menuRegistrosConsultar,"Mirar/Corregir",menuRegistroCorregir,"Eliminar",menuRegistroEliminar)
     BM1.focus()            
-def menuRegistrosIntroducir                         ():
-    
-    global EstamosEnIntroducir
-    EstamosEnIntroducir = True
-
-    ajusta_espacios_info(10,22,7,1,12,20,19,7,16,16,1,1)
-    textMenu.config(text = "MENU REGISTRE")            
-    global stringBusqueda
-    stringBusqueda = ""
+def menuRegistrosIntroducir                         (modo=None):
+    if modo != None:                                        # Si vinimos pulsando CTRL+R
+        recuperaFechaActual()                               # Ponemos la fecha actual
+    global EstamosEnIntroducir                              # Globalizamos la variable
+    EstamosEnIntroducir = True                              # Ponemos la variable a True
+    ajusta_espacios_info(10,22,7,1,12,20,19,7,16,16,1,1)    # Ajustamos los espacios
+    textMenu.config(text = "MENU REGISTRE")                 # Ponemos el texto del menú        
+    global stringBusqueda                                   # Globalizamos la variable
+    stringBusqueda = ""                                     # Ponemos la variable a ""
     def menuRegistrosIntroducirIntroduce ():
         
         global stringBusqueda 
@@ -5533,8 +5536,10 @@ def menuIncidenciasIntroducirPre                    ():
     if int(usuarioNivel) >= 3:
         return
     menuIncidenciasIntroducir()    
-def menuIncidenciasIntroducir                       ():
+def menuIncidenciasIntroducir                       (modo=None):
 
+    if modo != None:                                        # Si vinimos pulsando CTRL+I
+        recuperaFechaActual()                               # Ponemos la fecha actual
     global EstamosEnIntroducir
     EstamosEnIntroducir = True
     EstamosEnIncidencias = True
@@ -5675,8 +5680,10 @@ def menuIncidenciasIntroducir                       ():
         return  
     notasAmpliacion()                                                               # Mirmaos si hay que ampliar el blog de notas
     ActivaBotonPyFocus(LRR22,BotonPrimeroQ22)                                       # Activa el boton de la fecha
-def menuIncidenciasConsultar                        ():
+def menuIncidenciasConsultar                        (modo=None):
 
+    if modo != None:                                        # Si vinimos pulsando CTRL+O
+        recuperaFechaActual()                               # Ponemos la fecha actual
     global EstamosEnIntroducir
     EstamosEnIntroducir = False
 
@@ -7182,7 +7189,7 @@ nomUsuario.config(padx = 5,bg= "#b7b493",fg="#FFFFFF", anchor=W, font=("Helvetic
 # ------------------------------- Crea Fecha -----------------------------------
 
 def recuperaFechaActual():
-           
+    print("Ha entrado")      
     fecha = datetime.now()
     diaGlobal = str(fecha.day)
     #if int(diaGlobal) < 10: diaGlobal = "0" + diaGlobal
