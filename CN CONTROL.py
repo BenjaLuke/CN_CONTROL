@@ -1058,7 +1058,6 @@ def cambioUsuario           ():
     cargaUsuario()
 
 def BotonValidarForzado     ():
-    
     BB4.invoke()
 def BotonImprimirForzado    ():
     
@@ -1282,7 +1281,7 @@ def query_registros_busca   ():
                 "SELECT *, oid FROM bd_registros WHERE ((FECHA LIKE '" + v3 + "/%' or '" + v3 + "' = '') AND (FECHA LIKE '%/" + v2 + "/%' or '" + v2 + "' = '') AND (FECHA LIKE '%/" + v1 + "' or '" + v1 + "' = '') AND (USUARIO = '" + v11 + "' or '" + v11 + "' = '') AND (DESCRIPCION = '" + v5 + "' or '" + v5 + "' = '') AND (ORIGEN = '" + v6 + "' or '" + v6 + "' = '') AND (HORA >= '" + v7 + "' or '" + v7 + "' = '')  AND (HORA <= '" + v8 + "' or '" + v8 + "' = '')  AND (PRODUCTO = '" + v9 + "' or '" + v9 + "' = '')   AND (FUENTE = '" + v10 + "' or '" + v10 + "' = '')) ORDER BY FECHA",
                 8,
                 "EstamosEnRegistros",
-                "ID","","DATA","DESCRIPCIÓ","ORIGEN","HORA","PRODUCTE","FONT","")
+                "ID(L)","","DATA","DESCRIPCIÓ","ORIGEN","HORA","PRODUCTE","FONT","")
 def registroCorrigeUno      ():
 
     global val1,val2,diaGlobal,mesGlobal,anyoGlobal
@@ -1400,7 +1399,7 @@ def registroBorraUno        ():
     busqueda = "SELECT *, oid FROM bd_registros WHERE (oid = '" + LRR12.get() + "')"
     columnas = 8
     global puntero
-    query(base_datos,busqueda,columnas,"ID","","DATA","DESCRIPCIÓ","ORIGEN","HORA","PRODUCTE","FONT","")
+    query(base_datos,busqueda,columnas,"ID(L)","","DATA","DESCRIPCIÓ","ORIGEN","HORA","PRODUCTE","FONT","")
     
     val1 = LRR12.get()          # Recoge el valor del id
     if val1 == "":  return      # si no ha puesto ningún id, no hará nada
@@ -1418,7 +1417,7 @@ def del_register_yes        ():
                 "SELECT *, oid FROM bd_registros ORDER BY oid DESC",
                 8,
                 "EstamosEnRegistros",
-                "ID","","DATA","DESCRIPCIÓ","ORIGEN","HORA","PRODUCTE","FONT","")
+                "ID(L)","","DATA","DESCRIPCIÓ","ORIGEN","HORA","PRODUCTE","FONT","")
     LRR12.focus()                                                       # Foco
 
 def query_incidencias_busca ():
@@ -1437,7 +1436,7 @@ def query_incidencias_busca ():
                 "SELECT *, oid FROM bd_incidencias WHERE ((CLIENTE = '" + v1 + "' or '" + v1 + "' = '') AND (FECHA LIKE '" + v2 + "/%' or '" + v2 + "' = '') AND (FECHA LIKE '%/" + v3 + "/%' or '" + v3 + "' = '') AND (FECHA LIKE '%/" + v4 + "' or '" + v4 + "' = '') AND (PRODUCTO = '" + v5 + "' or '" + v5 + "' = '') AND (IDIOMA = '" + v6 + "' or '" + v6 + "' = '') AND (AGENDADO = '" + v7 + "' or '" + v7 + "' = '') AND (FECHA_REV LIKE '" + v8 + "/%' or '" + v8 + "' = '') AND (FECHA_REV LIKE '%/" + v9 + "/%' or '" + v9 + "' = '')  AND (FECHA_REV LIKE '%/" + v10 + "' or '" + v10 + "' = '') AND (ESTADO = '" + v12 + "' or '" + v12 + "' = '') AND (NOTAS = '" + v11 + "' or '" + v11 + "' = '') AND (PAGAT = '" + v13 + "' OR '" + v13 + "' = '') AND (MAIL_EXTRA = '" + v14 + "' OR '" + v14 + "' = '')) ORDER BY FECHA, HORA",
                 8,
                 "EstamosEnIncidencias",
-                "ID","DATA","HORA","PAX","PRODUCTE","IDIOMA","ESTAT","CLIENT","PAGAT")
+                "ID(L)","DATA","HORA","PAX","PRODUCTE","IDIOMA","ESTAT","CLIENT","PAGAT")
 def incidenciasCorrigeUno   ():
 
     global val1, val2, diaGlobal, mesGlobal, anyoGlobal, usuarioNivel
@@ -1627,7 +1626,7 @@ def incidenciasBorraUno     ():
     busqueda = "SELECT *, oid FROM bd_incidencias WHERE (oid = '" + LRR12.get() + "')"
     columnas = 8
     global puntero
-    query(base_datos,busqueda,columnas,"ID","DATA","HORA","PAX","PRODUCTE","IDIOMA","ESTAT","CLIENT","PAGAT")
+    query(base_datos,busqueda,columnas,"ID(L)","DATA","HORA","PAX","PRODUCTE","IDIOMA","ESTAT","CLIENT","PAGAT")
     
     val1 = LRR12.get()
 
@@ -1651,7 +1650,7 @@ def del_incidence_yes       ():
                 "SELECT *, oid FROM bd_incidencias ORDER BY oid DESC",
                 8,
                 "EstamosEnIncidencias",
-                "ID","DATA","HORA","PAX","PRODUCTE","IDIOMA","ESTAT","CLIENT","PAGAT")         
+                "ID(L)","DATA","HORA","PAX","PRODUCTE","IDIOMA","ESTAT","CLIENT","PAGAT")         
     LRR12.focus()                                                       # Foco
 
 def ProformaProduceUno      ():
@@ -1740,7 +1739,7 @@ def query_proforma_busca    ():
                 "SELECT *, oid FROM bd_Proforma WHERE ((NUM_PRO = '" + v1 + "' or '" + v1 + "' = '') AND (CLIENTE ='" + v2 + "' or '" + v2 + "' = '') AND ((PRECIO_1 = '" + v7 + "' or '" + v7 + "' = '') OR (PRECIO_2 = '" + v7 + "' OR '" + v7 + "' = '')) AND  ((CANT_1 = '" + v6 + "' OR '" + v6 + "' = '') OR (CANT_2 = '" + v6 + "' or '" + v6 + "' = '')) AND (FECHA LIKE '" + v3 + "/%' or '" + v3 + "' = '') AND (FECHA LIKE '%/" + v4 + "/%' or '" + v4 + "' = '') AND (FECHA LIKE '%/" + v5 + "' or '" + v5 + "' = '')) ORDER BY NUM_PRO DESC",
                 8,
                 "EstamosEnProforma",
-                "ID","DATA","","PROFORMA","CLIENT","QUANTITAT","CONCEPTE","PREU","")
+                "ID(L)","DATA","","PROFORMA","CLIENT","QUANTITAT","CONCEPTE","PREU","")
 def ProformaCorrigeUno      ():
     
     global val1
@@ -2078,7 +2077,7 @@ def ProformaBorraUno        ():
     busqueda = "SELECT *, oid FROM bd_proforma WHERE (oid = '" + LRR12.get() + "')"
     columnas = 8
     global puntero
-    query(base_datos,busqueda,columnas,"ID","DATA","","PROFORMA","CLIENT","QUANTITAT","CONCEPTE","PREU","")
+    query(base_datos,busqueda,columnas,"ID(L)","DATA","","PROFORMA","CLIENT","QUANTITAT","CONCEPTE","PREU","")
     
     val1 = LRR12.get()
 
@@ -2098,7 +2097,7 @@ def del_proform_yes         ():
                 "SELECT *, oid FROM bd_proforma ORDER BY NUM_PRO",
                 8,
                 "EstamosEnProformas",
-                "ID","DATA","","PROFORMA","CLIENT","QUANTITAT","CONCEPTE","PREU","")              
+                "ID(L)","DATA","","PROFORMA","CLIENT","QUANTITAT","CONCEPTE","PREU","")              
     LRR12.focus()                                                       # Foco
 
 def query_bloqueos          ():
@@ -2120,7 +2119,7 @@ def query_bloqueos_busca    ():
                 "SELECT *, oid FROM bd_bloqueos WHERE (FECHA = '" + v2 + "')",
                 8,
                 "EstamosEnBloqueos",
-                "ID","DATA","DESDE","FINS","","","","","")
+                "ID(L)","DATA","DESDE","FINS","","","","","")
 def bloqueoBorraUno         ():
 
     global v2
@@ -2173,7 +2172,7 @@ def bloqueoBorraUno         ():
     busqueda = "SELECT *, oid FROM bd_bloqueos WHERE (FECHA = '" + LRR12.get() + "')"
     columnas = 8
     global puntero
-    query(base_datos,busqueda,columnas,"ID","DATA","DESDE","FINS","","","","","")
+    query(base_datos,busqueda,columnas,"ID(L)","DATA","DESDE","FINS","","","","","")
     
     # Ventana de aviso
     ventanaSeleccion("Aixó esborrarà el bloqueig del"+ v2 +", si existeix.","red",del_block_yes)
@@ -2196,7 +2195,7 @@ def query_productos_busca   ():
                 "SELECT *, oid FROM bd_productos WHERE ((NOM = '" + v1 + "' or '" + v1 + "' = '') AND (PREU_HABITUAL = '" + v2 + "' or '" + v2 + "' = '') AND (PREU_ACTUAL = '" + v3 + "' or '" + v3 + "' = '') AND (REGISTRABLE = '" + v4 + "' or '" + v4 + "' = '')) ORDER BY NOM",
                 4,
                 "EstamosEnProductos",
-                "ID","NOM","PREU REAL","PREU ACTUAL","TIPUS")
+                "ID(L)","NOM","PREU REAL","PREU ACTUAL","TIPUS")
 def productoCorrigeUno      ():
 
     global val1                                 # Hace global el valor de val1
@@ -2265,7 +2264,7 @@ def productoBorraUno        ():
     busqueda = "SELECT *, oid FROM bd_productos WHERE (oid = '" + LRR12.get() + "')"
     columnas = 4
     global puntero
-    query(base_datos,busqueda,columnas,"ID","NOM","PREU REAL","PREU ACTUAL","TIPUS")
+    query(base_datos,busqueda,columnas,"ID(L)","NOM","PREU REAL","PREU ACTUAL","TIPUS")
 
     val1 = LRR12.get()
 
@@ -2292,7 +2291,7 @@ def del_product_yes         ():
                 "SELECT *, oid FROM bd_productos ORDER BY NOM",
                 4,
                 "EstamosEnProductos",
-                "ID","NOM","PREU REAL","PREU ACTUAL","TIPUS")              
+                "ID(L)","NOM","PREU REAL","PREU ACTUAL","TIPUS")              
     LRR12.focus()                                                       # Foco
 
 def query_clientes_busca    ():
@@ -2305,7 +2304,7 @@ def query_clientes_busca    ():
                 "SELECT *, oid FROM bd_clientes WHERE ((NOM = '" + v1 + "' or '" + v1 + "' = '') AND (TELEFONO = '" + v2 + "' or '" + v2 + "' = '') AND (MAIL = '" + v3 + "' or '" + v3 + "' = '') AND (NIFCIF = '" + v4 + "' or '" + v4 + "' = '')) ORDER BY NOM",
                 7,
                 "EstamosEnClientes",
-                "ID","NOM","","","CIUTAT/PAIS","TELÈFON","MAIL","NIF/CIF")
+                "ID(L)","NOM","","","CIUTAT/PAIS","TELÈFON","MAIL","NIF/CIF")
 def clienteCorrigeUno       ():
 
     global val1                                                         # Hace global la variable val1
@@ -2385,7 +2384,7 @@ def clienteBorraUno         ():
     columnas = 7                                        # Número de columnas
     global puntero                                      # Hace global la variable puntero
     # Llama a la función query
-    query(base_datos,busqueda,columnas,"ID","NOM","","","CIUTAT/PAIS","TELÈFON","MAIL","NIF/CIF")
+    query(base_datos,busqueda,columnas,"ID(L)","NOM","","","CIUTAT/PAIS","TELÈFON","MAIL","NIF/CIF")
     val1 = LRR12.get()                                  # Rescatamos el valor de la caja
     if val1 == "":  return                              # si no ha puesto ningún id, no hará nada
     # Ventana de aviso
@@ -2405,7 +2404,7 @@ def del_client_yes          ():
                 "SELECT *, oid FROM bd_clientes ORDER BY NOM",
                 7,
                 "EstamosEnClientes",
-                "ID","NOM","","","CIUTAT/PAIS","TELÈFON","MAIL","NIF/CIF")             
+                "ID(L)","NOM","","","CIUTAT/PAIS","TELÈFON","MAIL","NIF/CIF")             
     LRR12.focus()                                                       # Foco
 
 def query_usuarios_busca    ():
@@ -2417,7 +2416,7 @@ def query_usuarios_busca    ():
                 "SELECT *, oid FROM bd_usuarios WHERE ((NOM = '" + v1 + "' or '" + v1 + "' = '') AND (NIVEL = '" + v2 + "' or '" + v2 + "' = '') AND (INGLES = '" + v3 + "' or '" + v3 + "' = '') AND (CASTELLANO = '" + v4 + "' or '" + v4 + "' = '') AND (CATALAN = '" + v5 + "' or '" + v5 + "' = '') AND (FRANCES = '" + v6 + "' or '" + v6 + "' = '')) ORDER BY NOM",
                 8,
                 "EstamosEnUsuarios",
-                "ID","NOM","CLAU","NIVELL","ANGLÈS","CASTELLÀ"," CATALÀ","FRANCÈS","HORES")
+                "ID(L)","NOM","CLAU","NIVELL","ANGLÈS","CASTELLÀ"," CATALÀ","FRANCÈS","HORES")
 def usuariosCorrigeUno      ():
 
     global val1                                                     # Variable global para el id del registro a modificar
@@ -2511,7 +2510,7 @@ def usuariosBorraUno        ():
     global puntero                                                      # Variable global
     # Llamamos a la función que crea la tabla
     query(base_datos,busqueda,columnas,
-          "ID","NOM","CLAU","NIVELL","ANGLÈS","CASTELLÀ"," CATALÀ","FRANCÈS","HORES")
+          "ID(L)","NOM","CLAU","NIVELL","ANGLÈS","CASTELLÀ"," CATALÀ","FRANCÈS","HORES")
     val1 = LRR12.get()                                                  # Rescata el valor de la caja
     if val1 == "":  return                                              # si no ha puesto ningún id, no hará nada
     # Ventana de aviso
@@ -2527,7 +2526,7 @@ def del_user_yes            ():
                 "SELECT *, oid FROM bd_usuarios ORDER BY NOM",
                 8,
                 "EstamosEnUsuarios",
-                "ID","NOM","CLAU","NIVELL","ANGLÈS","CASTELLÀ","CATALÀ","FRANCÈS","HORES")          
+                "ID(L)","NOM","CLAU","NIVELL","ANGLÈS","CASTELLÀ","CATALÀ","FRANCÈS","HORES")          
     LRR12.focus()                                                       # Foco
 
 def Registros_Todo          (num):
@@ -3599,8 +3598,8 @@ def MenuInicial                             ():
     if int(usuarioNivel) == 0:
         return
     
-    textMenu.config(text = "MENU PRINCIPAL") 
-    menusBotones("Tornar",cambioUsuario,"Registre",menuRegistros,"Venda",menuVentas,"Taules",menuTablas,"Arqueijos",menuArqueos,"Stock",menuStocks,"Incidències/grups",menuIncidencias,"Calendaris",menuCalendarios,"Dades",menuDatos,"Seguretat",menuSeguridad)
+    textMenu.config(text = "MENU PRINCIPAL (M)") 
+    menusBotones("Tornar(<)",cambioUsuario,"Registre",menuRegistros,"Venda",menuVentas,"Taules",menuTablas,"Arqueijos",menuArqueos,"Stock",menuStocks,"Incidències/grups",menuIncidencias,"Calendaris",menuCalendarios,"Dades",menuDatos,"Seguretat",menuSeguridad)
     
     # Nos enfocamos en raiz
     raiz.deiconify()
@@ -3643,9 +3642,9 @@ def menuRegistros                               ():
     global puntero
     puntero = 0
     
-    textMenu.config(text = "MENU REGISTRE")            
+    textMenu.config(text = "MENU REGISTRE (M)")            
     LimpiaLabelsRellena()
-    menusBotones("Tornar",MenuInicial,"Introduir (R)",menuRegistrosIntroducir,"Consultar",menuRegistrosConsultar,"Mirar/Corregir",menuRegistroCorregir,"Eliminar",menuRegistroEliminar)
+    menusBotones("Tornar(<)",MenuInicial,"Introduir (R)",menuRegistrosIntroducir,"Consultar",menuRegistrosConsultar,"Mirar/Corregir",menuRegistroCorregir,"Eliminar",menuRegistroEliminar)
     BM1.focus()            
 def menuRegistrosIntroducir                         (modo=None):
     if modo != None:                                        # Si vinimos pulsando CTRL+R
@@ -3653,7 +3652,7 @@ def menuRegistrosIntroducir                         (modo=None):
     global EstamosEnIntroducir                              # Globalizamos la variable
     EstamosEnIntroducir = True                              # Ponemos la variable a True
     ajusta_espacios_info(10,22,7,1,12,20,19,7,16,16,1,1)    # Ajustamos los espacios
-    textMenu.config(text = "MENU REGISTRE")                 # Ponemos el texto del menú        
+    textMenu.config(text = "MENU REGISTRE (M)")             # Ponemos el texto del menú        
     global stringBusqueda                                   # Globalizamos la variable
     stringBusqueda = ""                                     # Ponemos la variable a ""
     def menuRegistrosIntroducirIntroduce ():
@@ -3702,7 +3701,7 @@ def menuRegistrosIntroducir                         (modo=None):
                     "SELECT *, oid FROM bd_registros ORDER BY FECHA DESC, oid DESC",
                     8,
                     "EstamosEnRegistros",
-                    "ID","","DATA","DESCRIPCIÓ","ORIGEN","HORA","PRODUCTE","FONT","")        
+                    "ID(L)","","DATA","DESCRIPCIÓ","ORIGEN","HORA","PRODUCTE","FONT","")        
         
         LR23.config(text = "")                                                          # Limpia posibles mensajes anteriores innecesarios
         base_datos_datos = sqlite3.connect('databases/basesDeDatosRegistros.db')        # Crea la base de datos o conecta con ella
@@ -3752,11 +3751,11 @@ def menuRegistrosIntroducir                         (modo=None):
     # Cerrar conexion 
     base_datos_datos.close() 
              
-    menusBotones("Tornar",menuRegistros,"Introduir (R)")
+    menusBotones("Tornar(<)",menuRegistros,"Introduir (R)")
     LimpiaLabelsRellena()
     
     OpcionesQuestionario(["1",LR1,"ID:",LRR1,idCorrecto],
-                         ["X1",LR2,"DESCRIPCIÓ:",LRR21,descripciones],
+                         ["X1",LR2,"DESCRIPCIÓ(Q):",LRR21,descripciones],
                          ["X1",LR3,"ORIGEN:",LRR31,origenes],
                          ["X1",LR4,"HORA:",LRR41,horas],
                          ["X1",LR5,"PRODUCTE:",LRR51,productosR],
@@ -3779,7 +3778,7 @@ def menuRegistrosIntroducir                         (modo=None):
                 "SELECT *, oid FROM bd_registros ORDER BY FECHA DESC, oid DESC",
                 8,
                 "EstamosEnRegistros",
-                "ID","","DATA","DESCRIPCIÓ","ORIGEN","HORA","PRODUCTE","FONT","")        
+                "ID(L)","","DATA","DESCRIPCIÓ","ORIGEN","HORA","PRODUCTE","FONT","")        
     ActivaBotonPyFocus(LRR21,BotonPrimeroQ21) 
 def menuRegistrosConsultar                          ():
 
@@ -3787,9 +3786,9 @@ def menuRegistrosConsultar                          ():
     EstamosEnIntroducir = False
            
     LimpiaLabelsRellena()    
-    menusBotones("Tornar",menuRegistros,"",regresaSinNada,"Consultar")
+    menusBotones("Tornar(<)",menuRegistros,"",regresaSinNada,"Consultar")
 
-    OpcionesQuestionario(["X2",LR1,"DIA:",LRR12],
+    OpcionesQuestionario(["X2",LR1,"DIA(Q):",LRR12],
                          ["X2",LR2,"MES:",LRR22],
                          ["X2",LR3,"ANY:",LRR32],
                          ["X1",LR4,"DESCRIPCIÓ:",LRR41,descripciones],
@@ -3820,9 +3819,9 @@ def menuRegistroCorregir                            ():
     anyoGlobaltk.set(anyoGlobal) 
        
     LimpiaLabelsRellena()
-    menusBotones("Tornar",menuRegistros,"",regresaSinNada,"",regresaSinNada,"Mirar/Corregir")
+    menusBotones("Tornar(<)",menuRegistros,"",regresaSinNada,"",regresaSinNada,"Mirar/Corregir")
     
-    OpcionesQuestionario(["X2",LR1,"ID:",LRR12])
+    OpcionesQuestionario(["X2",LR1,"ID(Q):",LRR12])
     Boton4activado2(registroCorrigeUno)
     ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
 def menuRegistroEliminar                            ():
@@ -3831,8 +3830,8 @@ def menuRegistroEliminar                            ():
     EstamosEnIntroducir = True
         
     LimpiaLabelsRellena()
-    menusBotones("Tornar",menuRegistros,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Eliminar")
-    OpcionesQuestionario(["X2",LR1,"ID:",LRR12])
+    menusBotones("Tornar(<)",menuRegistros,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Eliminar")
+    OpcionesQuestionario(["X2",LR1,"ID(Q):",LRR12])
     Boton4activado2(registroBorraUno)
     ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
 
@@ -3849,14 +3848,14 @@ def menuVentas                                  ():
     raiz.bind("<Control-Q>", lambda event: regresaSinNada())    
     
     LimpiaLabelsRellena()
-    textMenu.config(text = "MENU VENDES")   
-    menusBotones("Tornar",MenuInicial,"Introduir (E)",menuVentasIntroducir,"Consultar",menuVentasConsultar,"Mirar/Corregir",menuVentasCorregir,"Eliminar",menuVentasEliminar)
+    textMenu.config(text = "MENU VENDES (M)")   
+    menusBotones("Tornar(<)",MenuInicial,"Introduir (E)",menuVentasIntroducir,"Consultar",menuVentasConsultar,"Mirar/Corregir",menuVentasCorregir,"Eliminar",menuVentasEliminar)
     BM1.focus()
 def menuVentasIntroducir                            ():
-    textMenu.config(text = "MENU VENDES")   
+    textMenu.config(text = "MENU VENDES (M)")   
 
     LimpiaLabelsRellena()
-    menusBotones("Tornar",menuVentas,"Introduir (E)")
+    menusBotones("Tornar(<)",menuVentas,"Introduir (E)")
     
     LR1.config(text = "ID:")
     LRR1.grid(row=0, column=1)  
@@ -3882,7 +3881,7 @@ def menuVentasIntroducir                            ():
 def menuVentasConsultar                             ():
     
     LimpiaLabelsRellena()    
-    menusBotones("Tornar",menuVentas,"",regresaSinNada,"Consultar")
+    menusBotones("Tornar(<)",menuVentas,"",regresaSinNada,"Consultar")
 
     LR1.config(text = "inici DIA:")
     LRR12.grid(row=0, column=1)
@@ -3911,7 +3910,7 @@ def menuVentasConsultar                             ():
 def menuVentasCorregir                              ():
 
     LimpiaLabelsRellena()
-    menusBotones("Tornar",menuVentas,"",regresaSinNada,"",regresaSinNada,"Mirar/Corregir")
+    menusBotones("Tornar(<)",menuVentas,"",regresaSinNada,"",regresaSinNada,"Mirar/Corregir")
     
     LR1.config(text = "ID:")
     LRR12.grid(row=0, column=1)
@@ -3922,7 +3921,7 @@ def menuVentasCorregir                              ():
 def menuVentasEliminar                              ():
 
     LimpiaLabelsRellena()
-    menusBotones("Tornar",menuVentas,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Eliminar")
+    menusBotones("Tornar(<)",menuVentas,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Eliminar")
     
     LR1.config(text = "ID:")
     LRR12.grid(row=0, column=1)
@@ -3943,8 +3942,8 @@ def menuTablas                                  ():
 
         return
     LimpiaLabelsRellena()
-    textMenu.config(text = "MENU TAULES")   
-    menusBotones("Tornar",MenuInicial,"Pax",menuTablasPax,"Visitants per zona",menuTablasVGrupo,"Visitants per províncies",menuTablasVProvincia,"Visitants per comarca",menuTablasVComarca,"Visitants per perfil",menuTablasVPerfil,"Visitants per font",menuTablasVFuente,"Visitants per hora",menuTablasVHora,"Visitants per dia",menuTablasVDia,"Visitants per origen",menuTablasVOrigen)
+    textMenu.config(text = "MENU TAULES (M)")   
+    menusBotones("Tornar(<)",MenuInicial,"Pax",menuTablasPax,"Visitants per zona",menuTablasVGrupo,"Visitants per províncies",menuTablasVProvincia,"Visitants per comarca",menuTablasVComarca,"Visitants per perfil",menuTablasVPerfil,"Visitants per font",menuTablasVFuente,"Visitants per hora",menuTablasVHora,"Visitants per dia",menuTablasVDia,"Visitants per origen",menuTablasVOrigen)
     # Hacemos prioritaria y visible la raiz
     raiz.deiconify()
     BM1.focus()
@@ -4059,9 +4058,9 @@ def menuTablasPax                                   ():
     crea_espacios_info(frameTabla,40,33)             # Cramos las labels dentro de la tabla
     # Ajustamos las labels
     ajusta_espacios_info(40,33,8,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,8)           
-    menusBotones("Tornar",preMenuTablas,"Pax")          # Preparamos la salida
+    menusBotones("Tornar(<)",preMenuTablas,"Pax")          # Preparamos la salida
     # Datos a rellenar
-    OpcionesQuestionario(["X2",LR1,"ANY:",LRR12],
+    OpcionesQuestionario(["X2",LR1,"ANY(Q):",LRR12],
                          ["X2",LR2,"MES:",LRR22])
     # Si aquí se pulsan las teclas CTRL + D se pone la fecha actual
     raiz.bind("<Control-d>", lambda event: FechaActualIncrustadaPax())
@@ -4260,9 +4259,9 @@ def menuTablasVGrupo                                ():
     crea_espacios_info(frameTabla,3,35)                 # Ajustamos las labels
     ajusta_espacios_info(3,35,20,15,15)                 # Ajustamos las labels
     # Preparamos la salida
-    menusBotones("Tornar",preMenuTablas,"",regresaSinNada,"Visitants per zona")
+    menusBotones("Tornar(<)",preMenuTablas,"",regresaSinNada,"Visitants per zona")
     # Datos a rellenar
-    OpcionesQuestionario(["X2",LR1,"desde DIA:",LRR12],
+    OpcionesQuestionario(["X2",LR1,"desde DIA(Q):",LRR12],
                          ["X2",LR2,"MES:",LRR22],
                          ["X2",LR3,"ANY:",LRR32],
                          ["X2",LR4,"fins DIA:",LRR42],
@@ -4445,9 +4444,9 @@ def menuTablasVProvincia                            ():
     crea_espacios_info(frameTabla,4,5)                          # Cramos las labels dentro de la tabla
     ajusta_espacios_info(4,5,20,15,15,15)                       # Ajustamos las labels dentro de la tabla
     # Preparamos la salida
-    menusBotones("Tornar",preMenuTablas,"",regresaSinNada,"",regresaSinNada,"Visitants per províncies")
+    menusBotones("Tornar(<)",preMenuTablas,"",regresaSinNada,"",regresaSinNada,"Visitants per províncies")
     # Datos a rellenar
-    OpcionesQuestionario(["X2",LR1,"desde DIA:",LRR12],
+    OpcionesQuestionario(["X2",LR1,"desde DIA(Q):",LRR12],
                          ["X2",LR2,"MES:",LRR22],
                          ["X2",LR3,"ANY:",LRR32],
                          ["X2",LR4,"fins DIA:",LRR42],
@@ -4623,9 +4622,9 @@ def menuTablasVComarca                              ():
     crea_espacios_info(frameTabla,3,11)
     ajusta_espacios_info(3,11,20,15,15)                
     # Preparamos la salida
-    menusBotones("Tornar",preMenuTablas,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Visitants per comarca")
+    menusBotones("Tornar(<)",preMenuTablas,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Visitants per comarca")
     # Datos a rellenar
-    OpcionesQuestionario(["X2",LR1,"desde DIA:",LRR12],
+    OpcionesQuestionario(["X2",LR1,"desde DIA(Q):",LRR12],
                          ["X2",LR2,"MES:",LRR22],
                          ["X2",LR3,"ANY:",LRR32],
                          ["X2",LR4,"fins DIA:",LRR42],
@@ -4774,9 +4773,9 @@ def menuTablasVPerfil                               ():
     crea_espacios_info(frameTabla,3,11)
     ajusta_espacios_info(3,11,20,15,15)                 
     # Preparamos la salida
-    menusBotones("Tornar",preMenuTablas,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Visitants per perfil")
+    menusBotones("Tornar(<)",preMenuTablas,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Visitants per perfil")
     # Datos a rellenar
-    OpcionesQuestionario(["X2",LR1,"desde DIA:",LRR12],
+    OpcionesQuestionario(["X2",LR1,"desde DIA(Q):",LRR12],
                          ["X2",LR2,"MES:",LRR22],
                          ["X2",LR3,"ANY:",LRR32],
                          ["X2",LR4,"fins DIA:",LRR42],
@@ -4924,9 +4923,9 @@ def menuTablasVFuente                               ():
     crea_espacios_info(frameTabla,3,11)
     ajusta_espacios_info(3,11,20,15,15)                
     # Preparamos la salida
-    menusBotones("Tornar",preMenuTablas,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Visitants per font")
+    menusBotones("Tornar(<)",preMenuTablas,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Visitants per font")
     # Datos a rellenar
-    OpcionesQuestionario(["X2",LR1,"desde DIA:",LRR12],
+    OpcionesQuestionario(["X2",LR1,"desde DIA(Q):",LRR12],
                          ["X2",LR2,"MES:",LRR22],
                          ["X2",LR3,"ANY:",LRR32],
                          ["X2",LR4,"fins DIA:",LRR42],
@@ -5067,15 +5066,15 @@ def menuTablasVHora                                 ():
                           
     # Destruimos las labels de informacion para no sobrecargar el sistema
     destruye_espacios_info(10,22)
-# Creamos ventana extra para esta tabla
+    # Creamos ventana extra para esta tabla
     ventanaTablas('Taula hores',[0,0,1,300,50,"green"])
     # Cramos las labels dentro de la tabla
     crea_espacios_info(frameTabla,3,11)
     ajusta_espacios_info(3,11,20,15,15)                 
     # Preparamos la salida
-    menusBotones("Tornar",preMenuTablas,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Visitants per hora")
+    menusBotones("Tornar(<)",preMenuTablas,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Visitants per hora")
     # Datos a rellenar
-    OpcionesQuestionario(["X2",LR1,"desde DIA:",LRR12],
+    OpcionesQuestionario(["X2",LR1,"desde DIA(Q):",LRR12],
                          ["X2",LR2,"MES:",LRR22],
                          ["X2",LR3,"ANY:",LRR32],
                          ["X2",LR4,"fins DIA:",LRR42],
@@ -5239,9 +5238,9 @@ def menuTablasVDia                                  ():
     crea_espacios_info(frameTabla,3,12)
     ajusta_espacios_info(3,12,20,15,15)                
     # Preparamos la salida
-    menusBotones("Tornar",preMenuTablas,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Visitants per dia")
+    menusBotones("Tornar(<)",preMenuTablas,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Visitants per dia")
     # Datos a rellenar
-    OpcionesQuestionario(["X2",LR1,"desde DIA:",LRR12],
+    OpcionesQuestionario(["X2",LR1,"desde DIA(Q):",LRR12],
                          ["X2",LR2,"MES:",LRR22],
                          ["X2",LR3,"ANY:",LRR32],
                          ["X2",LR4,"fins DIA:",LRR42],
@@ -5390,9 +5389,9 @@ def menuTablasVOrigen                               ():
     crea_espacios_info(frameTabla,3,11)
     ajusta_espacios_info(3,11,20,15,15)                 
     # Preparamos la salida
-    menusBotones("Tornar",preMenuTablas,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Visitants per origen")
+    menusBotones("Tornar(<)",preMenuTablas,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Visitants per origen")
     # Datos a rellenar
-    OpcionesQuestionario(["X2",LR1,"desde DIA:",LRR12],
+    OpcionesQuestionario(["X2",LR1,"desde DIA(Q):",LRR12],
                          ["X2",LR2,"MES:",LRR22],
                          ["X2",LR3,"ANY:",LRR32],
                          ["X2",LR4,"fins DIA:",LRR42],
@@ -5419,14 +5418,14 @@ def menuArqueos                                 ():
     BotonPrimeroQNada()                
     raiz.bind("<Control-Q>", lambda event: regresaSinNada())    
     LimpiaLabelsRellena()
-    textMenu.config(text = "MENU ARQUEIJOS")   
-    menusBotones("Tornar",MenuInicial,"Arqueig diari",menuArqueoDiario,"Arqueig global",regresaSinNada,"Resum econòmic parcial")         
+    textMenu.config(text = "MENU ARQUEIJOS (M)")   
+    menusBotones("Tornar(<)",MenuInicial,"Arqueig diari",menuArqueoDiario,"Arqueig global",regresaSinNada,"Resum econòmic parcial")         
     BM1.focus()
 def menuArqueoDiario                                ():
 
     LimpiaLabelsRellena()   
-    textMenu.config(text = "ARQUEIG DIARI")   
-    menusBotones("Tornar",menuArqueos,"Matí",menuArqueoDiarioMatí,"Tarda",menuArqueoDiarioTarde)         
+    textMenu.config(text = "ARQUEIG DIARI (M)")   
+    menusBotones("Tornar(<)",menuArqueos,"Matí",menuArqueoDiarioMatí,"Tarda",menuArqueoDiarioTarde)         
 def menuArqueoDiarioMatí                                ():
 
     # Carga los datos en zona 3 del arqueo de mañana de ese día
@@ -5450,13 +5449,13 @@ def menuStocks                                  ():
     raiz.bind("<Control-Q>", lambda event: regresaSinNada())    
       
     LimpiaLabelsRellena()
-    textMenu.config(text = "MENU STOCKS")   
-    menusBotones("Tornar",MenuInicial,"Introduir",menuStockIntroducir,"Consultar",menustockConsultar)         
+    textMenu.config(text = "MENU STOCKS (M)")   
+    menusBotones("Tornar(<)",MenuInicial,"Introduir",menuStockIntroducir,"Consultar",menustockConsultar)         
     BM1.focus()
 def menuStockIntroducir                             ():
     
     LimpiaLabelsRellena()
-    menusBotones("Tornar",menuStocks,"Introduir",regresaSinNada) 
+    menusBotones("Tornar(<)",menuStocks,"Introduir",regresaSinNada) 
 
     LR1.config(text = "PRODUCTE:")  
     LRR11.grid(row=0, column=1)  
@@ -5470,8 +5469,8 @@ def menuStockIntroducir                             ():
 def menustockConsultar                              ():
     
     LimpiaLabelsRellena()
-    textMenu.config(text = "CONSULTA STOCKS")   
-    menusBotones("Tornar",menuStocks,"Total",menustockConsultarTotal,"Específica",menustockConsultarEspecifica)         
+    textMenu.config(text = "CONSULTA STOCKS (M)")   
+    menusBotones("Tornar(<)",menuStocks,"Total",menustockConsultarTotal,"Específica",menustockConsultarEspecifica)         
 def menustockConsultarTotal                             ():
     
     # Salta a un resumen total de productos en la zona 3
@@ -5479,8 +5478,8 @@ def menustockConsultarTotal                             ():
 def menustockConsultarEspecifica                        ():
     
     LimpiaLabelsRellena()
-    textMenu.config(text = "CONSULTA STOCKS")   
-    menusBotones("Tornar",menustockConsultar,"",regresaSinNada,"Específica",regresaSinNada)       
+    textMenu.config(text = "CONSULTA STOCKS (M)")   
+    menusBotones("Tornar(<)",menustockConsultar,"",regresaSinNada,"Específica",regresaSinNada)       
 
     LR1.config(text = "PRODUCTE:")  
     LRR11.grid(row=0, column=1)  
@@ -5516,12 +5515,12 @@ def menuIncidencias                             ():
     global usuarioNivel
     LimpiaLabelsRellena()
        
-    textMenu.config(text = "MENU INCIDÈNC./GRUPS")   
-    menusBotones("Tornar",MenuInicial,"Introduir (I)",menuIncidenciasIntroducirPre,"Consultar (O)",menuIncidenciasConsultar,"Mirar/Corregir",menuIncidenciasCorregir,"Eliminar",menuIncidenciasEliminar,"",regresaSinNada,"Factures proforma",menuIncidenciasFacturaProforma,"",regresaSinNada,"Bloquejos",menuIncidenciasBloqueos)         
+    textMenu.config(text = "MENU INC./GRUPS (M)")   
+    menusBotones("Tornar(<)",MenuInicial,"Introduir (I)",menuIncidenciasIntroducirPre,"Consultar (O)",menuIncidenciasConsultar,"Mirar/Corregir",menuIncidenciasCorregir,"Eliminar",menuIncidenciasEliminar,"",regresaSinNada,"Factures proforma",menuIncidenciasFacturaProforma,"",regresaSinNada,"Bloquejos",menuIncidenciasBloqueos)         
     BM1.focus()
     
     if int(usuarioNivel) >= 3:
-            menusBotones("Tornar",MenuInicial,"",regresaSinNada,"Consultar",menuIncidenciasConsultar,"Mirar/Corregir",menuIncidenciasCorregir)        
+            menusBotones("Tornar(<)",MenuInicial,"",regresaSinNada,"Consultar",menuIncidenciasConsultar,"Mirar/Corregir",menuIncidenciasCorregir)        
             # Pon el foco en el botón de consultar
             BM2.focus()
     if int(usuarioNivel) >= 3:
@@ -5544,7 +5543,7 @@ def menuIncidenciasIntroducir                       (modo=None):
     EstamosEnIntroducir = True
     EstamosEnIncidencias = True
     ajusta_espacios_info(10,22,7,12,7,5,20,8,17,16,7,1)
-    textMenu.config(text = "MENU INCIDÈNC./GRUPS")   
+    textMenu.config(text = "MENU INC./GRUPS (M)")   
     
     def menuIncidenciasIntroducirIntroduce ():
         global horas
@@ -5610,7 +5609,7 @@ def menuIncidenciasIntroducir                       (modo=None):
                     "SELECT *, oid FROM bd_incidencias ORDER BY FECHA_CREA DESC, HORA DESC",
                     8,
                     "EstamosEnIncidencias",
-                    "ID","DATA","HORA","PAX","PRODUCTE","IDIOMA","ESTAT","CLIENT","PAGAT") 
+                    "ID(L)","DATA","HORA","PAX","PRODUCTE","IDIOMA","ESTAT","CLIENT","PAGAT") 
         LR23.config(text = "")                                                      # Limpia posibles mensajes anteriores innecesarios
 
         # Pinta la lista actualizada
@@ -5643,10 +5642,10 @@ def menuIncidenciasIntroducir                       (modo=None):
     idCorrecto = int(idAdecuado)+1                                                  # Prepara el nuevo ID
     base_datos_datos.close()                                                        # Cerrar conexion 
     LimpiaLabelsRellena()                                                           # Limpia los campos
-    menusBotones("Tornar",menuIncidencias,"Introduir (I)")                          # Pinta los botones
+    menusBotones("Tornar(<)",menuIncidencias,"Introduir (I)")                          # Pinta los botones
     # Pinta los campos
     OpcionesQuestionario(["1",LR1,"ID:",LRR1,idCorrecto],
-                         ["X2",LR2,"DIA/MES/ANY:",LRR22],
+                         ["X2",LR2,"DIA/MES/ANY(Q):",LRR22],
                          ["X1",LR3,"CLIENT:",LRR31,clientes,regresaSinNada1,"readandwrite"],
                          ["X2",LR4,"TELF. EXTRA:",LRR42],
                          ["X2",LR5,"MAIL EXTRA:",LRR52],
@@ -5672,7 +5671,7 @@ def menuIncidenciasIntroducir                       (modo=None):
                 "SELECT *, oid FROM bd_incidencias ORDER BY FECHA_CREA DESC, HORA DESC",
                 8,
                 "EstamosEnIncidencias",
-                "ID","DATA","HORA","PAX","PRODUCTE","IDIOMA","ESTAT","CLIENT","PAGAT")        
+                "ID(L)","DATA","HORA","PAX","PRODUCTE","IDIOMA","ESTAT","CLIENT","PAGAT")        
     # Si el usuario tiene un nivel de 3 o más...
     if int(usuarioNivel) >= 3:
         # Ponemos el foco en el botón de estado
@@ -5687,12 +5686,12 @@ def menuIncidenciasConsultar                        (modo=None):
     global EstamosEnIntroducir
     EstamosEnIntroducir = False
 
-    textMenu.config(text = "MENU INCIDÈNC./GRUPS")   
+    textMenu.config(text = "MENU INC./GRUPS (M)")   
     ajusta_espacios_info(10,22,7,12,7,5,20,8,17,16,7,1)
     LimpiaLabelsRellena()
-    menusBotones("Tornar",menuIncidencias,"",regresaSinNada,"Consultar (O)")    
+    menusBotones("Tornar(<)",menuIncidencias,"",regresaSinNada,"Consultar (O)")    
 
-    OpcionesQuestionario(["X1",LR1,"CLIENT:",LRR11,clientes,regresaSinNada1,"readandwrite"],
+    OpcionesQuestionario(["X1",LR1,"CLIENT(Q):",LRR11,clientes,regresaSinNada1,"readandwrite"],
                          ["X2",LR2,"esdeveniment DIA:",LRR22],
                          ["X2",LR3,"MES:",LRR32],
                          ["X2",LR4,"ANY:",LRR42],
@@ -5745,9 +5744,9 @@ def menuIncidenciasCorregir                         ():
     anyoGlobaltk.set(anyoGlobal) 
      
     LimpiaLabelsRellena()
-    menusBotones("Tornar",menuIncidencias,"",regresaSinNada,"",regresaSinNada,"Mirar/Corregir")
+    menusBotones("Tornar(<)",menuIncidencias,"",regresaSinNada,"",regresaSinNada,"Mirar/Corregir")
 
-    OpcionesQuestionario(["X2",LR1,"ID:",LRR12])
+    OpcionesQuestionario(["X2",LR1,"ID(Q):",LRR12])
         
     Boton4activado2(incidenciasCorrigeUno)
     ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
@@ -5757,9 +5756,9 @@ def menuIncidenciasEliminar                         ():
     EstamosEnIntroducir = True
 
     LimpiaLabelsRellena()
-    menusBotones("Tornar",menuIncidencias,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Eliminar")
+    menusBotones("Tornar(<)",menuIncidencias,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Eliminar")
 
-    OpcionesQuestionario(["X2",LR1,"ID:",LRR12])
+    OpcionesQuestionario(["X2",LR1,"ID(Q):",LRR12])
  
     Boton4activado2(incidenciasBorraUno)
     ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
@@ -5782,22 +5781,22 @@ def menuIncidenciasFacturaProforma               ():
     MiraFecha(anyoFecha)
     
     ajusta_espacios_info(10,22,8,11,1,12,25,9,25,7,1,1)
-    textMenu.config(text = "PROFORMA")   
+    textMenu.config(text = "PROFORMA (M)")   
     LimpiaLabelsRellena() 
-    menusBotones("Tornar",menuIncidencias,"Introduir",menuIncidenciasFacturaProformaIntroducir,"Consultar",menuIncidenciasFacturaProformaConsultar,"Mirar/Corregir",menuIncidenciasFacturaProformaCorregir,"Eliminar",menuIncidenciasFacturaProformaEliminar)
+    menusBotones("Tornar(<)",menuIncidencias,"Introduir",menuIncidenciasFacturaProformaIntroducir,"Consultar",menuIncidenciasFacturaProformaConsultar,"Mirar/Corregir",menuIncidenciasFacturaProformaCorregir,"Eliminar",menuIncidenciasFacturaProformaEliminar)
     BM1.focus()
 def menuIncidenciasFacturaProformaIntroducir        ():
     
     if nomUsuario.cget("text") == "":
         return
-    textMenu.config(text = "PROFORMA INTRODUIR")   
+    textMenu.config(text = "PROFORMA INTRODUIR (M)")   
     LimpiaLabelsRellena() 
-    menusBotones("Tornar",menuIncidenciasFacturaProforma,"Produir",menuIncidenciasFacturaProformaIntroducirProducir,"Clonar",menuIncidenciasFacturaProformaIntroducirClonar,"Crear",menuIncidenciasFacturaProformaIntroducirCrear)
+    menusBotones("Tornar(<)",menuIncidenciasFacturaProforma,"Produir",menuIncidenciasFacturaProformaIntroducirProducir,"Clonar",menuIncidenciasFacturaProformaIntroducirClonar,"Crear",menuIncidenciasFacturaProformaIntroducirCrear)
     BM1.focus()
 def menuIncidenciasFacturaProformaIntroducirProducir    ():
     
     LimpiaLabelsRellena()
-    menusBotones("Tornar",menuIncidenciasFacturaProformaIntroducir,"Produir")
+    menusBotones("Tornar(<)",menuIncidenciasFacturaProformaIntroducir,"Produir")
 
     LR1.config(text = "ID Incidència/grup:")
     LRR12.grid(row=0, column=1)
@@ -5807,7 +5806,7 @@ def menuIncidenciasFacturaProformaIntroducirProducir    ():
 def menuIncidenciasFacturaProformaIntroducirClonar      ():
 
     LimpiaLabelsRellena()
-    menusBotones("Tornar",menuIncidenciasFacturaProformaIntroducir,"Produir",regresaSinNada,"Clonar")
+    menusBotones("Tornar(<)",menuIncidenciasFacturaProformaIntroducir,"Produir",regresaSinNada,"Clonar")
 
     LR1.config(text = "ID Proforma:")
     LRR12.grid(row=0, column=1)
@@ -6032,7 +6031,7 @@ def menuIncidenciasFacturaProformaIntroducirCrear       ():
                     "SELECT *, oid FROM bd_proforma ORDER BY NUM_PRO DESC",
                     8,
                     "EstamosEnProformas",
-                    "ID","DATA","","PROFORMA","CLIENT","QUANTITAT","CONCEPTE","PREU","")        
+                    "ID(L)","DATA","","PROFORMA","CLIENT","QUANTITAT","CONCEPTE","PREU","")        
 
         # Limpia posibles mensajes anteriores innecesarios
         LR23.config(text = "")
@@ -6112,10 +6111,10 @@ def menuIncidenciasFacturaProformaIntroducirCrear       ():
     # Cerrar conexion 
     base_datos_datos.close()
     LimpiaLabelsRellena()
-    menusBotones("Tornar",menuIncidenciasFacturaProforma,"",regresaSinNada,"",regresaSinNada,"Crear") 
+    menusBotones("Tornar(<)",menuIncidenciasFacturaProforma,"",regresaSinNada,"",regresaSinNada,"Crear") 
     
     OpcionesQuestionario(["1",LR1,"ID:",LRR1,idCorrecto],
-                         ["X2",LR2,"PROFORMA:",LRR22],
+                         ["X2",LR2,"PROFORMA(Q):",LRR22],
                          ["X1",LR3,"CLIENT:",LRR31,clientes,regresaSinNada1,"readandwrite"],
                          ["X2",LR4,"DATA ACTE D/M/A:",LRR42],
                          ["X2",LR5,"QUANTITAT 1:",LRR52],
@@ -6148,7 +6147,7 @@ def menuIncidenciasFacturaProformaIntroducirCrear       ():
                 "SELECT *, oid FROM bd_proforma ORDER BY NUM_PRO DESC",
                 8,
                 "EstamosEnProformas",
-                "ID","DATA","","PROFORMA","CLIENT","QUANTITAT","CONCEPTE","PREU","")        
+                "ID(L)","DATA","","PROFORMA","CLIENT","QUANTITAT","CONCEPTE","PREU","")        
     
     ActivaBotonPyFocus(LRR22,BotonPrimeroQ22)
 def menuIncidenciasFacturaProformaConsultar         ():
@@ -6157,9 +6156,9 @@ def menuIncidenciasFacturaProformaConsultar         ():
     EstamosEnIntroducir = False
 
     LimpiaLabelsRellena()    
-    menusBotones("Tornar",menuIncidenciasFacturaProforma,"",regresaSinNada,"Consultar")
+    menusBotones("Tornar(<)",menuIncidenciasFacturaProforma,"",regresaSinNada,"Consultar")
 
-    OpcionesQuestionario(["X2",LR1,"PROFORMA:",LRR12],
+    OpcionesQuestionario(["X2",LR1,"PROFORMA(Q):",LRR12],
                          ["X1",LR2,"CLIENT:",LRR21,clientes],
                          ["X2",LR3,"Acte: DIA:",LRR32],
                          ["X2",LR4,"MES:",LRR42],
@@ -6185,9 +6184,9 @@ def menuIncidenciasFacturaProformaCorregir          ():
     anyoGlobaltk.set(anyoGlobal) 
      
     LimpiaLabelsRellena()
-    menusBotones("Tornar",menuIncidenciasFacturaProforma,"",regresaSinNada,"",regresaSinNada,"Mirar/Corregir")
+    menusBotones("Tornar(<)",menuIncidenciasFacturaProforma,"",regresaSinNada,"",regresaSinNada,"Mirar/Corregir")
 
-    OpcionesQuestionario(["X2",LR1,"ID:",LRR12])
+    OpcionesQuestionario(["X2",LR1,"ID(Q):",LRR12])
        
     Boton4activado2(ProformaCorrigeUno)
     ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
@@ -6197,9 +6196,9 @@ def menuIncidenciasFacturaProformaEliminar          ():
     EstamosEnIntroducir = True
 
     LimpiaLabelsRellena()
-    menusBotones("Tornar",menuIncidenciasFacturaProforma,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Eliminar")
+    menusBotones("Tornar(<)",menuIncidenciasFacturaProforma,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Eliminar")
 
-    OpcionesQuestionario(["X2",LR1,"ID:",LRR12])
+    OpcionesQuestionario(["X2",LR1,"ID(Q):",LRR12])
    
     Boton4activado2(ProformaBorraUno)
     ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
@@ -6220,9 +6219,9 @@ def menuIncidenciasBloqueos                      ():
     MiraFecha(anyoFecha)
     
     ajusta_espacios_info(10,22,10,10,10,10,10,10,10,10,10,10)
-    textMenu.config(text = "BLOQUEJOS")   
+    textMenu.config(text = "BLOQUEJOS (M)")   
     LimpiaLabelsRellena() 
-    menusBotones("Tornar",menuIncidencias,"Bloquejar",menuIncidenciasBloqueosBloquear,"Desbloquejar",menuIncidenciasBloqueosDesbloquear)
+    menusBotones("Tornar(<)",menuIncidencias,"Bloquejar",menuIncidenciasBloqueosBloquear,"Desbloquejar",menuIncidenciasBloqueosDesbloquear)
     BM1.focus()
 def menuIncidenciasBloqueosBloquear                 ():
 
@@ -6326,7 +6325,7 @@ def menuIncidenciasBloqueosBloquear                 ():
                     "SELECT *, oid FROM bd_bloqueos ORDER BY FECHA",
                     8,
                     "EstamosEnBloqueos",
-                    "ID","DATA","DESDE","FINS","","","","","")
+                    "ID(L)","DATA","DESDE","FINS","","","","","")
 
         # Limpia posibles mensajes anteriores innecesarios
         LR23.config(text = "")
@@ -6341,9 +6340,9 @@ def menuIncidenciasBloqueosBloquear                 ():
     base_datos_datos = sqlite3.connect('databases/basesDeDatosIncidencias.db')
         
     LimpiaLabelsRellena()
-    menusBotones("Tornar",menuIncidenciasBloqueos ,"Bloquejar") 
+    menusBotones("Tornar(<)",menuIncidenciasBloqueos ,"Bloquejar") 
             
-    OpcionesQuestionario(["X2",LR1,"DIA/MES/ANY:",LRR12],
+    OpcionesQuestionario(["X2",LR1,"DIA/MES/ANY(Q):",LRR12],
                          ["X1",LR2,"HORA INICI:",LRR21,horas],
                          ["X1",LR3,"HORA FINAL:",LRR31,horas])
           
@@ -6351,7 +6350,7 @@ def menuIncidenciasBloqueosBloquear                 ():
     query_todos('databases/basesDeDatosIncidencias.db',
                 "SELECT *, oid FROM bd_bloqueos ORDER BY FECHA",
                 8,"EstamosEnBloqueos",
-                "ID","DATA","DESDE","FINS","","","","","")
+                "ID(L)","DATA","DESDE","FINS","","","","","")
               
     ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
 def menuIncidenciasBloqueosDesbloquear              ():
@@ -6359,15 +6358,15 @@ def menuIncidenciasBloqueosDesbloquear              ():
     global EstamosEnIntroducir
     EstamosEnIntroducir = True
     LimpiaLabelsRellena()
-    menusBotones("Tornar",menuIncidenciasBloqueos,"",regresaSinNada,"Desbloqueja")
+    menusBotones("Tornar(<)",menuIncidenciasBloqueos,"",regresaSinNada,"Desbloqueja")
 
-    OpcionesQuestionario(["X2",LR1,"DIA/MES/ANY:",LRR12])       
+    OpcionesQuestionario(["X2",LR1,"DIA/MES/ANY(Q):",LRR12])       
     Boton4activado2(bloqueoBorraUno)
     query_todos('databases/basesDeDatosIncidencias.db',
                 "SELECT *, oid FROM bd_bloqueos ORDER BY FECHA",
                 8,
                 "EstamosEnBloqueos",
-                "ID","DATA","DESDE","FINS","","","","","")
+                "ID(L)","DATA","DESDE","FINS","","","","","")
 
 
     ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
@@ -6383,8 +6382,8 @@ def menuCalendarios                             ():
         return
     global usuarioNivel
     LimpiaLabelsRellena()
-    textMenu.config(text = "MENU CALENDARI")   
-    menusBotones("Tornar",MenuInicial,"Crear",menuCalendarioCrear,"Mostrar",menuCalendarioMostrar)
+    textMenu.config(text = "MENU CALENDARI (M)")   
+    menusBotones("Tornar(<)",MenuInicial,"Crear",menuCalendarioCrear,"Mostrar",menuCalendarioMostrar)
     
     if int(usuarioNivel) >= 3:
         BM1.config(text = "")
@@ -6398,12 +6397,12 @@ def menuCalendarioCrear                             ():
     
     LimpiaLabelsRellena()
 
-    textMenu.config(text = "CREAR CALEND.")   
-    menusBotones("Tornar",menuCalendarios,"Usuaris",MenuCalendarioCrearUsuarios,"Visites",MenuCalendarioCrearVisitas)
+    textMenu.config(text = "CREAR CALEND. (M)")   
+    menusBotones("Tornar(<)",menuCalendarios,"Usuaris",MenuCalendarioCrearUsuarios,"Visites",MenuCalendarioCrearVisitas)
 def MenuCalendarioCrearUsuarios                         ():
     
     LimpiaLabelsRellena()
-    menusBotones("Tornar",menuCalendarioCrear,"Usuaris")
+    menusBotones("Tornar(<)",menuCalendarioCrear,"Usuaris")
     
     LR1.config(text = "MES:")
     LRR12.grid(row=0, column=1)
@@ -6416,7 +6415,7 @@ def MenuCalendarioCrearUsuarios                         ():
 def MenuCalendarioCrearVisitas                          ():
     
     LimpiaLabelsRellena()
-    menusBotones("Tornar",menuCalendarioCrear,"",regresaSinNada,"Visites")
+    menusBotones("Tornar(<)",menuCalendarioCrear,"",regresaSinNada,"Visites")
     
     LR1.config(text = "MES:")
     LRR12.grid(row=0, column=1)
@@ -6431,7 +6430,7 @@ def menuCalendarioMostrar                           ():
     LimpiaLabelsRellena()
 
     textMenu.config(text = "MOSTRAR CALEND.")        
-    menusBotones("Tornar",menuCalendarios,"Usuaris",menuCalendarioMostrarUsuarios,"Visites",menuCalendarioMostrarVisitas,"Hores",menuCalendarioMostrarHoras)
+    menusBotones("Tornar(<)",menuCalendarios,"Usuaris",menuCalendarioMostrarUsuarios,"Visites",menuCalendarioMostrarVisitas,"Hores",menuCalendarioMostrarHoras)
 
     global usuarioNivel
     if int(usuarioNivel) >= 3:
@@ -6439,7 +6438,7 @@ def menuCalendarioMostrar                           ():
 def menuCalendarioMostrarUsuarios                       ():
     
     LimpiaLabelsRellena()
-    menusBotones("Tornar",menuCalendarioMostrar,"Usuaris")
+    menusBotones("Tornar(<)",menuCalendarioMostrar,"Usuaris")
     
     LR1.config(text = "MES:")
     LRR12.grid(row=0, column=1)
@@ -6452,7 +6451,7 @@ def menuCalendarioMostrarUsuarios                       ():
 def menuCalendarioMostrarVisitas                        ():
     
     LimpiaLabelsRellena()
-    menusBotones("Tornar",menuCalendarioMostrar,"",regresaSinNada,"Visites")
+    menusBotones("Tornar(<)",menuCalendarioMostrar,"",regresaSinNada,"Visites")
     
     LR1.config(text = "MES:")
     LRR12.grid(row=0, column=1)
@@ -6470,7 +6469,7 @@ def menuCalendarioMostrarHoras                          ():
         
     global usoUsuarios
     LimpiaLabelsRellena()
-    menusBotones("Tornar",menuCalendarioMostrar,"",regresaSinNada,"",regresaSinNada,"Hores")
+    menusBotones("Tornar(<)",menuCalendarioMostrar,"",regresaSinNada,"",regresaSinNada,"Hores")
     
     LR1.config(text = "USUARI:")
     LRR11.grid(row=0, column=1)
@@ -6495,8 +6494,8 @@ def menuDatos                                   ():
     raiz.bind("<Control-Q>", lambda event: regresaSinNada())    
     LimpiaLabelsRellena()
     borra_datos()   
-    textMenu.config(text = "MENU DADES")   
-    menusBotones("Tornar",MenuInicial,"Producte",MenuDatosProducto,"Clients",MenuDatosCliente,"Usuaris",menuDatosUsuario,"Empresa",menuDatosEmpresa)             
+    textMenu.config(text = "MENU DADES (M)")   
+    menusBotones("Tornar(<)",MenuInicial,"Producte",MenuDatosProducto,"Clients",MenuDatosCliente,"Usuaris",menuDatosUsuario,"Empresa",menuDatosEmpresa)             
     BM1.focus()
 def MenuDatosProducto                               ():
 
@@ -6506,9 +6505,9 @@ def MenuDatosProducto                               ():
     BotonPrimeroQNada()                
     raiz.bind("<Control-Q>", lambda event: regresaSinNada())    
 
-    textMenu.config(text = "MENU PRODUCTE")   
+    textMenu.config(text = "MENU PRODUCTE (M)")   
     LimpiaLabelsRellena()
-    menusBotones("Tornar",menuDatos,"Introduir",MenuDatosProductoIntroducir,"Consultar",MenuDatosProductoConsultar,"Mirar/Corregir",MenuDatosProductoCorregir,"Eliminar",menuDatosProductoEliminar)            
+    menusBotones("Tornar(<)",menuDatos,"Introduir",MenuDatosProductoIntroducir,"Consultar",MenuDatosProductoConsultar,"Mirar/Corregir",MenuDatosProductoCorregir,"Eliminar",menuDatosProductoEliminar)            
     BM1.focus()
 def MenuDatosProductoIntroducir                         ():
 
@@ -6578,7 +6577,7 @@ def MenuDatosProductoIntroducir                         ():
                     "SELECT *, oid FROM bd_productos ORDER BY oid DESC",
                     4,
                     "EstamosEnProductos",
-                    "ID","NOM","PREU REAL","PREU ACTUAL","TIPUS")
+                    "ID(L)","NOM","PREU REAL","PREU ACTUAL","TIPUS")
 
 
         # Limpia posibles mensajes anteriores innecesarios
@@ -6637,10 +6636,10 @@ def MenuDatosProductoIntroducir                         ():
     base_datos_datos.close() 
                     
     LimpiaLabelsRellena()
-    menusBotones("Tornar",MenuDatosProducto,"Introduir")
+    menusBotones("Tornar(<)",MenuDatosProducto,"Introduir")
 
     OpcionesQuestionario(["1",LR1,"ID:",LRR1,idCorrecto],
-                         ["X2",LR2,"PRODUCTE:",LRR22],
+                         ["X2",LR2,"PRODUCTE(Q):",LRR22],
                          ["X2",LR3,"PREU REAL:",LRR32],
                          ["X2",LR4,"PREU ACTUAL:",LRR42],
                          ["X1",LR5,"REGISTRE/STOCK:",LRR51,["Registre","Stock"]])
@@ -6650,7 +6649,7 @@ def MenuDatosProductoIntroducir                         ():
                 "SELECT *, oid FROM bd_productos ORDER BY oid DESC",
                 4,
                 "EstamosEnProductos",
-                "ID","NOM","PREU REAL","PREU ACTUAL","TIPUS")
+                "ID(L)","NOM","PREU REAL","PREU ACTUAL","TIPUS")
     ActivaBotonPyFocus(LRR22,BotonPrimeroQ22)
 def MenuDatosProductoConsultar                          ():
  
@@ -6658,9 +6657,9 @@ def MenuDatosProductoConsultar                          ():
     EstamosEnIntroducir = False
 
     LimpiaLabelsRellena()
-    menusBotones("Tornar",MenuDatosProducto,"",regresaSinNada,"Consultar")
+    menusBotones("Tornar(<)",MenuDatosProducto,"",regresaSinNada,"Consultar")
 
-    OpcionesQuestionario(["X1",LR1,"PRODUCTE:",LRR11,productos],
+    OpcionesQuestionario(["X1",LR1,"PRODUCTE(Q):",LRR11,productos],
                          ["X2",LR2,"PREU REAL:",LRR22],
                          ["X2",LR3,"PREU ACTUAL:",LRR32],
                          ["X1",LR4,"REGISTRE/STOCK:",LRR41,["Registre","Stock"]])
@@ -6676,9 +6675,9 @@ def MenuDatosProductoCorregir                           ():
     EstamosEnIntroducir = False
 
     LimpiaLabelsRellena()
-    menusBotones("Tornar",MenuDatosProducto,"",regresaSinNada,"",regresaSinNada,"Mirar/Corregir")
+    menusBotones("Tornar(<)",MenuDatosProducto,"",regresaSinNada,"",regresaSinNada,"Mirar/Corregir")
     
-    OpcionesQuestionario(["X2",LR1,"ID:",LRR12])     
+    OpcionesQuestionario(["X2",LR1,"ID(Q):",LRR12])     
     
     BB4.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 10,  command = productoCorrigeUno)
     cambiaPasaEncima(BB4,"green","#27779d")     
@@ -6689,9 +6688,9 @@ def menuDatosProductoEliminar                           ():
     EstamosEnIntroducir = True
 
     LimpiaLabelsRellena()
-    menusBotones("Tornar",MenuDatosProducto,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Eliminar")
+    menusBotones("Tornar(<)",MenuDatosProducto,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Eliminar")
     
-    OpcionesQuestionario(["X2",LR1,"ID:",LRR12])     
+    OpcionesQuestionario(["X2",LR1,"ID(Q):",LRR12])     
    
     Boton4activado2(productoBorraUno)
     ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
@@ -6703,9 +6702,9 @@ def MenuDatosCliente                                ():
     BotonPrimeroQNada()                
     raiz.bind("<Control-Q>", lambda event: regresaSinNada())    
     
-    textMenu.config(text = "MENU CLIENT")   
+    textMenu.config(text = "MENU CLIENT (M)")   
     LimpiaLabelsRellena()
-    menusBotones("Tornar",menuDatos,"Introduir",MenuDatosClienteIntroducir,"Consultar",MenuDatosClienteConsultar,"Mirar/Corregir",MenuDatosClienteCorregir,"Eliminar",menuDatosClienteEliminar)            
+    menusBotones("Tornar(<)",menuDatos,"Introduir",MenuDatosClienteIntroducir,"Consultar",MenuDatosClienteConsultar,"Mirar/Corregir",MenuDatosClienteCorregir,"Eliminar",menuDatosClienteEliminar)            
     BM1.focus()
 def MenuDatosClienteIntroducir                          ():
 
@@ -6778,7 +6777,7 @@ def MenuDatosClienteIntroducir                          ():
                     "SELECT *, oid FROM bd_clientes ORDER BY oid DESC",
                     7,
                     "EstamosEnClientes",
-                    "ID","NOM","","","CIUTAT/PAIS","TELÈFON","MAIL","NIF/CIF")
+                    "ID(L)","NOM","","","CIUTAT/PAIS","TELÈFON","MAIL","NIF/CIF")
 
         # Limpia posibles mensajes anteriores innecesarios
         LR23.config(text = "")
@@ -6836,10 +6835,10 @@ def MenuDatosClienteIntroducir                          ():
     base_datos_datos.close() 
              
     LimpiaLabelsRellena()
-    menusBotones("Tornar",MenuDatosCliente,"Introduir")
+    menusBotones("Tornar(<)",MenuDatosCliente,"Introduir")
 
     OpcionesQuestionario(["1",LR1,"ID:",LRR1,idCorrecto],
-                         ["X2",LR2,"NOM:",LRR22],
+                         ["X2",LR2,"NOM(Q):",LRR22],
                          ["X2",LR3,"ADREÇA:",LRR32],
                          ["X2",LR4,"C.P.:",LRR42],
                          ["X2",LR5,"CIUTAT/PAIS:",LRR52],
@@ -6857,7 +6856,7 @@ def MenuDatosClienteIntroducir                          ():
                 "SELECT *, oid FROM bd_clientes ORDER BY oid DESC",
                 7,
                 "EstamosEnClientes",
-                "ID","NOM","","","CIUTAT/PAIS","TELÈFON","MAIL","NIF/CIF")
+                "ID(L)","NOM","","","CIUTAT/PAIS","TELÈFON","MAIL","NIF/CIF")
        
     ActivaBotonPyFocus(LRR22,BotonPrimeroQ22)
 def MenuDatosClienteConsultar                           ():
@@ -6866,9 +6865,9 @@ def MenuDatosClienteConsultar                           ():
     EstamosEnIntroducir = False
 
     LimpiaLabelsRellena()
-    menusBotones("Tornar",MenuDatosCliente,"",regresaSinNada,"Consultar")
+    menusBotones("Tornar(<)",MenuDatosCliente,"",regresaSinNada,"Consultar")
     
-    OpcionesQuestionario(["X1",LR1,"NOM:",LRR11,clientes],
+    OpcionesQuestionario(["X1",LR1,"NOM(Q):",LRR11,clientes],
                          ["X2",LR2,"TELÈFON:",LRR22],
                          ["X2",LR3,"E-MAIL:",LRR32],
                          ["X2",LR4,"NIF/CIF:",LRR42])
@@ -6883,9 +6882,9 @@ def MenuDatosClienteCorregir                            ():
     EstamosEnIntroducir = False
 
     LimpiaLabelsRellena()
-    menusBotones("Tornar",MenuDatosCliente,"",regresaSinNada,"",regresaSinNada,"Mirar/Corregir")
+    menusBotones("Tornar(<)",MenuDatosCliente,"",regresaSinNada,"",regresaSinNada,"Mirar/Corregir")
     
-    OpcionesQuestionario(["X2",LR1,"ID:",LRR12])     
+    OpcionesQuestionario(["X2",LR1,"ID(Q):",LRR12])     
 
     Boton4activado2(clienteCorrigeUno)
     ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
@@ -6895,9 +6894,9 @@ def menuDatosClienteEliminar                            ():
     EstamosEnIntroducir = True
 
     LimpiaLabelsRellena()
-    menusBotones("Tornar",MenuDatosCliente,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Eliminar")
+    menusBotones("Tornar(<)",MenuDatosCliente,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Eliminar")
     
-    OpcionesQuestionario(["X2",LR1,"ID:",LRR12])     
+    OpcionesQuestionario(["X2",LR1,"ID(Q):",LRR12])     
   
     Boton4activado2(clienteBorraUno)
     ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
@@ -6913,11 +6912,11 @@ def menuDatosUsuario                                ():
     if int(usuarioNivel) >= 3:
         return
     
-    textMenu.config(text = "MENU USUARIS") 
+    textMenu.config(text = "MENU USUARIS (M)") 
     LimpiaLabelsRellena()
     LRR22.config(show="")
     LRR32.config(show="")
-    menusBotones("Tornar",menuDatos,"Introduir",menuDatosUsuarioIntroducir,"Consultar",menuDatosUsuarioConsultar,"Mirar/Corregir",menuDatosUsuarioCorregir,"Eliminar",menuDatosUsuarioEliminar)            
+    menusBotones("Tornar(<)",menuDatos,"Introduir",menuDatosUsuarioIntroducir,"Consultar",menuDatosUsuarioConsultar,"Mirar/Corregir",menuDatosUsuarioCorregir,"Eliminar",menuDatosUsuarioEliminar)            
     BM1.focus()
 def menuDatosUsuarioIntroducir                          ():
     
@@ -6979,7 +6978,7 @@ def menuDatosUsuarioIntroducir                          ():
                     "SELECT *, oid FROM bd_usuarios ORDER BY oid DESC",
                     7,
                     "EstamosEnUsuarios",
-                    "ID","NOM","CLAU","NIVELL","ANGLÈS","CASTELLÀ"," CATALÀ","FRANCÈS","HORES")
+                    "ID(L)","NOM","CLAU","NIVELL","ANGLÈS","CASTELLÀ"," CATALÀ","FRANCÈS","HORES")
       
 
         # Limpia posibles mensajes anteriores innecesarios
@@ -6990,9 +6989,9 @@ def menuDatosUsuarioIntroducir                          ():
         LRR12.focus()
         
     LimpiaLabelsRellena()
-    menusBotones("Tornar",menuDatosUsuario,"Introduir")
+    menusBotones("Tornar(<)",menuDatosUsuario,"Introduir")
     
-    OpcionesQuestionario(["X2",LR1,"NOM:",LRR12],
+    OpcionesQuestionario(["X2",LR1,"NOM(Q):",LRR12],
                          ["X2",LR2,"CLAU:",LRR22],
                          ["X2",LR3,"REPETEIX CLAU:",LRR32],
                          ["X1",LR4,"NIVELL D'ACCÉS:",LRR41,["1","2","3","4","5"]],
@@ -7007,7 +7006,7 @@ def menuDatosUsuarioIntroducir                          ():
                 "SELECT *, oid FROM bd_usuarios ORDER BY oid DESC",
                 8,
                 "EstamosEnUsuarios",
-                "ID","NOM","CLAU","NIVELL","ANGLÈS","CASTELLÀ","CATALÀ","FRANCÈS","HORES")
+                "ID(L)","NOM","CLAU","NIVELL","ANGLÈS","CASTELLÀ","CATALÀ","FRANCÈS","HORES")
     ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
 def menuDatosUsuarioConsultar                           ():
       
@@ -7016,9 +7015,9 @@ def menuDatosUsuarioConsultar                           ():
 
     global usuariosO
     LimpiaLabelsRellena()
-    menusBotones("Tornar",menuDatosUsuario,"",regresaSinNada,"Consultar")
+    menusBotones("Tornar(<)",menuDatosUsuario,"",regresaSinNada,"Consultar")
 
-    OpcionesQuestionario(["X2",LR1,"NOM:",LRR12],
+    OpcionesQuestionario(["X2",LR1,"NOM(Q):",LRR12],
                          ["X1",LR2,"NIVELL D'ACCÉS:",LRR21,["1","2","3","4","5"]],
                          ["X1",LR3,"ANGLÈS:",LRR31,["Si","No"]],
                          ["X1",LR4,"CASTELLÀ:",LRR41,["Si","No"]],
@@ -7035,9 +7034,9 @@ def menuDatosUsuarioCorregir                            ():
     EstamosEnIntroducir = False
 
     LimpiaLabelsRellena()
-    menusBotones("Tornar",menuDatosUsuario,"",regresaSinNada,"",regresaSinNada,"Mirar/Corregir")
+    menusBotones("Tornar(<)",menuDatosUsuario,"",regresaSinNada,"",regresaSinNada,"Mirar/Corregir")
     
-    OpcionesQuestionario(["X2",LR1,"ID:",LRR12])     
+    OpcionesQuestionario(["X2",LR1,"ID(Q):",LRR12])     
    
     Boton4activado2(usuariosCorrigeUno)
     ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
@@ -7047,9 +7046,9 @@ def menuDatosUsuarioEliminar                            ():
     EstamosEnIntroducir = True
 
     LimpiaLabelsRellena()
-    menusBotones("Tornar",menuDatosUsuario,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Eliminar")
+    menusBotones("Tornar(<)",menuDatosUsuario,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Eliminar")
 
-    OpcionesQuestionario(["X2",LR1,"ID:",LRR12])     
+    OpcionesQuestionario(["X2",LR1,"ID(Q):",LRR12])     
        
     Boton4activado2(usuariosBorraUno)
     ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
@@ -7068,7 +7067,7 @@ def menuDatosEmpresa                                ():
         menuDatos()
             
     LimpiaLabelsRellena()
-    menusBotones("Tornar",menuDatos,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Empresa")
+    menusBotones("Tornar(<)",menuDatos,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Empresa")
 
     LR1.config(text = "NOM:")
     LRR12.grid(row=0, column=1) 
@@ -7106,8 +7105,8 @@ def menuSeguridad                               ():
     BotonPrimeroQNada()                
     raiz.bind("<Control-Q>", lambda event: regresaSinNada())    
     LimpiaLabelsRellena()
-    textMenu.config(text = "MENU SEGURETAT")   
-    menusBotones("Tornar",MenuInicial,"Còpia de seguretat",menuSeguridadCopiaDeSeguridad,"Carregar",menuSeguridadCargar,"Fussionar",menuSeguridadFusionar,"Esborrar",menuSeguridadBorrar,"Netejar I/G",menuSeguridadLimpiarIncidenciasGrupos)
+    textMenu.config(text = "MENU SEGURETAT (M)")   
+    menusBotones("Tornar(<)",MenuInicial,"Còpia de seguretat",menuSeguridadCopiaDeSeguridad,"Carregar",menuSeguridadCargar,"Fussionar",menuSeguridadFusionar,"Esborrar",menuSeguridadBorrar,"Netejar I/G",menuSeguridadLimpiarIncidenciasGrupos)
     BM1.focus()
 def menuSeguridadCopiaDeSeguridad                   ():
         CopiaSeguridadGlobal()
@@ -7189,7 +7188,6 @@ nomUsuario.config(padx = 5,bg= "#b7b493",fg="#FFFFFF", anchor=W, font=("Helvetic
 # ------------------------------- Crea Fecha -----------------------------------
 
 def recuperaFechaActual():
-    print("Ha entrado")      
     fecha = datetime.now()
     diaGlobal = str(fecha.day)
     #if int(diaGlobal) < 10: diaGlobal = "0" + diaGlobal
@@ -7257,26 +7255,26 @@ ConfiguraColumnas(frameBotones,4,1,1,1,1,1,1,1)
 
 Label(frameBotones,text=" ",bg="#b7b493").grid(row=0,column=0)
 
-BB1 = Button(frameBotones, text="-", command=TamanyoMenos, font=(10))
+BB1 = Button(frameBotones, text="(-)", command=TamanyoMenos, font=(10))
 BB1.grid(row=0, column=1)
 BB1.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 5)
 BB1.grid(pady=10)
 cambiaPasaEncima(BB1,"green","#27779d")
 
 
-BB2 = Button(frameBotones, text="+", command=TamanyoMas, font=(10))
+BB2 = Button(frameBotones, text="(+)", command=TamanyoMas, font=(10))
 BB2.grid(row=0, column=2)
 BB2.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 5)
 cambiaPasaEncima(BB2,"green","#27779d")
 
 Label(frameBotones,text=" ",bg="#b7b493").grid(row=0,column=3)
 
-BB5 = Button(frameBotones, text="ant.", font=(10))
+BB5 = Button(frameBotones, text="ant.(\u02C4)", font=(10))
 BB5.grid(row=0, column=4)
 BB5.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 5)
 cambiaPasaEncima(BB5,"green","#27779d")
 
-BB6 = Button(frameBotones, text="post.", font=(10))
+BB6 = Button(frameBotones, text="post.(\u02C5)", font=(10))
 BB6.grid(row=0, column=5)
 BB6.config(bg="#27779d",fg="#FFFFFF",  height = 1, width = 5)
 cambiaPasaEncima(BB6,"green","#27779d")
