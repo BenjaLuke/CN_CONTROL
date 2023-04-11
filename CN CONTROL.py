@@ -6205,171 +6205,109 @@ def menuIncidenciasFacturaProformaEliminar          ():
 
 def menuIncidenciasBloqueos                      ():
  
-    global usuarioNivel
-    if int(usuarioNivel) >= 3:
-        return
-    
-    global VieneDeIncGrups
-    VieneDeIncGrups = "None"
-    
-    nomUsuario.config(text = usuarioReal)
-    diaGlobaltk.set(diaGlobal)
-    mesGlobaltk.set(mesGlobal)
-    anyoGlobaltk.set(anyoGlobal)
-    MiraFecha(anyoFecha)
-    
-    ajusta_espacios_info(10,22,10,10,10,10,10,10,10,10,10,10)
-    textMenu.config(text = "BLOQUEJOS (M)")   
-    LimpiaLabelsRellena() 
+    global usuarioNivel                                 # Variable global que indica el nivel del usuario
+    if int(usuarioNivel) >= 3:                          # Si el nivel del usuario es 3 o superior
+        return                                          # No se puede acceder a este menú
+    global VieneDeIncGrups                              # Variable global que indica de donde viene
+    VieneDeIncGrups = "None"                            # Indica que no viene de ningún sitio
+    nomUsuario.config(text = usuarioReal)               # Pone el nombre del usuario en la barra de estado
+    diaGlobaltk.set(diaGlobal)                          # Pone la fecha actual en la barra de estado
+    mesGlobaltk.set(mesGlobal)                          # Pone la fecha actual en la barra de estado
+    anyoGlobaltk.set(anyoGlobal)                        # Pone la fecha actual en la barra de estado
+    MiraFecha(anyoFecha)                                # Mira la fecha actual
+    ajusta_espacios_info(10,22,10,10,10,10,30,1,1,9,9,10)# Ajusta los espacios de los labels
+    textMenu.config(text = "BLOQUEJOS (M)")             # Pone el título del menú
+    LimpiaLabelsRellena()                               # Limpia los labels
+    # Pone los labels y los campos de texto
     menusBotones("Tornar(<)",menuIncidencias,"Bloquejar",menuIncidenciasBloqueosBloquear,"Desbloquejar",menuIncidenciasBloqueosDesbloquear)
-    BM1.focus()
+    BM1.focus()                                         # Pone el foco en el botón Bloquejar
 def menuIncidenciasBloqueosBloquear                 ():
 
-    global EstamosEnIntroducir
-    EstamosEnIntroducir = True
-    global usuarioNivel
-    if int(usuarioNivel) >= 3:
-        return
-    ajusta_espacios_info(10,22,10,10,10,10,10,10,10,10,10,10)
-
-    
+    global EstamosEnIntroducir                          # Variable global que indica si estamos en introducir o en consultar
+    EstamosEnIntroducir = True                          # Indica que estamos en introducir
+    global usuarioNivel                                 # Variable global que indica el nivel del usuario
+    if int(usuarioNivel) >= 3:                          # Si el usuario es de nivel 3 o superior
+        return                                          # No hace nada
+    ajusta_espacios_info(10,22,10,10,10,10,30,1,1,9,9,10)# Ajusta los espacios de los labels
     def menuIncidenciasBloqueosBloquea ():
         # Rescata los valores de los campos
-        v2 = LRR12.get()
-        v3 = LRR21.get()
-        v4 = LRR31.get()
-        
+        v2,v3,v4,v5 = LRR12.get(),LRR21.get(),LRR31.get(),LRR42.get()       
         # Coteja errores
-        try:
-            # Si el principio de v2 es 1 dígito y "/"
-            if v2[1] == "/":
-                #Añadimos un 0 delante
-                v2 = "0" + v2
-            # Si el principio de v2 no es 2 dígitos y "/"
-            if v2[0:2].isdigit() == False:
-                LR23.config(text = "Dia incorrecte")
-                LRR22.focus()
-                return
-
-            # Si la posición 4 es "/"
-            if v2[4] == "/":
-                # Añadimos un 0 entre la posición 2 y 3
-                v2 = v2[0:3] + "0" + v2[3:]
-            # Si v2 no contiene "/" dos digitos y "/"
-            if v2[3:5].isdigit() == False:
-                LR23.config(text = "Mes incorrecte")
-                LRR22.focus()
-                return
-
-            # Si el largo de la cadena v2 es inferior a 10 caracteres
-            if len(v2) <= 9:
-                # Añadimos 20 entre las posiciones 5 y 6
-                v2 = v2[0:6] + "20" + v2[6:] 
-            # Si v2 no acaba en 4 dígitos
-            if v2[6:10].isdigit() == False:
-                LR23.config(text = "Any incorrecte")
-                LRR22.focus()
-                return
-            # Si el largo es superior a 10 caracteres
-            if len(v2) > 10:
-                LR23.config(text = "Data incorrecte")
-                LRR22.focus()
-                return
-            # Si v2 no contiene 2 dígitos, "/", 2 dígitos, "/", 4 dígitos
-            if v2[2] != "/" or v2[5] != "/":
-                LR23.config(text = "Data incorrecte")
-                LRR22.focus()
-                return
-        except:
-                LR23.config(text = "Data incorrecte")
-                LRR22.focus() 
-                return 
-         
+        muralla = False                                 # Inicializa la variable
+        muralla,v2 = cotejaFechaBlock(muralla,v2,LRR12) # Comprueba que la fecha sea correcta
+        # Comprueba que no exista una incidencia con los mismos datos
+        if muralla == True:                             # Si hay error 
+            LR23.config(fg = "red")                     # Pone el texto en rojo
+            return                                      # Si hay error, no hace nada
         # Miramos si existe una incidencia con la misma fecha y hora
         # Abrimos la base de datos de incidencias
         conn = sqlite3.connect('databases/basesDeDatosIncidencias.db')    
-        # Creamos el cursor
-        miCursor = conn.cursor()
+        miCursor = conn.cursor()                        # Creamos el cursor
         # Crea una lista con los datos FECHA
         miCursor.execute("SELECT *,oid FROM bd_incidencias WHERE ((FECHA = '" + v2 + "') AND (HORA >='"+ v3 + "') AND (HORA <'" + v4 + "'))")
-        casos = miCursor.fetchall()
-        cant_casos = len(casos)
-        # Si hay más de un caso con la misma fecha y hora
-        if cant_casos > 0:
-            ventanaAviso("Ja existeixen incidències a la franja.", "red",2)                                                          
+        casos = miCursor.fetchall()                     # Guarda los datos en la lista
+        cant_casos = len(casos)                         # Cuenta los datos de la lista
+        if cant_casos > 0:                              # Si hay más de un caso con la misma fecha y hora
+            # Avisa de que ya existe una incidencia con la misma fecha y hora                                                       
+            ventanaAviso("Ja existeixen incidències a la franja.", "red",2)
         # Salva datos
         # Crea la base de datos o conecta con ella
         base_datos_datos = sqlite3.connect('databases/basesDeDatosIncidencias.db')
-        
-        
-        # Crea el cursor
-        cursor = base_datos_datos.cursor()   
-    
+        cursor = base_datos_datos.cursor()              # Crea el cursor
         # Inserta en la base de tados
-        cursor.execute("""INSERT INTO bd_Bloqueos VALUES (:fecha, :desde, :hasta)""",
+        cursor.execute("""INSERT INTO bd_Bloqueos VALUES (:fecha, :desde, :hasta, :motivo)""",
                 {
                     'fecha':        v2,
                     'desde':        v3,
-                    'hasta':        v4
+                    'hasta':        v4,
+                    'motivo':       v5
                     })
-
-
-        # Asegura los cambios
-        base_datos_datos.commit()
-
-        # Cerrar conexion 
-        base_datos_datos.close() 
-                            
+        base_datos_datos.commit()                       # Asegura los cambios
+        base_datos_datos.close()                        # Cerrar conexion      
         # Pinta datos en zona 3
         query_todos('databases/basesDeDatosIncidencias.db',
                     "SELECT *, oid FROM bd_bloqueos ORDER BY FECHA",
                     8,
                     "EstamosEnBloqueos",
-                    "ID(L)","DATA","DESDE","FINS","","","","","")
-
-        # Limpia posibles mensajes anteriores innecesarios
-        LR23.config(text = "")
-        
-        # Limpia los campos
-        LimpiaElegibles()
-                
-        # Coloca foco
-        LRR12.focus()
-           
+                    "ID(L)","DATA","DESDE","FINS","MOTIU","","","","")
+        LR23.config(text = "")                          # Limpia posibles mensajes anteriores innecesarios
+        LimpiaElegibles()                               # Limpia los campos        
+        LRR12.focus()                                   # Coloca foco       
     # Crea la base de datos o conecta con ella
-    base_datos_datos = sqlite3.connect('databases/basesDeDatosIncidencias.db')
-        
-    LimpiaLabelsRellena()
-    menusBotones("Tornar(<)",menuIncidenciasBloqueos ,"Bloquejar") 
-            
+    base_datos_datos = sqlite3.connect('databases/basesDeDatosIncidencias.db')        
+    LimpiaLabelsRellena()                               # Limpia los campos
+    menusBotones("Tornar(<)",menuIncidenciasBloqueos ,"Bloquejar")  # Crea los botones
+    # Crea los campos        
     OpcionesQuestionario(["X2",LR1,"DIA/MES/ANY(Q):",LRR12],
                          ["X1",LR2,"HORA INICI:",LRR21,horas],
-                         ["X1",LR3,"HORA FINAL:",LRR31,horas])
-          
-    Boton4activado2(menuIncidenciasBloqueosBloquea)
+                         ["X1",LR3,"HORA FINAL:",LRR31,horas],
+                         ["X2",LR4,"MOTIU:",LRR42])     
+    Boton4activado2(menuIncidenciasBloqueosBloquea)     # Activa el botón
+    # Pinta datos en zona 3
     query_todos('databases/basesDeDatosIncidencias.db',
                 "SELECT *, oid FROM bd_bloqueos ORDER BY FECHA",
                 8,"EstamosEnBloqueos",
-                "ID(L)","DATA","DESDE","FINS","","","","","")
-              
-    ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
+                "ID(L)","DATA","DESDE","FINS","MOTIU","","","","")
+    ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)           # Coloca foco
 def menuIncidenciasBloqueosDesbloquear              ():
 
-    global EstamosEnIntroducir
-    EstamosEnIntroducir = True
-    LimpiaLabelsRellena()
-    menusBotones("Tornar(<)",menuIncidenciasBloqueos,"",regresaSinNada,"Desbloqueja")
-
+    global EstamosEnIntroducir                          # Variable global
+    EstamosEnIntroducir = True                          # Variable global a True
+    LimpiaLabelsRellena()                               # Limpia los campos
+    # Crea los campos
+    menusBotones("Tornar(<)",
+                 menuIncidenciasBloqueos,"",
+                 regresaSinNada,"Desbloqueja")
+    # Crea los campos
     OpcionesQuestionario(["X2",LR1,"DIA/MES/ANY(Q):",LRR12])       
-    Boton4activado2(bloqueoBorraUno)
+    Boton4activado2(bloqueoBorraUno)                    # Activa el botón
+    # Pinta datos en zona 3
     query_todos('databases/basesDeDatosIncidencias.db',
                 "SELECT *, oid FROM bd_bloqueos ORDER BY FECHA",
                 8,
                 "EstamosEnBloqueos",
-                "ID(L)","DATA","DESDE","FINS","","","","","")
-
-
-    ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
+                "ID(L)","DATA","DESDE","FINS","MOTIU","","","","")
+    ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)           # Coloca foco
 
 def menuCalendarios                             ():
     
@@ -7530,7 +7468,8 @@ try:
     cursor.execute("""CREATE TABLE bd_bloqueos (
         FECHA           text,
         DESDE           text,
-        HASTA           text)""")
+        HASTA           text,
+        MOTIVO          text,)""")
     
     # Ejecutar (commit) instrucción o consulta
     base_datos_datos.commit()
