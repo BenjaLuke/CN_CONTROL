@@ -2789,28 +2789,21 @@ def del_no                  ():
 
     LimpiaElegibles()           # Limpia las labels de elegibles
     seleccion.destroy()         # Destruye la ventana de selección
-
+# ---------------- Funciones de impresión de PDF ----------------
 def PDFTablasPax            ():
     
     # Creamos el nombre del archivo de salida
-    Nombre = "pdf/Pax "+ LRR22.get() + " " + LRR12.get() + ".pdf"
-    
-    # Creamos el documento, DIN A4 y apaisado
-    PDF = canvas.Canvas(Nombre, pagesize=landscape(A4))
-    
-    # Imágenes en el documento
-    PDF.drawImage('image/LOGO PARA PDF.bmp',5*mm,5*mm,width=35,height=35)
-    PDF.drawImage('image/MARCA PARA PDF.bmp',260*mm,5*mm,width=100,height =14)
-
+    Nombre = "pdf/Pax "+ LRR12.get() + " " + LRR22.get() + " " + LRR32.get() + "   " + LRR42.get() + " " + LRR52.get() + " " + LRR62.get() + ".pdf"
+    PDF = canvas.Canvas(Nombre, pagesize=landscape(A4))                         # Creamos el documento, DIN A4 y apaisado    
+    PDF.drawImage('image/LOGO PARA PDF.bmp',5*mm,5*mm,width=35,height=35)       # Imágenes en el documento
+    PDF.drawImage('image/MARCA PARA PDF.bmp',260*mm,5*mm,width=100,height =14)  # Imágenes en el documento
     # Tipografía y tamaño
     pdfmetrics.registerFont(TTFont('Boecklins Universe','image/Boecklins Universe.ttf'))
-    PDF.setFont('Boecklins Universe',18)
-    PDF.setFillColorRGB(0.4,0.1,0.3)
-    PDF.drawString(22*mm,200*mm,"Tabla de Pax: "+ LRR22.get() + "/" + LRR12.get() + " - Total: "+globals()['VIEW039032'].cget("text"))
-    
-    # Espacios
-    columna = 0
-    
+    PDF.setFont('Boecklins Universe',18)                                        # Tipografía y tamaño
+    PDF.setFillColorRGB(0.4,0.1,0.3)                                            # Color de relleno
+    # Texto
+    PDF.drawString(22*mm,200*mm,"Tabla de Pax: "+ LRR12.get() + " " + LRR22.get() + " " + LRR32.get() + "   " + LRR42.get() + " " + LRR52.get() + " " + LRR62.get() + " - Total: "+globals()['VIEW039032'].cget("text"))
+    columna = 0                                                                 # Espacios
     for columnas in range(9,289,7):
         fila = 32
         alterna = True
@@ -3518,7 +3511,7 @@ def PDFProforma             ():
     except:
         ventanaAviso("ERROR al generar el PDF", "red",2)
         LRR22.focus()                       # Pone el foco en el campo de texto
-
+# --------- Funciones comunes de las tablas -----------------------------
 def preMenuTablas           ():
     
     try:
@@ -3538,6 +3531,18 @@ def preMenuTablas           ():
         pass
     crea_espacios_info(frameLista,10,22)
     menuTablas()
+def comunTablas             ():
+    # Datos a rellenar
+    OpcionesQuestionario(["X2",LR1,"desde DIA(Q):",LRR12],
+                         ["X2",LR2,"MES:",LRR22],
+                         ["X2",LR3,"ANY:",LRR32],
+                         ["X2",LR4,"fins DIA:",LRR42],
+                         ["X2",LR5,"MES:",LRR52],
+                         ["X2",LR6,"ANY:",LRR62])
+    # Si aquí se pulsan las teclas CTRL + D se pone la fecha actual
+    raiz.bind("<Control-d>", lambda event: FechaActualIncrustadaGru())
+    raiz.bind("<Control-D>", lambda event: FechaActualIncrustadaGru())    
+    ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)           # Foco en el año    
 # ------------------------------ Menus -------------------------------
 
 def MenuInicial                             ():
@@ -3952,18 +3957,24 @@ def menuTablasPax                                   ():
     def menuTablasPaxMuestra ():
         
         # Rescata valores
-        v1,v2,v3 = LRR12.get(),LRR22.get(),"01"
-        # Coteja fallos        
-        muralla = False                                             #   Si hay fallo en el registro
-        # Si hay error en la fecha
-        muralla,v3,v2,v1 = cotejaFecha(muralla,v3,LRR12,v2,LRR22,v1,LRR12)   
-        if muralla == True:                                         # Si hay fallo en el registro
-            LR23.config(fg = "red")                                 # Pone el fondo en rojo
-            return                                                  # Sale de la función   
-        LR23.config(text = "")                                      # Limpia posibles mensajes anteriores innecesarios
+        v1,v2,v3,v4,v5,v6 = LRR12.get(),LRR22.get(),LRR32.get(),LRR42.get(),LRR52.get(),LRR62.get()
+        # Coteja fallos
+        muralla = False
+        muralla,v4,v5,v6 = cotejaFecha(muralla,v4,LRR42,v5,LRR52,v6,LRR62)
+        muralla,v1,v2,v3 = cotejaFecha(muralla,v1,LRR12,v2,LRR22,v3,LRR32)
+        muralla = cotejaVacio(muralla,v1,LRR12)
+        muralla = cotejaVacio(muralla,v2,LRR22)
+        muralla = cotejaVacio(muralla,v3,LRR32)
+        muralla = cotejaVacio(muralla,v4,LRR42)
+        muralla = cotejaVacio(muralla,v5,LRR52)
+        muralla = cotejaVacio(muralla,v6,LRR62)
+        if muralla == True:
+            LR23.config(fg = "red")
+            return      
+        LR23.config(text = "")                                      # Limpia posibles mensajes anteriores innecesarios   
         ventanaTabla.deiconify()                                    # Importancia en la tabla
         # Crea el título de la tabla
-        ventanaTabla.title('Taula Pax: any ' + v1 + '. Mes ' + v2 + '.')
+        ventanaTabla.title('Taula pax: desde ' +v1 + '/'+v2+'/'+v3+' fins '+v4+'/'+v5+'/'+v6+'.')
         # Terminamos de dibujar las necesidades de la tabla
         columna = 1                                                 # Columna de la tabla
         for data in range (1,32,2):                                 # Recorre los días del mes            
@@ -3997,7 +4008,7 @@ def menuTablasPax                                   ():
         base_datos = sqlite3.connect('databases/basesDeDatosRegistros.db')
         c = base_datos.cursor()                                     # Crea cursor
         # Query the database
-        c.execute("SELECT * FROM bd_registros WHERE FECHA LIKE '" + v1 + "/" + v2 + "/%'")
+        c.execute("SELECT * FROM bd_registros WHERE FECHA >= '"+v3+"/"+v2+"/"+v1+"' and FECHA <= '"+v6+"/"+v5+"/"+v4+"'")
         records = c.fetchall()                                      # Devuelve una lista de tuplas        
         for columna in range (1,39):                                # Repasa hora para pegar datos       
             for fila in range (1,32):                               # Recorre los días del mes
@@ -4055,17 +4066,11 @@ def menuTablasPax                                   ():
                           
     destruye_espacios_info(10,22)                       # Destruimos las labels de informacion para no sobrecargar el sistema
     ventanaTablas('Taula Pax',[0,0,3,300,50,"green"])   # Creamos ventana extra para esta tabla
-    crea_espacios_info(frameTabla,40,33)             # Cramos las labels dentro de la tabla
+    crea_espacios_info(frameTabla,40,33)                # Cramos las labels dentro de la tabla
     # Ajustamos las labels
     ajusta_espacios_info(40,33,8,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,8)           
-    menusBotones("Tornar(<)",preMenuTablas,"Pax")          # Preparamos la salida
-    # Datos a rellenar
-    OpcionesQuestionario(["X2",LR1,"ANY(Q):",LRR12],
-                         ["X2",LR2,"MES:",LRR22])
-    # Si aquí se pulsan las teclas CTRL + D se pone la fecha actual
-    raiz.bind("<Control-d>", lambda event: FechaActualIncrustadaPax())
-    raiz.bind("<Control-D>", lambda event: FechaActualIncrustadaPax())
-    ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)           # Foco en el año
+    menusBotones("Tornar(<)",preMenuTablas,"Pax")       # Preparamos la salida
+    comunTablas()                                       # Comun a todas las tablas
     Boton4activado2(menuTablasPaxMuestra)               # Activa la tabla
 def menuTablasVGrupo                                ():
     
@@ -4260,17 +4265,7 @@ def menuTablasVGrupo                                ():
     ajusta_espacios_info(3,35,20,15,15)                 # Ajustamos las labels
     # Preparamos la salida
     menusBotones("Tornar(<)",preMenuTablas,"",regresaSinNada,"Visitants per zona")
-    # Datos a rellenar
-    OpcionesQuestionario(["X2",LR1,"desde DIA(Q):",LRR12],
-                         ["X2",LR2,"MES:",LRR22],
-                         ["X2",LR3,"ANY:",LRR32],
-                         ["X2",LR4,"fins DIA:",LRR42],
-                         ["X2",LR5,"MES:",LRR52],
-                         ["X2",LR6,"ANY:",LRR62])
-    # Si aquí se pulsan las teclas CTRL + D se pone la fecha actual
-    raiz.bind("<Control-d>", lambda event: FechaActualIncrustadaGru())
-    raiz.bind("<Control-D>", lambda event: FechaActualIncrustadaGru())    
-    ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)           # Foco en el año
+    comunTablas()                                       # Comun a todas las tablas
     Boton4activado2(menuTablasVGrupoMuestra)            # Activa la tabla
 def menuTablasVProvincia                            ():
     def menuTablasVProvinciasMuestra ():
@@ -4445,17 +4440,7 @@ def menuTablasVProvincia                            ():
     ajusta_espacios_info(4,5,20,15,15,15)                       # Ajustamos las labels dentro de la tabla
     # Preparamos la salida
     menusBotones("Tornar(<)",preMenuTablas,"",regresaSinNada,"",regresaSinNada,"Visitants per províncies")
-    # Datos a rellenar
-    OpcionesQuestionario(["X2",LR1,"desde DIA(Q):",LRR12],
-                         ["X2",LR2,"MES:",LRR22],
-                         ["X2",LR3,"ANY:",LRR32],
-                         ["X2",LR4,"fins DIA:",LRR42],
-                         ["X2",LR5,"MES:",LRR52],
-                         ["X2",LR6,"ANY:",LRR62])
-    # Si aquí se pulsan las teclas CTRL + D se pone la fecha actual
-    raiz.bind("<Control-d>", lambda event: FechaActualIncrustadaGru())
-    raiz.bind("<Control-D>", lambda event: FechaActualIncrustadaGru())   
-    ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)                   # Foco en el año
+    comunTablas()                                               # Comun a todas las tablas
     Boton4activado2(menuTablasVProvinciasMuestra)               # Activa la tabla
 def menuTablasVComarca                              ():
     def menuTablasVComarcasMuestra ():
@@ -4623,18 +4608,7 @@ def menuTablasVComarca                              ():
     ajusta_espacios_info(3,11,20,15,15)                
     # Preparamos la salida
     menusBotones("Tornar(<)",preMenuTablas,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Visitants per comarca")
-    # Datos a rellenar
-    OpcionesQuestionario(["X2",LR1,"desde DIA(Q):",LRR12],
-                         ["X2",LR2,"MES:",LRR22],
-                         ["X2",LR3,"ANY:",LRR32],
-                         ["X2",LR4,"fins DIA:",LRR42],
-                         ["X2",LR5,"MES:",LRR52],
-                         ["X2",LR6,"ANY:",LRR62])
-    # Si aquí se pulsan las teclas CTRL + D se pone la fecha actual
-    raiz.bind("<Control-d>", lambda event: FechaActualIncrustadaGru())
-    raiz.bind("<Control-D>", lambda event: FechaActualIncrustadaGru())    
-    # Foco en el año
-    ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
+    comunTablas()                                               # Comun a todas las tablas
     # Activa la tabla
     Boton4activado2(menuTablasVComarcasMuestra)
 def menuTablasVPerfil                               ():
@@ -4774,18 +4748,7 @@ def menuTablasVPerfil                               ():
     ajusta_espacios_info(3,11,20,15,15)                 
     # Preparamos la salida
     menusBotones("Tornar(<)",preMenuTablas,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Visitants per perfil")
-    # Datos a rellenar
-    OpcionesQuestionario(["X2",LR1,"desde DIA(Q):",LRR12],
-                         ["X2",LR2,"MES:",LRR22],
-                         ["X2",LR3,"ANY:",LRR32],
-                         ["X2",LR4,"fins DIA:",LRR42],
-                         ["X2",LR5,"MES:",LRR52],
-                         ["X2",LR6,"ANY:",LRR62])
-    # Si aquí se pulsan las teclas CTRL + D se pone la fecha actual
-    raiz.bind("<Control-d>", lambda event: FechaActualIncrustadaGru())
-    raiz.bind("<Control-D>", lambda event: FechaActualIncrustadaGru())    
-    # Foco en el año
-    ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
+    comunTablas()                                               # Comun a todas las tablas
     # Activa la tabla
     Boton4activado2(menuTablasVPerfilesMuestra)
 def menuTablasVFuente                               ():
@@ -4924,18 +4887,7 @@ def menuTablasVFuente                               ():
     ajusta_espacios_info(3,11,20,15,15)                
     # Preparamos la salida
     menusBotones("Tornar(<)",preMenuTablas,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Visitants per font")
-    # Datos a rellenar
-    OpcionesQuestionario(["X2",LR1,"desde DIA(Q):",LRR12],
-                         ["X2",LR2,"MES:",LRR22],
-                         ["X2",LR3,"ANY:",LRR32],
-                         ["X2",LR4,"fins DIA:",LRR42],
-                         ["X2",LR5,"MES:",LRR52],
-                         ["X2",LR6,"ANY:",LRR62])
-    # Si aquí se pulsan las teclas CTRL + D se pone la fecha actual
-    raiz.bind("<Control-d>", lambda event: FechaActualIncrustadaGru())
-    raiz.bind("<Control-D>", lambda event: FechaActualIncrustadaGru())    
-    # Foco en el año
-    ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
+    comunTablas()                                               # Comun a todas las tablas
     # Activa la tabla
     Boton4activado2(menuTablasVFuentesMuestra)
 def menuTablasVHora                                 ():
@@ -5073,18 +5025,7 @@ def menuTablasVHora                                 ():
     ajusta_espacios_info(3,11,20,15,15)                 
     # Preparamos la salida
     menusBotones("Tornar(<)",preMenuTablas,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Visitants per hora")
-    # Datos a rellenar
-    OpcionesQuestionario(["X2",LR1,"desde DIA(Q):",LRR12],
-                         ["X2",LR2,"MES:",LRR22],
-                         ["X2",LR3,"ANY:",LRR32],
-                         ["X2",LR4,"fins DIA:",LRR42],
-                         ["X2",LR5,"MES:",LRR52],
-                         ["X2",LR6,"ANY:",LRR62])
-    # Si aquí se pulsan las teclas CTRL + D se pone la fecha actual
-    raiz.bind("<Control-d>", lambda event: FechaActualIncrustadaGru())
-    raiz.bind("<Control-D>", lambda event: FechaActualIncrustadaGru())    
-    # Foco en el año
-    ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
+    comunTablas()                                               # Comun a todas las tablas
     # Activa la tabla
     Boton4activado2(menuTablasVHorasMuestra)
 def menuTablasVDia                                  ():
@@ -5239,18 +5180,7 @@ def menuTablasVDia                                  ():
     ajusta_espacios_info(3,12,20,15,15)                
     # Preparamos la salida
     menusBotones("Tornar(<)",preMenuTablas,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Visitants per dia")
-    # Datos a rellenar
-    OpcionesQuestionario(["X2",LR1,"desde DIA(Q):",LRR12],
-                         ["X2",LR2,"MES:",LRR22],
-                         ["X2",LR3,"ANY:",LRR32],
-                         ["X2",LR4,"fins DIA:",LRR42],
-                         ["X2",LR5,"MES:",LRR52],
-                         ["X2",LR6,"ANY:",LRR62])
-    # Si aquí se pulsan las teclas CTRL + D se pone la fecha actual
-    raiz.bind("<Control-d>", lambda event: FechaActualIncrustadaGru())
-    raiz.bind("<Control-D>", lambda event: FechaActualIncrustadaGru())    
-    # Foco en el año
-    ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
+    comunTablas()                                               # Comun a todas las tablas
     # Activa la tabla
     Boton4activado2(menuTablasVDiasMuestra)
 def menuTablasVOrigen                               ():
@@ -5390,18 +5320,7 @@ def menuTablasVOrigen                               ():
     ajusta_espacios_info(3,11,20,15,15)                 
     # Preparamos la salida
     menusBotones("Tornar(<)",preMenuTablas,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Visitants per origen")
-    # Datos a rellenar
-    OpcionesQuestionario(["X2",LR1,"desde DIA(Q):",LRR12],
-                         ["X2",LR2,"MES:",LRR22],
-                         ["X2",LR3,"ANY:",LRR32],
-                         ["X2",LR4,"fins DIA:",LRR42],
-                         ["X2",LR5,"MES:",LRR52],
-                         ["X2",LR6,"ANY:",LRR62])
-    # Si aquí se pulsan las teclas CTRL + D se pone la fecha actual
-    raiz.bind("<Control-d>", lambda event: FechaActualIncrustadaGru())
-    raiz.bind("<Control-D>", lambda event: FechaActualIncrustadaGru())    
-    # Foco en el año
-    ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
+    comunTablas()                                               # Comun a todas las tablas
     # Activa la tabla
     Boton4activado2(menuTablasVOrigenesMuestra)
 
