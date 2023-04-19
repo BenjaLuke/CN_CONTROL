@@ -81,9 +81,9 @@ avisoint, EstamosEnIncidencias, EstamosEnRegistros, EstamosEnProforma, EstamosEn
 # Variable sobre el tamaño de la letra
 global TamanyoLetra                 
 TamanyoLetra = 0                    
-# Variables de control de la base de datos
-global origenes, idiomas, horas, fuentes, descripciones, tiposPago, estados, usoUsuarios, productos, productosR, productosS                                                                                                                          
-origenes, idiomas, horas, fuentes, descripciones, tiposPago, estados, usoUsuarios, productos, productosR, productosS = "","","","","","","","","","",""                                                                                             
+# Variables de control de la base de datos,datos
+global origenes, idiomas, horas, fuentes, descripciones, tiposPago, estados, usoUsuarios, productos, productosR, productosS,datos                                                                                                                          
+origenes, idiomas, horas, fuentes, descripciones, tiposPago, estados, usoUsuarios, productos, productosR, productosS, datos = "","","","","","","","","","","",""                                                                                             
 # Variables de control del manejo de los datos de los cuestionarioa
 global vr1,vr2,vr3,vr4,vr5,vr6,vr7,vr8,vr9,vr10,vr11,vr12,vr13,vr14                                                                                                                                                                                 
 vr1,vr2,vr3,vr4,vr5,vr6,vr7,vr8,vr9,vr10,vr11,vr12,vr13,vr14 = "","","","","","",False,"","","","","","",False                                                                                                                                      
@@ -133,7 +133,7 @@ def ventanaAviso            (texto,color,pausa):                                
     aviso.overrideredirect(True)         # Quitamos el marco de la ventana
     aviso.update()                       # Actualiza la ventana       
     time.sleep(pausa)                    # X segundos de pausa
-    aviso.destroy()                      # Destruye la ventana 
+    if pausa != 0.1: aviso.destroy()     # Destruye la ventana si no es perenne
 def ventanaSeleccion        (texto,color,destinoSi):                                # Función que crea la ventana de selección
     global seleccion                                            # Función que crea la ventana de selección
     seleccion = Tk()                                            # Creamos la ventana
@@ -1232,7 +1232,7 @@ def query_todos             (archivo,seleccion,column,variableTrue,*datosAlQuery
 
     global EstamosEnRegistros,EstamosEnIncidencias,EstamosEnProforma,EstamosEnBloqueos,EstamosEnProduto,EstamosEnClientes,EstamosEnProductos,EstamosEnClientes,EstamosEnUsuarios, EstamosEnIntroducir 
     
-   # Creamos la base de datos o conectamos con una
+    # Creamos la base de datos o conectamos con una
     base_datos = sqlite3.connect(archivo)
     busqueda = seleccion
     columnas = column
@@ -1259,11 +1259,93 @@ def Le_Bd_Se_todos          (base_datos):
     LimpiaElegibles     ()                                              # Limpia los campos de texto
     base_datos.commit   ()	                                            # Asegura los cambios
     base_datos.close    ()	                                            # Cierra la conexión
-    seleccion.destroy   ()                                              # Destruye la ventana de aviso
-                   
+    seleccion.destroy   ()                                              # Destruye la ventana de aviso                   
+def cambiaBloqueRegistros   ():
+    global datos
+    v2,v3,v4,v5,v6 = LRR21.get(),LRR31.get(),LRR41.get(),LRR51.get(),LRR61.get() # Datos que sustituyen
+    # Si más de un valor entre v2 v3 v4 v5 v6 y v7 es diferente de "" no se ejecuta el query
+    v=0
+    if v2 != "": v+=1
+    if v3 != "": v+=1
+    if v4 != "": v+=1
+    if v5 != "": v+=1
+    if v6 != "": v+=1
+    if v != 1:
+        LR23.config(text = "Sols pots canviar un valor cada cop")
+        return    
+    ventanaAviso("Fent canvi en bloc", "blue",0.1)    
+    try:
+        for i in datos:
+            # Abre la base de datos
+            base_datos = sqlite3.connect('databases/basesDeDatosRegistros.db')
+            c = base_datos.cursor()
+            if v2 != "":
+                c.execute("""UPDATE bd_registros SET 
+                    DESCRIPCION = :descripcion
+                    
+                    WHERE oid = :val1""",
+                    {
+                    'descripcion': v2,
+                    'val1' : i[8]
+                    })
+                # Ejecutar (commit) instrucción o consulta
+                base_datos.commit()
+            if v3 != "":
+                c.execute("""UPDATE bd_registros SET 
+                    ORIGEN = :origen
+                    
+                    WHERE oid = :val1""",
+                    {
+                    'origen': v3,
+                    'val1' : i[8]
+                    })
+                # Ejecutar (commit) instrucción o consulta
+                base_datos.commit()
+            if v4 != "":
+                c.execute("""UPDATE bd_registros SET 
+                    HORA = :hora
+                    
+                    WHERE oid = :val1""",
+                    {
+                    'hora': v4,
+                    'val1' : i[8]
+                    })
+                # Ejecutar (commit) instrucción o consulta
+                base_datos.commit()
+            if v5 != "":
+                c.execute("""UPDATE bd_registros SET 
+                    PRODUCTO = :producto
+                    
+                    WHERE oid = :val1""",
+                    {
+                    'producto': v5,
+                    'val1' : i[8]
+                    })
+                # Ejecutar (commit) instrucción o consulta
+                base_datos.commit()
+            if v6 != "":
+                c.execute("""UPDATE bd_registros SET 
+                    FUENTE = :fuente
+                    
+                    WHERE oid = :val1""",
+                    {
+                    'fuente': v6,
+                    'val1' : i[8]
+                    })
+                # Ejecutar (commit) instrucción o consulta
+                base_datos.commit()
+            # Cierra la base de datos
+            base_datos.close()  
+        aviso.destroy()
+        ventanaAviso("Canvi en bloc realitzat", "green",2)  
+        menuRegistros()  
+    except:
+        aviso.destroy()
+        ventanaAviso("Error fent el canvi en bloc", "red",2)
+        menuRegistros()          
 def query_registros_busca   ():
     
-    global EstamosEnRegistros
+    global EstamosEnRegistros,datos
     
     # Rescata valores
     v1,v2,v3,v4,v5,v6,v7,v8,v9,v10,v11 = LRR12.get(),LRR22.get(),LRR32.get(),LRR12.get()+"/"+LRR22.get()+"/"+LRR32.get(),LRR41.get(),LRR51.get(),LRR61.get(),LRR71.get(),LRR81.get(),LRR91.get(),LRR101.get()
@@ -1275,13 +1357,32 @@ def query_registros_busca   ():
         LR23.config(fg = "red")         # Pintamos de rojo el campo LR23
         return 
        
-    # Salva datos       
-    # Creamos la base de datos o conectamos con una
     query_todos('databases/basesDeDatosRegistros.db',
                 "SELECT *, oid FROM bd_registros WHERE ((FECHA LIKE '" + v3 + "/%' or '" + v3 + "' = '') AND (FECHA LIKE '%/" + v2 + "/%' or '" + v2 + "' = '') AND (FECHA LIKE '%/" + v1 + "' or '" + v1 + "' = '') AND (USUARIO = '" + v11 + "' or '" + v11 + "' = '') AND (DESCRIPCION = '" + v5 + "' or '" + v5 + "' = '') AND (ORIGEN = '" + v6 + "' or '" + v6 + "' = '') AND (HORA >= '" + v7 + "' or '" + v7 + "' = '')  AND (HORA <= '" + v8 + "' or '" + v8 + "' = '')  AND (PRODUCTO = '" + v9 + "' or '" + v9 + "' = '')   AND (FUENTE = '" + v10 + "' or '" + v10 + "' = '')) ORDER BY FECHA",
                 8,
                 "EstamosEnRegistros",
                 "ID(L)","","DATA","DESCRIPCIÓ","ORIGEN","HORA","PRODUCTE","FONT","")
+def query_registros_busca_b ():
+    global datos
+    query_registros_busca()
+    for i in range(1,24):
+            
+        globals()['LR%s' % (i)].config(text = "")
+        globals()['LRR%s' % (i) + '1'].grid_forget()
+        globals()['LRR%s' % (i) + '2'].grid_forget()
+        globals()['LRR%s' % (i) + '1'].config(state = "readandwrite")
+        globals()['LRR%s' % (i) + '1'].delete(first=0,last="end")
+        globals()['LRR%s' % (i) + '1'].config(state = "readonly")
+    OpcionesQuestionario(["1",LR1,"",LRR1,""],
+                         ["X1",LR2,"DESCRIPCIÓ(Q):",LRR21,descripciones],
+                         ["X1",LR3,"ORIGEN:",LRR31,origenes],
+                         ["X1",LR4,"HORA:",LRR41,horas],
+                         ["X1",LR5,"PRODUCTE:",LRR51,productosR],
+                         ["X1",LR6,"FONT:",LRR61,fuentes])
+    LRR22.focus()                                                       # Centramos el cursor
+    menusBotones("Tornar(<)",menuRegistros,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Canvi en bloc")
+    ActivaBotonPyFocus(LRR21,BotonPrimeroQ21)
+    Boton4activado2(cambiaBloqueRegistros)
 def registroCorrigeUno      ():
 
     global val1,val2,diaGlobal,mesGlobal,anyoGlobal
@@ -2665,7 +2766,7 @@ def query                   (seleccion,busc,columnas,*enunciados):
     global EstamosEnIncidencias,EstamosEnRegistros,EstamosEnProforma,EstamosEnBloqueos,EstamosEnProductos,EstamosEnClientes,EstamosEnUsuarios
 
     # Definimos a puntero como global para que se guarde su valor fuera de la función
-    global puntero
+    global puntero,datos
         
 	# Crea el cursor
     cursor = seleccion.cursor()
@@ -3649,7 +3750,9 @@ def menuRegistros                               ():
     
     textMenu.config(text = "MENU REGISTRE (M)")            
     LimpiaLabelsRellena()
-    menusBotones("Tornar(<)",MenuInicial,"Introduir (R)",menuRegistrosIntroducir,"Consultar",menuRegistrosConsultar,"Mirar/Corregir",menuRegistroCorregir,"Eliminar",menuRegistroEliminar)
+    menusBotones("Tornar(<)",MenuInicial,"Introduir (R)",menuRegistrosIntroducir,"Consultar",menuRegistrosConsultar,"Mirar/Corregir",menuRegistroCorregir,"Canvi en bloc",menuRegistroBloque,"Eliminar",menuRegistroEliminar)
+    if int(usuarioNivel) >= 3:
+        BM4.config(text="")
     BM1.focus()            
 def menuRegistrosIntroducir                         (modo=None):
     if modo != None:                                        # Si vinimos pulsando CTRL+R
@@ -3829,13 +3932,20 @@ def menuRegistroCorregir                            ():
     OpcionesQuestionario(["X2",LR1,"ID(Q):",LRR12])
     Boton4activado2(registroCorrigeUno)
     ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
+def menuRegistroBloque                              ():
+    global usuarioNivel
+    if int(usuarioNivel) >= 3:
+        return    
+    menuRegistrosConsultar()
+    menusBotones("Tornar(<)",menuRegistros,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Canvi en bloc")
+    Boton4activado(query_todos_busca0,query_registros_busca_b)
 def menuRegistroEliminar                            ():
 
     global EstamosEnIntroducir
     EstamosEnIntroducir = True
         
     LimpiaLabelsRellena()
-    menusBotones("Tornar(<)",menuRegistros,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Eliminar")
+    menusBotones("Tornar(<)",menuRegistros,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Eliminar")
     OpcionesQuestionario(["X2",LR1,"ID(Q):",LRR12])
     Boton4activado2(registroBorraUno)
     ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
@@ -5435,7 +5545,7 @@ def menuIncidencias                             ():
     LimpiaLabelsRellena()
        
     textMenu.config(text = "MENU INC./GRUPS (M)")   
-    menusBotones("Tornar(<)",MenuInicial,"Introduir (I)",menuIncidenciasIntroducirPre,"Consultar (O)",menuIncidenciasConsultar,"Mirar/Corregir",menuIncidenciasCorregir,"Eliminar",menuIncidenciasEliminar,"",regresaSinNada,"Factures proforma",menuIncidenciasFacturaProforma,"",regresaSinNada,"Bloquejos",menuIncidenciasBloqueos)         
+    menusBotones("Tornar(<)",MenuInicial,"Introduir (I)",menuIncidenciasIntroducirPre,"Consultar (O)",menuIncidenciasConsultar,"Mirar/Corregir",menuIncidenciasCorregir,"Canvi en bloc",menuIncidenciasBloque,"Eliminar",menuIncidenciasEliminar,"",regresaSinNada,"Factures proforma",menuIncidenciasFacturaProforma,"",regresaSinNada,"Bloquejos",menuIncidenciasBloqueos)         
     BM1.focus()
     
     if int(usuarioNivel) >= 3:
@@ -5669,13 +5779,15 @@ def menuIncidenciasCorregir                         ():
         
     Boton4activado2(incidenciasCorrigeUno)
     ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
+def menuIncidenciasBloque                           ():
+    return
 def menuIncidenciasEliminar                         ():
 
     global EstamosEnIntroducir
     EstamosEnIntroducir = True
 
     LimpiaLabelsRellena()
-    menusBotones("Tornar(<)",menuIncidencias,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Eliminar")
+    menusBotones("Tornar(<)",menuIncidencias,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Eliminar")
 
     OpcionesQuestionario(["X2",LR1,"ID(Q):",LRR12])
  
