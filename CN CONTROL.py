@@ -1263,13 +1263,13 @@ def Le_Bd_Se_todos          (base_datos):
 def cambiaBloqueRegistros   ():
     global datos
     v2,v3,v4,v5,v6 = LRR21.get(),LRR31.get(),LRR41.get(),LRR51.get(),LRR61.get() # Datos que sustituyen
+    # La lista vx incluye todas las v
+    vx = [v2,v3,v4,v5,v6]
+    vy =["DESCRIPCION","ORIGEN","HORA","PRODUCTO","FUENTE"]
     # Si más de un valor entre v2 v3 v4 v5 v6 y v7 es diferente de "" no se ejecuta el query
-    v=0
-    if v2 != "": v+=1
-    if v3 != "": v+=1
-    if v4 != "": v+=1
-    if v5 != "": v+=1
-    if v6 != "": v+=1
+    v,w=0,0
+    for i in vx:
+        if i != "": v+=1
     if v != 1:
         LR23.config(text = "Sols pots canviar un valor cada cop")
         return    
@@ -1279,61 +1279,22 @@ def cambiaBloqueRegistros   ():
             # Abre la base de datos
             base_datos = sqlite3.connect('databases/basesDeDatosRegistros.db')
             c = base_datos.cursor()
-            if v2 != "":
-                c.execute("""UPDATE bd_registros SET 
-                    DESCRIPCION = :descripcion
-                    
-                    WHERE oid = :val1""",
-                    {
-                    'descripcion': v2,
-                    'val1' : i[8]
-                    })
-                # Ejecutar (commit) instrucción o consulta
-                base_datos.commit()
-            if v3 != "":
-                c.execute("""UPDATE bd_registros SET 
-                    ORIGEN = :origen
-                    
-                    WHERE oid = :val1""",
-                    {
-                    'origen': v3,
-                    'val1' : i[8]
-                    })
-                # Ejecutar (commit) instrucción o consulta
-                base_datos.commit()
-            if v4 != "":
-                c.execute("""UPDATE bd_registros SET 
-                    HORA = :hora
-                    
-                    WHERE oid = :val1""",
-                    {
-                    'hora': v4,
-                    'val1' : i[8]
-                    })
-                # Ejecutar (commit) instrucción o consulta
-                base_datos.commit()
-            if v5 != "":
-                c.execute("""UPDATE bd_registros SET 
-                    PRODUCTO = :producto
-                    
-                    WHERE oid = :val1""",
-                    {
-                    'producto': v5,
-                    'val1' : i[8]
-                    })
-                # Ejecutar (commit) instrucción o consulta
-                base_datos.commit()
-            if v6 != "":
-                c.execute("""UPDATE bd_registros SET 
-                    FUENTE = :fuente
-                    
-                    WHERE oid = :val1""",
-                    {
-                    'fuente': v6,
-                    'val1' : i[8]
-                    })
-                # Ejecutar (commit) instrucción o consulta
-                base_datos.commit()
+            w=0
+            for a in vx:
+                
+                if a != "":
+                    c.execute("""UPDATE bd_registros SET 
+                        """ + vy[w] + """ = :dato
+                        
+                        WHERE oid = :val1""",
+                        {
+                        'dato': a,
+                        'val1' : i[8]
+                        })
+                    # Ejecutar (commit) instrucción o consulta
+                    base_datos.commit()                        
+                w += 1
+        
             # Cierra la base de datos
             base_datos.close()  
         aviso.destroy()
@@ -1364,7 +1325,23 @@ def query_registros_busca   ():
                 "ID(L)","","DATA","DESCRIPCIÓ","ORIGEN","HORA","PRODUCTE","FONT","")
 def query_registros_busca_b ():
     global datos
-    query_registros_busca()
+    global EstamosEnRegistros,datos
+    
+    # Rescata valores
+    v1,v2,v3,v4,v5,v6,v7,v8,v9,v10,v11,v12,v13 = LRR12.get(),LRR22.get(),LRR32.get(),LRR12.get()+"/"+LRR22.get()+"/"+LRR32.get(),LRR41.get(),LRR51.get(),LRR61.get(),LRR71.get(),LRR81.get(),LRR91.get(),LRR101.get(),LRR122.get(),LRR132.get()
+    
+    # Coteja fallos
+    muralla = False
+    muralla,v1,v2,v3 = cotejaFechaEmptyOk(muralla,v1,LRR12,v2,LRR22,v3,LRR32)
+    if muralla == True: 
+        LR23.config(fg = "red")         # Pintamos de rojo el campo LR23
+        return 
+       
+    query_todos('databases/basesDeDatosRegistros.db',
+                "SELECT *, oid FROM bd_registros WHERE ((FECHA LIKE '" + v3 + "/%' or '" + v3 + "' = '') AND (FECHA LIKE '%/" + v2 + "/%' or '" + v2 + "' = '') AND (FECHA LIKE '%/" + v1 + "' or '" + v1 + "' = '') AND (USUARIO = '" + v11 + "' or '" + v11 + "' = '') AND (DESCRIPCION = '" + v5 + "' or '" + v5 + "' = '') AND (ORIGEN = '" + v6 + "' or '" + v6 + "' = '') AND (HORA >= '" + v7 + "' or '" + v7 + "' = '')  AND (HORA <= '" + v8 + "' or '" + v8 + "' = '')  AND (PRODUCTO = '" + v9 + "' or '" + v9 + "' = '') AND (FUENTE = '" + v10 + "' or '" + v10 + "' = '') AND (oid >= '" + v12 + "' or '" + v12 + "' = '') AND (oid <= '" + v13 + "' or '" + v13 + "' = '')) ORDER BY FECHA",
+                8,
+                "EstamosEnRegistros",
+                "ID(L)","","DATA","DESCRIPCIÓ","ORIGEN","HORA","PRODUCTE","FONT","")
     for i in range(1,24):
             
         globals()['LR%s' % (i)].config(text = "")
@@ -3936,9 +3913,26 @@ def menuRegistroBloque                              ():
     global usuarioNivel
     if int(usuarioNivel) >= 3:
         return    
-    menuRegistrosConsultar()
+    LimpiaLabelsRellena()        
     menusBotones("Tornar(<)",menuRegistros,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Canvi en bloc")
+    OpcionesQuestionario(["X2",LR1,"DIA(Q):",LRR12],
+                         ["X2",LR2,"MES:",LRR22],
+                         ["X2",LR3,"ANY:",LRR32],
+                         ["X1",LR4,"DESCRIPCIÓ:",LRR41,descripciones],
+                         ["X1",LR5,"ORIGEN:",LRR51,origenes],
+                         ["X1",LR6,"desde HORA:",LRR61,horas],
+                         ["X1",LR7,"fins a HORA:",LRR71,horas],
+                         ["X1",LR8,"PRODUCTE:",LRR81,productosR],
+                         ["X1",LR9,"FONT:",LRR91,fuentes],
+                         ["X1",LR10,"USUARI:",LRR101,usuariosO],
+                         ["1",LR11,"",LRR1,""],
+                         ["X2",LR12,"entre ID:",LRR122],
+                         ["X2",LR13,"i ID:",LRR132])
+    # Si aquí se pulsan las teclas CTRL + D se pone la fecha actual
+    raiz.bind("<Control-d>", lambda event: FechaActualIncrustada())
+    raiz.bind("<Control-D>", lambda event: FechaActualIncrustada())
     Boton4activado(query_todos_busca0,query_registros_busca_b)
+    ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)    
 def menuRegistroEliminar                            ():
 
     global EstamosEnIntroducir
