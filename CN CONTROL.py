@@ -1260,6 +1260,7 @@ def Le_Bd_Se_todos          (base_datos):
     base_datos.commit   ()	                                            # Asegura los cambios
     base_datos.close    ()	                                            # Cierra la conexión
     seleccion.destroy   ()                                              # Destruye la ventana de aviso                   
+
 def cambiaBloqueRegistros   ():
     global datos
     v2,v3,v4,v5,v6 = LRR21.get(),LRR31.get(),LRR41.get(),LRR51.get(),LRR61.get() # Datos que sustituyen
@@ -1324,7 +1325,6 @@ def query_registros_busca   ():
                 "EstamosEnRegistros",
                 "ID(L)","","DATA","DESCRIPCIÓ","ORIGEN","HORA","PRODUCTE","FONT","")
 def query_registros_busca_b ():
-    global datos
     global EstamosEnRegistros,datos
     
     # Rescata valores
@@ -1498,6 +1498,50 @@ def del_register_yes        ():
                 "ID(L)","","DATA","DESCRIPCIÓ","ORIGEN","HORA","PRODUCTE","FONT","")
     LRR12.focus()                                                       # Foco
 
+def cambiaBloqueIncid        ():
+    global datos
+    v2,v3,v4,v5,v6,v7,v8,v9,v10,v11,v12,v13,v14,v15,v16,v17,v18,v19,v20 = LRR22.get(),LRR31.get(),LRR42.get(),LRR52.get(),LRR61.get(),LRR72.get(),LRR82.get(),LRR92.get(),LRR102.get(),LRR112.get(),LRR122.get(),LRR131.get(),LRR141.get(),LRR152.get(),LRR161.get(),LRR172.get(),LRR181.get(),LRR192.get(),LRR201.get()
+    # La lista vx incluye todas las v
+    vx = [v2,v3,v4,v5,v6,v7,v8,v9,v10,v11,v12,v13,v14,v15,v16,v17,v18,v19,v20]
+    vy =["FECHA","CLIENTE","TEL_EXTRA","MAIL_EXTRA","HORA","PAX1","PRECIO1","TIPO1","PAX2","PRECIO2","TIPO2","PRODUCTO","IDIOMA","CONTACTO","AGENDADO","FECHA_REV","PAGAT","FACTURA","ESTADO"]
+    # Si más de un valor entre v2 v3 v4 v5 v6 y v7 es diferente de "" no se ejecuta el query
+    v,w=0,0
+    for i in vx:
+        if i != "": v+=1
+    if v != 1:
+        LR23.config(text = "Sols pots canviar un valor cada cop")
+        return    
+    ventanaAviso("Fent canvi en bloc", "blue",0.1)    
+    try:
+        for i in datos:
+            # Abre la base de datos
+            base_datos = sqlite3.connect('databases/basesDeDatosIncidencias.db')
+            c = base_datos.cursor()
+            w=0
+            for a in vx:
+                
+                if a != "":
+                    c.execute("""UPDATE bd_incidencias SET 
+                        """ + vy[w] + """ = :dato
+                        
+                        WHERE oid = :val1""",
+                        {
+                        'dato': a,
+                        'val1' : i[-1]
+                        })
+                    # Ejecutar (commit) instrucción o consulta
+                    base_datos.commit()                        
+                w += 1
+        
+            # Cierra la base de datos
+            base_datos.close()  
+        aviso.destroy()
+        ventanaAviso("Canvi en bloc realitzat", "green",2)  
+        menuIncidencias()  
+    except:
+        aviso.destroy()
+        ventanaAviso("Error fent el canvi en bloc", "red",2)
+        menuIncidencias()          
 def query_incidencias_busca ():
     
     global EstamosEnIncidencias
@@ -1697,6 +1741,56 @@ def IncidenciasSalvaCorrecc ():
     anyoFecha.config(text = anyoGlobaltk)
     MiraFecha(anyoFecha)
     menuIncidenciasCorregir()	                                                    # Vuelve hacia atrás
+def query_incid_busca_b     ():
+    global EstamosEnIncidencias,datos
+    
+    # Rescata valores
+    v1,v2,v3,v4,v5,v6,v7,v8,v9,v10,v11,v12,v13,v14 = LRR11.get(),LRR22.get(),LRR32.get(),LRR42.get(),LRR51.get(),LRR61.get(),LRR71.get(),LRR82.get(),LRR92.get(),LRR102.get(),LRR112.get(),LRR121.get(),LRR131.get(),LRR142.get()
+    
+    muralla = False
+    muralla,v2,v3,v4 = cotejaFechaEmptyOk(muralla,v2,LRR22,v3,LRR32,v4,LRR42)
+    muralla,v8,v9,v10 = cotejaFechaEmptyOk(muralla,v8,LRR82,v9,LRR92,v10,LRR102)
+    if muralla == True:
+        LR23.config(fg = "red")         # Pintamos de rojo el campo LR23
+        return
+    # Creamos la base de datos o conectamos con una
+    query_todos('databases/basesDeDatosIncidencias.db',
+                "SELECT *, oid FROM bd_incidencias WHERE ((CLIENTE = '" + v1 + "' or '" + v1 + "' = '') AND (FECHA LIKE '" + v2 + "/%' or '" + v2 + "' = '') AND (FECHA LIKE '%/" + v3 + "/%' or '" + v3 + "' = '') AND (FECHA LIKE '%/" + v4 + "' or '" + v4 + "' = '') AND (PRODUCTO = '" + v5 + "' or '" + v5 + "' = '') AND (IDIOMA = '" + v6 + "' or '" + v6 + "' = '') AND (AGENDADO = '" + v7 + "' or '" + v7 + "' = '') AND (FECHA_REV LIKE '" + v8 + "/%' or '" + v8 + "' = '') AND (FECHA_REV LIKE '%/" + v9 + "/%' or '" + v9 + "' = '')  AND (FECHA_REV LIKE '%/" + v10 + "' or '" + v10 + "' = '') AND (ESTADO = '" + v12 + "' or '" + v12 + "' = '') AND (NOTAS = '" + v11 + "' or '" + v11 + "' = '') AND (PAGAT = '" + v13 + "' OR '" + v13 + "' = '') AND (MAIL_EXTRA = '" + v14 + "' OR '" + v14 + "' = '')) ORDER BY FECHA, HORA",
+                8,
+                "EstamosEnIncidencias",
+                "ID(L)","DATA","HORA","PAX","PRODUCTE","IDIOMA","ESTAT","CLIENT","PAGAT")
+    for i in range(1,24):
+            
+        globals()['LR%s' % (i)].config(text = "")
+        globals()['LRR%s' % (i) + '1'].grid_forget()
+        globals()['LRR%s' % (i) + '2'].grid_forget()
+        globals()['LRR%s' % (i) + '1'].config(state = "readandwrite")
+        globals()['LRR%s' % (i) + '1'].delete(first=0,last="end")
+        globals()['LRR%s' % (i) + '1'].config(state = "readonly")
+    OpcionesQuestionario(["1",LR1,"",LRR1,""],
+                         ["X2",LR2,"DIA/MES/ANY(Q):",LRR22],
+                         ["X1",LR3,"CLIENT:",LRR31,clientes,regresaSinNada1,"readandwrite"],
+                         ["X2",LR4,"TELF. EXTRA:",LRR42],
+                         ["X2",LR5,"MAIL EXTRA:",LRR52],
+                         ["X1",LR6,"HORA:",LRR61,horas],
+                         ["X2",LR7,"PAX:",LRR72],
+                         ["X2",LR8,"PREU:",LRR82],
+                         ["X2",LR9,"TIPUS:",LRR92],
+                         ["X2",LR10,"PAX:",LRR102],
+                         ["X2",LR11,"PREU:",LRR112],
+                         ["X2",LR12,"TIPUS:",LRR122],
+                         ["X1",LR13,"PRODUCTE:",LRR131,productosR],
+                         ["X1",LR14,"IDIOMA:",LRR141,idiomas],
+                         ["X2",LR15,"CONTACTE:",LRR152],
+                         ["X1",LR16,"AGENDAT:",LRR161,["Si","No"]],
+                         ["X2",LR17,"DATA REV.:",LRR172],
+                         ["X1",LR18,"PAGAT:",LRR181,["Si","No"]],
+                         ["X2",LR19,"FACTURA:",LRR192],
+                         ["X1",LR20,"ESTAT:",LRR201,estados])
+    LRR22.focus()                                                       # Centramos el cursor
+    menusBotones("Tornar(<)",menuIncidencias,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Canvi en bloc")
+    ActivaBotonPyFocus(LRR22,BotonPrimeroQ22)
+    Boton4activado2(cambiaBloqueIncid)    
 def incidenciasBorraUno     ():
 
     # Creamos la base de datos o conectamos con una
@@ -5774,7 +5868,30 @@ def menuIncidenciasCorregir                         ():
     Boton4activado2(incidenciasCorrigeUno)
     ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
 def menuIncidenciasBloque                           ():
-    return
+    global usuarioNivel
+    if int(usuarioNivel) >= 3:
+        return    
+    LimpiaLabelsRellena()        
+    menusBotones("Tornar(<)",menuIncidencias,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Canvi en bloc")
+    OpcionesQuestionario(["X1",LR1,"CLIENT(Q):",LRR11,clientes,regresaSinNada1,"readandwrite"],
+                         ["X2",LR2,"esdeveniment DIA:",LRR22],
+                         ["X2",LR3,"MES:",LRR32],
+                         ["X2",LR4,"ANY:",LRR42],
+                         ["X1",LR5,"PRODUCTE:",LRR51,productosR],
+                         ["X1",LR6,"IDIOMA:",LRR61,idiomas],
+                         ["X1",LR7,"AGENDAT:",LRR71,["Si","No"]],
+                         ["X2",LR8,"revisió DIA:",LRR82],
+                         ["X2",LR9,"MES:",LRR92],
+                         ["X2",LR10,"ANY:",LRR102],
+                         ["X2",LR11,"FACTURA:",LRR112],
+                         ["X1",LR12,"ESTAT:",LRR121,estados],
+                         ["X1",LR13,"PAGAT:",LRR131,["Si","No"]],
+                         ["X2",LR14,"MAIL:",LRR142])
+    # Si aquí se pulsan las teclas CTRL + D se pone la fecha actual
+    raiz.bind("<Control-d>", lambda event: FechaActualIncrustadaInc())
+    raiz.bind("<Control-D>", lambda event: FechaActualIncrustadaInc())
+    Boton4activado(query_todos_busca0,query_incid_busca_b)
+    ActivaBotonPyFocus(LRR11,BotonPrimeroQ11)     
 def menuIncidenciasEliminar                         ():
 
     global EstamosEnIntroducir
