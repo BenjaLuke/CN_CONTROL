@@ -1498,7 +1498,7 @@ def del_register_yes        ():
                 "ID(L)","","DATA","DESCRIPCIÓ","ORIGEN","HORA","PRODUCTE","FONT","")
     LRR12.focus()                                                       # Foco
 
-def cambiaBloqueIncid        ():
+def cambiaBloqueIncid       ():
     global datos
     v2,v3,v4,v5,v6,v7,v8,v9,v10,v11,v12,v13,v14,v15,v16,v17,v18,v19,v20 = LRR22.get(),LRR31.get(),LRR42.get(),LRR52.get(),LRR61.get(),LRR72.get(),LRR82.get(),LRR92.get(),LRR102.get(),LRR112.get(),LRR122.get(),LRR131.get(),LRR141.get(),LRR152.get(),LRR161.get(),LRR172.get(),LRR181.get(),LRR192.get(),LRR201.get()
     # La lista vx incluye todas las v
@@ -1559,6 +1559,114 @@ def query_incidencias_busca ():
                 8,
                 "EstamosEnIncidencias",
                 "ID(L)","DATA","HORA","PAX","PRODUCTE","IDIOMA","ESTAT","CLIENT","PAGAT")
+def incidenciasClonaUno     ():
+    incidenciasCorrigeUno()
+    # Llamamos a la función que devuelve la fecha actual
+    recuperaFechaActual() 
+    nomUsuario.config(text = val2)                                                  # Vuelve a pintar usuario y fecha    
+    # Crea la base de datos o conecta con ella
+    base_datos_datos = sqlite3.connect('databases/basesDeDatosIncidencias.db')
+        
+    # Crea el cursor
+    cursor = base_datos_datos.cursor()
+    
+    # Coge el valor del ultimo oid
+    cursor.execute("SELECT *, oid FROM bd_Incidencias")
+    
+    try:
+        datos = cursor.fetchall()
+        dato = datos[-1]
+        idAdecuado = dato[22]
+    except:
+        idAdecuado = 0
+        
+    idCorrecto = int(idAdecuado)+1
+    OpcionesQuestionario(["1",LR1,"ID:",LRR1,idCorrecto])
+    Boton4activado2(incidenciasSalvaClon)
+def incidenciasSalvaClon    ():
+    global horas
+    # Rescata los valores de los campos
+    v1,v2,v3,v4,v5,v6,v7,v8,v9,v10,v11,v12,v13,v14,v16,v17,v18,v19,v20,v21,v22 = LR1.cget("text"),LRR22.get(),LRR31.get(),LRR42.get(),LRR52.get(),LRR61.get(),LRR72.get(),LRR82.get(),LRR92.get(),LRR102.get(),LRR112.get(),LRR122.get(),LRR131.get(),LRR141.get(),LRR161.get(),LRR172.get(),LRR181.get(),LRR213.get(1.0,END),LRR201.get(),LRR192.get(),LRR152.get()
+              
+    muralla = False
+    muralla     = cotejaVacio(muralla,v20,LRR201)                               # Comprueba que el campo no esté vacío
+    muralla,v17 = cotejaFechaBlock(muralla,v17,LRR172)                          # Comprueba que la fecha no esté bloqueada
+    muralla,v2  = cotejaFechaBlock(muralla,v2,LRR22)                            # Comprueba que la fecha no esté bloqueada
+    v2          = cotejaCondicional(v2,"Per definir",v20,"Pendent gaudir")      # Si el campo v20 es "Pendent gaudir" el campo v2 es "Per definir"
+    muralla     = cotejaVacioCond1(muralla,v2,LRR22,v20,"Pendent gaudir")       # Si el campo v20 no es "Pendent gaudir" el campo v2 no puede estar vacío
+    muralla     = cotejaFechaBloqueada(muralla,v2,v6,LRR22)                     # Comprueba que la fecha no esté bloqueada
+    v4,v5,v22   = cotejaDatosCliente(v3,v4,v5,v22)                              # Comprueba si hay que aprovechar datos del cliente
+    # Comprueba que no exista una incidencia con los mismos datos
+    if muralla == False:
+        muralla     = cotejaDatoCoincidente(muralla,False,True,
+                                        'databases/basesDeDatosIncidencias.db',
+                                        'bd_incidencias',
+                                        "SELECT *,oid FROM bd_incidencias WHERE ((FECHA = '" + v2 + "') AND (HORA = '" + v6+ "'))","",
+                                        "¡¡ATENCIÓ!! Ja existeix una altra incidència amb aquesta data i hora",3,v1,"red")        
+     
+    # Si hay algún error
+    if muralla == True:                                                         # Si hay algún error
+        LR23.config(fg = "red")                                                 # Pintamos de rojo el campo LR23
+        return                                                                  # Salimos de la función
+        
+    # Salva datos
+    base_datos_datos = sqlite3.connect('databases/basesDeDatosIncidencias.db')  # Crea la base de datos o conecta con ella
+    cursor = base_datos_datos.cursor()                                          # Crea el cursor
+    # Inserta en la base de tados
+    cursor.execute("""INSERT INTO bd_Incidencias VALUES (:fecha,:hora,:pax1,:pax2,:producto,
+                    :idioma,:tel_extra,:estado,:usuario,:fecha_cre,:cliente,:mail_extra,:precio1,
+                    :tipo1,:precio2,:tipo2,:agendado,:fecha_rev,:pagat,:notas,:factura,:contacto)""",
+            {
+                'fecha':        v2,
+                'hora':         v6,
+                'pax1':         v7,
+                'pax2':         v10,
+                'producto':     v13,
+                'idioma':       v14,
+                'tel_extra':    v4,
+                'estado':       v20,
+                'usuario':      usuarioReal,
+                'fecha_cre':    anyoGlobaltk.get() + "/" + mesGlobaltk.get() + "/" + diaGlobaltk.get(),
+                'cliente':      v3,
+                'mail_extra':   v5,
+                'precio1':      v8,
+                'tipo1':        v9,
+                'precio2':      v11,
+                'tipo2':        v12,
+                'agendado':     v16,
+                'fecha_rev':    v17,
+                'pagat' :       v18,
+                'notas':        v21,
+                'factura':      v19,
+                'contacto':     v22
+                })
+    base_datos_datos.commit()                                                   # Asegura los cambios
+    base_datos_datos.close()                                                    # Cerrar conexion             
+    # Pinta datos en zona 3
+    query_todos('databases/basesDeDatosIncidencias.db',
+                "SELECT *, oid FROM bd_incidencias ORDER BY FECHA_CREA DESC, HORA DESC",
+                8,
+                "EstamosEnIncidencias",
+                "ID(L)","DATA","HORA","PAX","PRODUCTE","IDIOMA","ESTAT","CLIENT","PAGAT") 
+    LR23.config(text = "")                                                      # Limpia posibles mensajes anteriores innecesarios
+
+    # Pinta la lista actualizada
+    base_datos_datos = sqlite3.connect('databases/basesDeDatosIncidencias.db')  # Crea la base de datos o conecta con ella  
+    cursor = base_datos_datos.cursor()                                          # Crea el cursor
+    cursor.execute("SELECT *, oid FROM bd_incidencias")                         # Coge el valor del ultimo oid
+    try:                                                                        # Si hay datos
+        datos = cursor.fetchall()
+        dato = datos[-1]
+        idAdecuado = dato[22]
+    except:
+        idAdecuado = 0
+            
+    idCorrecto = int(idAdecuado)+1                                              # Prepara el nuevo ID
+    base_datos_datos.close()                                                    # Cerrar conexion 
+    LimpiaElegibles()                                                           # Limpia los campos
+    LRR1.config(text = idCorrecto)                                              # Prepara el nuevo ID    
+    LRR31.config(state = "readandwrite")                                        # Liberamos la escritura de la etiqueta CLIENT
+    LRR22.focus()   
 def incidenciasCorrigeUno   ():
 
     global val1, val2, diaGlobal, mesGlobal, anyoGlobal, usuarioNivel
@@ -1855,7 +1963,7 @@ def ProformaProduceUno      ():
         LRR92.insert(0,record[15])
         LRR102.insert(0,record[14])    
     LRR22.focus()                                                       # Centramos el cursor 
-def ProformaClonaUno        ():                         
+def ProformaClonaUno        ():
         
     global VieneDeIncGrups                                              # Variable global que indica si viene de incidencias o de grupos
     VieneDeIncGrups = LRR12.get()                                       # Recupera el id de la incidencia o grupo
@@ -5633,7 +5741,7 @@ def menuIncidencias                             ():
     LimpiaLabelsRellena()
        
     textMenu.config(text = "MENU INC./GRUPS (M)")   
-    menusBotones("Tornar(<)",MenuInicial,"Introduir (I)",menuIncidenciasIntroducirPre,"Consultar (O)",menuIncidenciasConsultar,"Mirar/Corregir",menuIncidenciasCorregir,"Canvi en bloc",menuIncidenciasBloque,"Eliminar",menuIncidenciasEliminar,"",regresaSinNada,"Factures proforma",menuIncidenciasFacturaProforma,"",regresaSinNada,"Bloquejos",menuIncidenciasBloqueos)         
+    menusBotones("Tornar(<)",MenuInicial,"Introduir (I)",menuIncidenciasIntroducirPre,"Clonar",menuIncidenciasClonar,"Consultar (O)",menuIncidenciasConsultar,"Mirar/Corregir",menuIncidenciasCorregir,"Canvi en bloc",menuIncidenciasBloque,"Eliminar",menuIncidenciasEliminar,"",regresaSinNada,"Factures proforma",menuIncidenciasFacturaProforma,"",regresaSinNada,"Bloquejos",menuIncidenciasBloqueos)         
     BM1.focus()
     
     if int(usuarioNivel) >= 3:
@@ -5759,7 +5867,7 @@ def menuIncidenciasIntroducir                       (modo=None):
     idCorrecto = int(idAdecuado)+1                                                  # Prepara el nuevo ID
     base_datos_datos.close()                                                        # Cerrar conexion 
     LimpiaLabelsRellena()                                                           # Limpia los campos
-    menusBotones("Tornar(<)",menuIncidencias,"Introduir (I)")                          # Pinta los botones
+    menusBotones("Tornar(<)",menuIncidencias,"Introduir (I)")                       # Pinta los botones
     # Pinta los campos
     OpcionesQuestionario(["1",LR1,"ID:",LRR1,idCorrecto],
                          ["X2",LR2,"DIA/MES/ANY(Q):",LRR22],
@@ -5796,6 +5904,14 @@ def menuIncidenciasIntroducir                       (modo=None):
         return  
     notasAmpliacion()                                                               # Mirmaos si hay que ampliar el blog de notas
     ActivaBotonPyFocus(LRR22,BotonPrimeroQ22)                                       # Activa el boton de la fecha
+def menuIncidenciasClonar                           ():
+    global EstamosEnIntroducir
+    EstamosEnIntroducir = True
+    LimpiaLabelsRellena()    
+    menusBotones("Tornar(<)",menuIncidencias,"",regresaSinNada,"Clonar")                          # Pinta los botones
+    OpcionesQuestionario(["X2",LR1,"ID(Q):",LRR12])
+    Boton4activado2(incidenciasClonaUno)
+    ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
 def menuIncidenciasConsultar                        (modo=None):
 
     if modo != None:                                        # Si vinimos pulsando CTRL+O
@@ -5806,7 +5922,7 @@ def menuIncidenciasConsultar                        (modo=None):
     textMenu.config(text = "MENU INC./GRUPS (M)")   
     ajusta_espacios_info(10,22,7,12,7,5,20,8,17,16,7,1)
     LimpiaLabelsRellena()
-    menusBotones("Tornar(<)",menuIncidencias,"",regresaSinNada,"Consultar (O)")    
+    menusBotones("Tornar(<)",menuIncidencias,"",regresaSinNada,"",regresaSinNada,"Consultar (O)")    
 
     OpcionesQuestionario(["X1",LR1,"CLIENT(Q):",LRR11,clientes,regresaSinNada1,"readandwrite"],
                          ["X2",LR2,"esdeveniment DIA:",LRR22],
@@ -5861,7 +5977,7 @@ def menuIncidenciasCorregir                         ():
     anyoGlobaltk.set(anyoGlobal) 
      
     LimpiaLabelsRellena()
-    menusBotones("Tornar(<)",menuIncidencias,"",regresaSinNada,"",regresaSinNada,"Mirar/Corregir")
+    menusBotones("Tornar(<)",menuIncidencias,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Mirar/Corregir")
 
     OpcionesQuestionario(["X2",LR1,"ID(Q):",LRR12])
         
@@ -5872,7 +5988,7 @@ def menuIncidenciasBloque                           ():
     if int(usuarioNivel) >= 3:
         return    
     LimpiaLabelsRellena()        
-    menusBotones("Tornar(<)",menuIncidencias,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Canvi en bloc")
+    menusBotones("Tornar(<)",menuIncidencias,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Canvi en bloc")
     OpcionesQuestionario(["X1",LR1,"CLIENT(Q):",LRR11,clientes,regresaSinNada1,"readandwrite"],
                          ["X2",LR2,"esdeveniment DIA:",LRR22],
                          ["X2",LR3,"MES:",LRR32],
@@ -5898,7 +6014,7 @@ def menuIncidenciasEliminar                         ():
     EstamosEnIntroducir = True
 
     LimpiaLabelsRellena()
-    menusBotones("Tornar(<)",menuIncidencias,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Eliminar")
+    menusBotones("Tornar(<)",menuIncidencias,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"",regresaSinNada,"Eliminar")
 
     OpcionesQuestionario(["X2",LR1,"ID(Q):",LRR12])
  
