@@ -37,7 +37,7 @@ raiz.state("zoomed")                                    # Ajusta la ventana a la
 logo = PhotoImage(file="image/logo.png")                # Carga laimagen del logo
 logo = logo.subsample(8, 8)                             # Lo colocamos en raiz utilizando la transparencia
 Label(raiz, image=logo, bg="#b7b493").place(x=30, y=20) # Lo colocamos en raiz utilizando la transparencia
-        
+   
 raiz.bind("<Control-r>", lambda event: menuRegistrosIntroducir("Yes"))  # Si en cualquier momento se pulsan las teclas CTRL + R se va al menu de registro
 raiz.bind("<Control-R>", lambda event: menuRegistrosIntroducir("Yes"))
 raiz.bind("<Control-c>", lambda event: copia())                         # Si en cualquier momento se pulsa las teclas CTRL + C intenta copiar al portapapeles
@@ -682,6 +682,11 @@ def LimpiaLabelsRellena     ():
     LRR6.grid_forget()  
     LRR73.grid_forget()  
     LRR213.grid_forget()
+    
+    if EstamosEnIntroducir == True and EstamosEnIncidencias == True:
+        LRR31.bind('<Key>', regresaSinNada) 
+    else:
+        LRR31.bind('<Key>', pulsaTeclaCombobox) 
     
     LimpiaElegibles()
     borra_datos()
@@ -6022,7 +6027,7 @@ def menuIncidenciasEliminar                         ():
     Boton4activado2(incidenciasBorraUno)
     ActivaBotonPyFocus(LRR12,BotonPrimeroQ12)
      
-def menuIncidenciasFacturaProforma               ():
+def menuIncidenciasFacturaProforma              ():
  
     global usuarioNivel
     if int(usuarioNivel) >= 3:
@@ -6514,7 +6519,7 @@ def menuIncidenciasBloqueosBloquear                 ():
         base_datos_datos = sqlite3.connect('databases/basesDeDatosIncidencias.db')
         cursor = base_datos_datos.cursor()              # Crea el cursor
         # Inserta en la base de tados
-        cursor.execute("""INSERT INTO bd_Bloqueos VALUES (:fecha, :desde, :hasta, :motivo)""",
+        cursor.execute("""INSERT INTO bd_bloqueos VALUES (:fecha, :desde, :hasta, :motivo)""",
                 {
                     'fecha':        v2,
                     'desde':        v3,
