@@ -1268,16 +1268,24 @@ def Le_Bd_Se_todos          (base_datos):
 
 def cambiaBloqueRegistros   ():
     global datos
-    v2,v3,v4,v5,v6 = LRR21.get(),LRR31.get(),LRR41.get(),LRR51.get(),LRR61.get() # Datos que sustituyen
+    v2,v3,v4,v5,v6,v7,v8,v9 = LRR21.get(),LRR31.get(),LRR41.get(),LRR51.get(),LRR61.get(),anyoFecha.get(),mesFecha.get(),diaFecha.get() # Datos que sustituyen
+
+    # Coteja fallos
+    muralla = False
+    muralla,v9,v8,v7 = cotejaFecha(muralla,v9,diaFecha,v8,mesFecha,v7,anyoFecha)
+    if muralla == True: 
+        LR23.config(fg = "red")         # Pintamos de rojo el campo LR23
+        return    
+    v7 = v7 + "/" + v8 + "/" + v9
     # La lista vx incluye todas las v
-    vx = [v2,v3,v4,v5,v6]
-    vy =["DESCRIPCION","ORIGEN","HORA","PRODUCTO","FUENTE"]
+    vx = [v2,v3,v4,v5,v6,v7]
+    vy =["DESCRIPCION","ORIGEN","HORA","PRODUCTO","FUENTE","FECHA"]
     # Si más de un valor entre v2 v3 v4 v5 v6 y v7 es diferente de "" no se ejecuta el query
     v,w=0,0
     for i in vx:
         if i != "": v+=1
-    if v != 1:
-        LR23.config(text = "Sols pots canviar un valor cada cop")
+    if v < 1 and v > 2:
+        LR23.config(text = "Canvia data i un valor cada cop")
         return    
     ventanaAviso("Fent canvi en bloc", "blue",0.1)    
     try:
@@ -3954,7 +3962,7 @@ def menuRegistrosIntroducir                         (modo=None):
         stringBusqueda = ""
     
         # Rescata valores
-        v1,v2,v3,v4,v5,v6,v7,v8,v9 = LRR21.get(),LRR31.get(),LRR41.get(),LRR51.get(),LRR61.get(),LRR73.get(1.0,END),anyoGlobaltk.get(),mesGlobaltk.get(),diaGlobaltk.get()
+        v1,v2,v3,v4,v5,v6,v7,v8,v9 = LRR21.get(),LRR31.get(),LRR41.get(),LRR51.get(),LRR61.get(),LRR73.get(1.0,END),anyoFecha.get(),mesFecha.get(),diaFecha.get()
                         
         # Coteja fallos
         muralla = False

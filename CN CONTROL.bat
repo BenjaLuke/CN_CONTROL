@@ -1,9 +1,9 @@
 mode con: lines=45
 echo off
-echo CN CONTROL V.3.18.01
+echo CN CONTROL V.3.18.02
 echo by: Benjamin Miguel Miralpeix
 echo 2021/2023
-echo ultima actualizacion: 2023/04/27
+echo ultima actualizacion: 2023/05/13
 echo -
 echo -
 echo ------------------------------------------------------------
